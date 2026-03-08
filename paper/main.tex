@@ -12,33 +12,8 @@
 
 \maketitle
 
-\begin{abstract}\noindent Reinforcement learning (RL) for large language models (LLMs)
-is commonly implemented using policy gradient methods augmented with advantage
-estimation or learned value functions. While effective in classical control, these
-techniques implicitly assume a meaningful notion of state and a well-defined expectation
-over future returns. In language generation, however, the ``state'' is a partial text
-prefix that is non-Markov, semantically unstable, and often poorly suited for value
-estimation. As a result, critics can introduce bias while providing limited variance
-reduction.
-
-Recent work has therefore moved toward critic-free, outcome-based methods such as GRPO
-and RLOO. These approaches eliminate value networks but still assign trajectory-level
-rewards uniformly across tokens, leaving open the question of how credit should be
-distributed within a generated sequence. In this work, we study \emph{token-level credit
-redistribution} as a design axis for on-policy LLM reinforcement learning, without
-learning value functions or prefix values.
-
-We investigate a family of intrinsic token-weighting schemes derived directly from the
-model’s predictive distribution, including surprisal- and entropy-based weights, and
-apply them as multiplicative factors on token-level policy gradients. These methods
-require no additional networks, no tree construction, and no reward models. Through
-controlled experiments on verifiable math and code reasoning tasks, we compare uniform
-token weighting, batch-baseline methods (RLOO/GRPO), and intrinsic token weighting. We
-show that intrinsic weighting can reduce gradient variance, stabilize training, and
-yield interpretable credit assignment patterns, while achieving performance comparable
-to established critic-free baselines. Our results suggest that, in language RL,
-redistributing credit using intrinsic distributional signals is a viable alternative to
-advantage estimation and prefix value modeling.
+\\begin{abstract}\noindent
+Policy gradient methods for LLM reinforcement learning rely on value function critics, but language generation prefixes are non-Markov and poorly suited for value estimation, often introducing bias. Recent critic-free approaches such as GRPO and RLOO eliminate value networks but still assign trajectory rewards uniformly across tokens, leaving the credit assignment problem unresolved. In this work, we study token-level credit redistribution without value functions, using intrinsic token-weighting schemes derived from the model's predictive distribution, including surprisal- and entropy-based weights. These methods require no additional networks, no tree construction, and no reward models. Through experiments on verifiable math and code tasks, we show that intrinsic weighting reduces gradient variance, stabilizes training, and yields interpretable credit assignment while matching established critic-free baselines. Our results demonstrate that redistributing credit via intrinsic distributional signals is a viable alternative to advantage estimation in language RL.
 \end{abstract}
 
 

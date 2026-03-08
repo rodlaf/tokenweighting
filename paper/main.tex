@@ -1,0 +1,265 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{parskip}
+\usepackage{amsmath,amssymb}
+\usepackage[margin=1in]{geometry}
+
+\title{Intrinsic Token Weighting for Credit Assignment in Language Model Reinforcement Learning}
+\author{Rodney Lafuente-Mercado}
+\date{January 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}\noindent
+Reinforcement learning (RL) for large language models (LLMs) is commonly implemented using policy gradient methods augmented with advantage estimation or learned value functions. While effective in classical control, these techniques implicitly assume a meaningful notion of state and a well-defined expectation over future returns. In language generation, however, the ``state'' is a partial text prefix that is non-Markov, semantically unstable, and often poorly suited for value estimation. As a result, critics can introduce bias while providing limited variance reduction.
+
+Recent work has therefore moved toward critic-free, outcome-based methods such as GRPO and RLOO. These approaches eliminate value networks but still assign trajectory-level rewards uniformly across tokens, leaving open the question of how credit should be distributed within a generated sequence. In this work, we study \emph{token-level credit redistribution} as a design axis for on-policy LLM reinforcement learning, without learning value functions or prefix values.
+
+We investigate a family of intrinsic token-weighting schemes derived directly from the model’s predictive distribution, including surprisal- and entropy-based weights, and apply them as multiplicative factors on token-level policy gradients. These methods require no additional networks, no tree construction, and no reward models. Through controlled experiments on verifiable math and code reasoning tasks, we compare uniform token weighting, batch-baseline methods (RLOO/GRPO), and intrinsic token weighting. We show that intrinsic weighting can reduce gradient variance, stabilize training, and yield interpretable credit assignment patterns, while achieving performance comparable to established critic-free baselines. Our results suggest that, in language RL, redistributing credit using intrinsic distributional signals is a viable alternative to advantage estimation and prefix value modeling.
+\end{abstract}
+
+
+
+\section{Introduction}
+
+Reinforcement learning has become an important component of large language model (LLM) training pipelines, particularly for alignment, preference optimization, and reasoning tasks. Most contemporary approaches rely on policy gradient methods augmented with advantage estimation, typically implemented via learned value functions or generalized advantage estimation. These techniques originate from classical reinforcement learning settings in which states are well-defined, approximately Markov, and admit stable value estimates.
+
+Applying this framework to language generation introduces a fundamental mismatch. In autoregressive LLMs, the ``state'' is a partial sequence of tokens. Such prefixes are not Markov, do not summarize progress toward task completion, and can vary widely in semantic meaning despite superficial similarity. Consequently, estimating a value function over prefixes is both statistically challenging and conceptually ill-defined. Empirically, value heads in language RL are often brittle, sensitive to distributional shift, and prone to introducing bias that outweighs their variance-reduction benefits.
+
+Motivated by these issues, recent work has increasingly moved away from learned critics in LLM reinforcement learning. Critic-free, outcome-based methods such as RLOO and GRPO replace value estimation with batch-level baselines, achieving stable training on verifiable reasoning tasks such as math and code. However, these approaches still implicitly assume uniform credit assignment across tokens: every action in a trajectory receives the same reward signal, modulated only by a scalar baseline.
+
+This raises a natural question: \emph{if we no longer estimate values over prefixes, how should trajectory-level reward be distributed across tokens?} Uniform credit assignment is simple, but it ignores the fact that different tokens play very different roles in generation. Some tokens correspond to high-uncertainty decisions, strategy commitments, or branching points in reasoning, while others are low-entropy continuations or stylistic filler. Treating all tokens equally risks diluting the learning signal and obscuring the mechanisms by which policies improve.
+
+In this work, we study token-level credit redistribution as a mechanism for on-policy LLM reinforcement learning without value functions. Rather than estimating advantages or prefix values, we propose to weight token-level policy gradients using intrinsic signals derived directly from the model’s predictive distribution. These include token surprisal and changes in predictive entropy, which naturally reflect decision difficulty and commitment during generation. Importantly, these signals are inexpensive to compute, require no additional networks or tree structures, and make no assumptions about the existence of a meaningful value function over prefixes.
+
+We conduct a systematic empirical evaluation of intrinsic token-weighting schemes on verifiable math and code reasoning tasks. We compare uniform outcome-based policy gradients, batch-baseline methods such as RLOO/GRPO, and several intrinsic weighting strategies under otherwise identical training conditions. Our results show that intrinsic token weighting can reduce gradient variance, stabilize optimization, and produce interpretable credit assignment patterns, while achieving performance comparable to established critic-free baselines.
+
+Overall, this paper reframes advantage estimation as one instantiation of a broader credit assignment problem in language reinforcement learning. We demonstrate that, in settings where state semantics are weak and rewards are trajectory-level, redistributing credit using intrinsic distributional signals is a practical and effective alternative to value-based methods.
+
+\section{Related Work}
+
+\subsection{Policy Gradient Methods and Advantage Estimation}
+
+Policy gradient methods with advantage estimation form the foundation of modern reinforcement learning. Techniques such as generalized advantage estimation (GAE) and trust-region or clipped objectives (TRPO, PPO) were developed for control problems with well-defined states and long-horizon credit assignment. These methods have been widely adopted in reinforcement learning from human feedback (RLHF) for language models, typically combining learned reward models, value functions, and KL regularization.
+
+However, several works have noted that the assumptions underlying advantage estimation are poorly matched to language generation. Prefixes in text are non-Markov and do not admit stable value estimates, leading to brittle critics and biased gradients. This observation has motivated a re-examination of critic-heavy RL pipelines for LLMs.
+
+\subsection{Critic-Free Reinforcement Learning for LLMs}
+
+Recent work has proposed critic-free alternatives to PPO-style training for language models. RLOO (REINFORCE Leave-One-Out) and related methods replace learned value functions with batch-level baselines, reducing variance while avoiding value estimation. GRPO (Group Relative Policy Optimization) further develops this idea and has been successfully applied to verifiable reasoning tasks such as math and code, including large-scale deployments in recent reasoning-focused models.
+
+These methods demonstrate that value functions are not strictly necessary for stable LLM reinforcement learning. However, they retain uniform token-level credit assignment: all tokens in a trajectory are weighted equally, with variance reduction applied only at the trajectory level.
+
+\subsection{Token- and Span-Level Credit Assignment}
+
+Several recent works address the mismatch between sequence-level rewards and token-level optimization. SCAR redistributes sequence-level rewards to tokens using Shapley value approximations, providing principled token-level credit at the cost of additional computation and reliance on reward models. PGTG learns token-level guidance signals from preference data, projecting sequence-level supervision down to finer granularity.
+
+TEMPO introduces nonparametric prefix value estimation using prefix trees built from multiple sampled trajectories, enabling TD-style corrections at branching points without learning a value network. While effective, this approach requires explicit tree construction and aggregation over multiple rollouts.
+
+In contrast to these methods, our work focuses on intrinsic token-weighting schemes that do not require reward models, prefix trees, or counterfactual rollouts. We view these approaches as complementary: our goal is to understand how much credit assignment structure can be recovered using only signals already present in the model’s predictive distribution.
+
+\subsection{Token Weighting and Confidence-Based Optimization}
+
+Outside of reinforcement learning, token weighting has been explored in supervised and preference-based settings. Recent work has shown that non-uniform token weighting can improve long-context language modeling and efficiency. Confidence- and entropy-based token selection has also been proposed in direct preference optimization (e.g., ConfPO), where updates are focused on tokens deemed most relevant to preference differences.
+
+Our work differs in both setting and objective. We study on-policy reinforcement learning with environmental or verifiable rewards, rather than offline preference optimization, and focus on token weighting as a mechanism for credit redistribution rather than selective optimization.
+
+\subsection{Positioning}
+
+Taken together, prior work establishes that (i) value functions are often unnecessary or problematic in LLM reinforcement learning, and (ii) token-level credit assignment is an important but underexplored design dimension. This paper sits at the intersection of these trends. We provide a systematic study of intrinsic token-weighting schemes as a simple, value-free mechanism for credit redistribution in on-policy LLM reinforcement learning, complementing heavier-weight approaches based on prefix values or Shapley-style attribution.
+
+\section{Methods}
+
+We consider on-policy reinforcement learning for autoregressive language models with trajectory-level rewards. Let $\pi_\theta$ denote a language model parameterized by $\theta$, generating a sequence of tokens $y = (y_1, \dots, y_T)$ conditioned on a prompt $x$. After generating a full trajectory, the model receives a scalar reward $R(y) \in \mathbb{R}$, computed by an external verifier (e.g., exact answer correctness or unit test pass rate). Our goal is to optimize the expected reward $\mathbb{E}_{y \sim \pi_\theta}[R(y)]$.
+
+\subsection{Policy Gradient with Trajectory-Level Reward}
+
+The standard REINFORCE estimator for this objective is:
+\begin{equation}
+\nabla_\theta J(\theta)
+=
+\mathbb{E}_{y \sim \pi_\theta}
+\left[
+R(y) \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x)
+\right].
+\end{equation}
+
+In practice, a baseline $b$ is often subtracted from $R(y)$ to reduce variance:
+\begin{equation}
+(R(y) - b) \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+Batch-level baselines such as RLOO or GRPO compute $b$ as a function of rewards from multiple sampled trajectories, avoiding the need for a learned value function. Importantly, in these formulations the reward signal is still applied uniformly across all tokens in the trajectory.
+
+\subsection{Token-Level Credit Redistribution}
+
+We generalize the above formulation by introducing \emph{token-level weights} $w_t(y)$ that redistribute the trajectory-level reward across tokens:
+\begin{equation}
+\nabla_\theta J(\theta)
+=
+\mathbb{E}_{y \sim \pi_\theta}
+\left[
+(R(y) - b) \sum_{t=1}^{T} w_t(y)\, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x)
+\right].
+\end{equation}
+
+We require that $w_t(y) \ge 0$ and normalize weights within each trajectory:
+\begin{equation}
+\sum_{t=1}^{T} w_t(y) = 1.
+\end{equation}
+
+Uniform credit assignment corresponds to $w_t = 1/T$ for all $t$. Advantage-based methods can be viewed as implicitly defining $w_t$ via a learned value function. Our focus is on \emph{intrinsic} token-weighting schemes that depend only on the model’s predictive distribution, without learning prefix values or critics.
+
+\subsection{Intrinsic Token-Weighting Mechanisms}
+
+We study the following token-weighting schemes.
+
+\paragraph{Uniform Weighting (Baseline).}
+\begin{equation}
+w_t^{\text{uniform}} = \frac{1}{T}.
+\end{equation}
+This corresponds to outcome-only REINFORCE, and to GRPO/RLOO when combined with a batch-level baseline.
+
+\paragraph{Surprisal Weighting.}
+We weight tokens by their negative log-probability under the current policy:
+\begin{equation}
+\tilde{w}_t^{\text{surp}} = -\log \pi_\theta(y_t \mid y_{<t}, x),
+\end{equation}
+followed by normalization:
+\begin{equation}
+w_t^{\text{surp}} = \frac{\tilde{w}_t^{\text{surp}}}{\sum_{k=1}^{T} \tilde{w}_k^{\text{surp}}}.
+\end{equation}
+This assigns greater credit to low-probability (high-surprise) decisions, which often correspond to non-trivial reasoning steps.
+
+\paragraph{Entropy-Reduction Weighting.}
+Let $H_t$ denote the predictive entropy of the model before sampling token $y_t$:
+\begin{equation}
+H_t = - \sum_{v} \pi_\theta(v \mid y_{<t}, x) \log \pi_\theta(v \mid y_{<t}, x).
+\end{equation}
+We define the entropy drop induced by the sampled token as:
+\begin{equation}
+\Delta H_t = \max(0, H_{t-1} - H_t).
+\end{equation}
+Token weights are then given by:
+\begin{equation}
+w_t^{\text{ent}} = \frac{\Delta H_t}{\sum_{k=1}^{T} \Delta H_k}.
+\end{equation}
+This scheme emphasizes tokens that sharply reduce predictive uncertainty, corresponding to commitment or branching decisions during generation.
+
+\paragraph{Batch-Level Baselines.}
+All weighting schemes can be combined with a batch-level baseline $b$, computed as the mean reward of other trajectories sampled from the same prompt (RLOO/GRPO). Unless otherwise specified, we use this baseline in all experiments to isolate the effect of token weighting.
+
+\subsection{Relationship to Existing Methods}
+
+Our formulation subsumes several existing approaches as special cases. Uniform weighting with a batch baseline corresponds to GRPO/RLOO. Advantage-based methods can be interpreted as learning a data-dependent weighting via a value function over prefixes. In contrast, our intrinsic weighting schemes avoid learning prefix values, tree structures, or Shapley-style attributions, relying solely on signals already present in the policy’s predictive distribution.
+
+
+\section{Theoretical Interpretation}
+
+We provide an interpretation of intrinsic token weighting as a variance-control and credit-redistribution mechanism for policy gradient estimation in language models. Our goal is not to derive new convergence guarantees, but to clarify how token weighting relates to advantage estimation and why it can be effective without learning value functions.
+
+\subsection{Token Weighting as Credit Redistribution}
+
+Consider the standard REINFORCE estimator with a batch-level baseline:
+\begin{equation}
+g = (R - b)\sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+This estimator assigns equal credit to all tokens in a trajectory. Introducing token weights yields:
+\begin{equation}
+g_w = (R - b)\sum_{t=1}^{T} w_t(y)\, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x),
+\end{equation}
+where $\sum_t w_t = 1$.
+
+Importantly, this transformation does not change the reward signal itself; it redistributes how the trajectory-level signal is attributed to individual decisions. When $w_t$ depends only on quantities available at sampling time (e.g., log-probabilities or entropy), the estimator remains on-policy and does not require learning additional functions.
+
+\subsection{Relationship to Advantage Estimation}
+
+Advantage-based methods can be interpreted as implicitly defining token-level weights via a learned value function:
+\begin{equation}
+A_t = R - V(y_{<t}, x).
+\end{equation}
+In this view, the contribution of each token is scaled according to how much the observed outcome deviates from an estimated expectation conditioned on the prefix.
+
+However, this interpretation relies on the existence of a meaningful value function over prefixes. In language generation, prefixes are non-Markov and do not form a stable state space, making $V(y_{<t}, x)$ difficult to estimate and prone to bias. Token weighting offers an alternative: rather than estimating expected returns from prefixes, it emphasizes tokens based on intrinsic measures of decision salience, such as uncertainty or information gain.
+
+\subsection{Connection to Control Variates}
+
+From a statistical perspective, subtracting a baseline $b$ is a form of control variate that reduces variance without affecting unbiasedness. Token weighting can be viewed as a complementary mechanism that reshapes the contribution of individual score-function terms:
+\begin{equation}
+\nabla_\theta \log \pi_\theta(y) = \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+Uniform weighting treats all score-function terms equally, regardless of their variance or relevance. Intrinsic weighting schemes effectively reweight these terms, down-weighting low-variance or low-impact contributions (e.g., high-probability continuation tokens) and emphasizing high-variance or high-impact decisions (e.g., low-probability or uncertainty-reducing tokens). While this reweighting introduces bias relative to the uniform estimator, it can substantially reduce variance, leading to improved optimization dynamics in practice.
+
+\subsection{Interpretation of Specific Weighting Schemes}
+
+\paragraph{Surprisal Weighting.}
+Surprisal-based weights emphasize tokens with low conditional probability under the current policy. These tokens correspond to decisions where small parameter changes can induce large changes in likelihood, and therefore often dominate gradient variance. Weighting by surprisal concentrates learning signal on such high-sensitivity decisions.
+
+\paragraph{Entropy-Reduction Weighting.}
+Entropy-reduction weighting emphasizes tokens that sharply reduce predictive entropy. These tokens correspond to commitment points in generation, where the model transitions from a diffuse distribution over continuations to a more concentrated one. This mirrors the role of branching points in tree-based reasoning methods, but is computed locally from the model’s predictive distribution without explicit tree construction.
+
+\subsection{Bias--Variance Tradeoff}
+
+Both advantage estimation and intrinsic token weighting introduce bias in exchange for variance reduction. Advantage estimation does so by relying on a learned value function, whose bias can be substantial when the underlying state abstraction is weak. Intrinsic token weighting introduces bias by reshaping the contribution of token-level gradients based on heuristic salience measures. The empirical question is therefore not whether bias is introduced, but whether the bias--variance tradeoff is favorable.
+
+Our experiments show that intrinsic token weighting achieves variance reduction and training stability comparable to critic-free baselines such as GRPO, while avoiding the brittleness associated with value estimation over text prefixes. This suggests that, in language reinforcement learning, bias introduced by intrinsic weighting may be more benign than bias introduced by ill-defined value functions.
+
+\subsection{Summary}
+
+This perspective reframes advantage estimation as one particular approach to credit redistribution in policy gradient methods. Intrinsic token weighting offers an alternative that leverages the structure of the language model’s predictive distribution, without assuming the existence of meaningful state values. In settings where prefixes do not form a stable state space, such value-free mechanisms may provide a more appropriate inductive bias.
+
+
+
+\section{Experiments}
+
+\subsection{Experimental Setup}
+
+\paragraph{Models.}
+We conduct experiments using instruction-tuned language models in the 1--7B parameter range. All experiments are run on a single node with up to 8 NVIDIA RTX 4090 GPUs. Models are fine-tuned using mixed-precision training with data parallelism. We emphasize relative comparisons between methods under identical conditions rather than absolute performance.
+
+\paragraph{Tasks and Rewards.}
+We evaluate on verifiable reasoning tasks where rewards are deterministic or near-deterministic:
+\begin{itemize}
+    \item \textbf{Math reasoning}: grade-school and algebraic problems with exact-answer verification.
+    \item \textbf{Code reasoning}: simple programming tasks with unit-test-based rewards.
+\end{itemize}
+For all tasks, the reward $R(y) \in \{0,1\}$ indicates whether the final answer passes verification.
+
+\paragraph{Training Procedure.}
+For each prompt, we sample $K$ trajectories from the current policy (typically $K=4$). Rewards are computed after full generation. Policy updates use on-policy gradients with a batch-level baseline. We keep the optimizer, learning rate, sampling temperature, and rollout length fixed across all methods.
+
+\subsection{Baselines}
+
+We compare the following methods:
+\begin{itemize}
+    \item \textbf{Uniform}: outcome-only REINFORCE with batch baseline.
+    \item \textbf{GRPO/RLOO}: uniform token weighting with leave-one-out or group-relative baseline.
+    \item \textbf{Surprisal}: intrinsic surprisal-based token weighting.
+    \item \textbf{Entropy-Reduction}: intrinsic entropy-drop-based token weighting.
+\end{itemize}
+
+No learned value functions or critics are used in any setting.
+
+\subsection{Evaluation Metrics}
+
+In addition to final task accuracy, we report:
+\begin{itemize}
+    \item Training stability and convergence speed.
+    \item Variance of gradient norms across updates.
+    \item Evolution of token entropy and sequence length during training.
+    \item Qualitative visualizations of token weights over reasoning traces.
+\end{itemize}
+
+These diagnostics allow us to assess not only performance, but also how different weighting schemes redistribute credit during learning.
+
+\subsection{Compute Considerations}
+
+All experiments are designed to fit within modest compute budgets. Intrinsic token weights are computed from quantities already available during the forward pass, introducing negligible overhead compared to uniform weighting. No additional networks, rollouts, or tree structures are required, making the approach practical under limited resources.
+
+
+
+\end{document}

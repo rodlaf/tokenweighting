@@ -42,33 +42,31 @@ Overall, this paper reframes advantage estimation as one instantiation of a broa
 
 \subsection{Policy Gradient Methods and Advantage Estimation}
 
-Policy gradient methods with advantage estimation form the foundation of modern reinforcement learning. Techniques such as generalized advantage estimation (GAE) and trust-region or clipped objectives (TRPO, PPO) were developed for control problems with well-defined states and long-horizon credit assignment. These methods have been widely adopted in reinforcement learning from human feedback (RLHF) for language models, typically combining learned reward models, value functions, and KL regularization.
+Modern reinforcement learning pipelines for neural sequence models inherit heavily from policy-gradient methods, starting from REINFORCE-style score-function estimators \cite{williams1992reinforce} and evolving toward trust-region and clipped-surrogate approaches such as TRPO and PPO \cite{schulman2015trpo,schulman2017ppo}. In parallel, advantage estimation methods such as generalized advantage estimation (GAE) were introduced to reduce gradient variance via learned value functions and temporally-smoothed advantage targets \cite{schulman2015gae}.
 
-However, several works have noted that the assumptions underlying advantage estimation are poorly matched to language generation. Prefixes in text are non-Markov and do not admit stable value estimates, leading to brittle critics and biased gradients. This observation has motivated a re-examination of critic-heavy RL pipelines for LLMs.
+These components have been widely adopted in reinforcement learning from human feedback (RLHF) and related alignment pipelines for language models, where reward signals are frequently sequence-level and training often uses PPO-style objectives with additional regularization \cite{ouyang2022instruct,stiennon2020summarize}. The broader paradigm of learning from preference feedback traces back to learning reward models from pairwise comparisons and optimizing policies against them \cite{christiano2017preferences}.
 
 \subsection{Critic-Free Reinforcement Learning for LLMs}
 
-Recent work has proposed critic-free alternatives to PPO-style training for language models. RLOO (REINFORCE Leave-One-Out) and related methods replace learned value functions with batch-level baselines, reducing variance while avoiding value estimation. GRPO (Group Relative Policy Optimization) further develops this idea and has been successfully applied to verifiable reasoning tasks such as math and code, including large-scale deployments in recent reasoning-focused models.
+Recent work has re-examined whether learned critics and token-level value modeling are necessary for stable on-policy optimization in language settings. A line of REINFORCE-style RLHF methods removes the learned value function entirely while retaining variance-reduction through baselines and normalization at the prompt or group level \cite{ahmadian2024backtobasics,li2023remax,hu2025reinforcepp}. In settings with verifiable, deterministic rewards, Group Relative Policy Optimization (GRPO) replaces learned values with group-relative normalization across multiple sampled responses \cite{shao2024deepseekmath}.
 
-These methods demonstrate that value functions are not strictly necessary for stable LLM reinforcement learning. However, they retain uniform token-level credit assignment: all tokens in a trajectory are weighted equally, with variance reduction applied only at the trajectory level.
+These critic-free methods simplify the optimization stack relative to PPO, but typically apply sequence-level outcomes uniformly across tokens (modulo a scalar baseline). This leaves open the design question of how credit should be distributed within a generated trajectory when the reward is observed only at the end.
 
 \subsection{Token- and Span-Level Credit Assignment}
 
-Several recent works address the mismatch between sequence-level rewards and token-level optimization. SCAR redistributes sequence-level rewards to tokens using Shapley value approximations, providing principled token-level credit at the cost of additional computation and reliance on reward models. PGTG learns token-level guidance signals from preference data, projecting sequence-level supervision down to finer granularity.
+Several recent approaches address the granularity mismatch between sequence-level supervision and token-level optimization by constructing token- or span-level learning signals. Preference-grounded token-level guidance methods learn token-level training signals from sequence-level preference data \cite{yang2023pgtg}. Complementarily, SCAR redistributes a sequence-level reward into token- or span-level attributions using Shapley-value ideas from cooperative game theory \cite{cao2025scar,shapley1953value}.
 
-TEMPO introduces nonparametric prefix value estimation using prefix trees built from multiple sampled trajectories, enabling TD-style corrections at branching points without learning a value network. While effective, this approach requires explicit tree construction and aggregation over multiple rollouts.
-
-In contrast to these methods, our work focuses on intrinsic token-weighting schemes that do not require reward models, prefix trees, or counterfactual rollouts. We view these approaches as complementary: our goal is to understand how much credit assignment structure can be recovered using only signals already present in the model’s predictive distribution.
+Another direction uses multiple sampled trajectories to recover structure over prefixes. TEMPO converts groups of sampled solutions into a prefix tree and computes nonparametric prefix values to provide branch-gated temporal-difference style corrections without training a learned critic \cite{tran2025tempo}. Compared to purely outcome-based group baselines, these methods inject additional structure about where decisions diverge.
 
 \subsection{Token Weighting and Confidence-Based Optimization}
 
-Outside of reinforcement learning, token weighting has been explored in supervised and preference-based settings. Recent work has shown that non-uniform token weighting can improve long-context language modeling and efficiency. Confidence- and entropy-based token selection has also been proposed in direct preference optimization (e.g., ConfPO), where updates are focused on tokens deemed most relevant to preference differences.
+Outside of on-policy reinforcement learning, non-uniform token weighting has been explored as a mechanism to steer optimization toward more informative or context-dependent tokens. For example, token-level loss weighting has been studied for improving long-context language modeling by assigning different weights to training tokens \cite{helm2025tokenweighting}. In preference optimization, methods such as ConfPO identify and emphasize preference-critical tokens based on policy confidence, rather than uniformly updating all tokens \cite{yoon2025confpo}.
 
-Our work differs in both setting and objective. We study on-policy reinforcement learning with environmental or verifiable rewards, rather than offline preference optimization, and focus on token weighting as a mechanism for credit redistribution rather than selective optimization.
+These works suggest that token-level non-uniformity can be beneficial in both supervised and preference-learning objectives, motivating investigation of token weighting as a credit-redistribution mechanism in on-policy reinforcement learning.
 
 \subsection{Positioning}
 
-Taken together, prior work establishes that (i) value functions are often unnecessary or problematic in LLM reinforcement learning, and (ii) token-level credit assignment is an important but underexplored design dimension. This paper sits at the intersection of these trends. We provide a systematic study of intrinsic token-weighting schemes as a simple, value-free mechanism for credit redistribution in on-policy LLM reinforcement learning, complementing heavier-weight approaches based on prefix values or Shapley-style attribution.
+Taken together, prior work establishes that (i) critics and learned value functions can be removed in several practical LLM optimization regimes \cite{ahmadian2024backtobasics,li2023remax,shao2024deepseekmath,hu2025reinforcepp}, and (ii) distributing sequence-level supervision to finer granularity can improve learning efficiency and interpretability \cite{yang2023pgtg,cao2025scar,tran2025tempo}. This paper studies intrinsic token-weighting schemes for on-policy reinforcement learning that redistribute credit using signals derived from the policy distribution itself, without introducing learned value heads, prefix trees, or Shapley-style counterfactual attribution.
 
 \section{Methods}
 
@@ -260,6 +258,7 @@ These diagnostics allow us to assess not only performance, but also how differen
 
 All experiments are designed to fit within modest compute budgets. Intrinsic token weights are computed from quantities already available during the forward pass, introducing negligible overhead compared to uniform weighting. No additional networks, rollouts, or tree structures are required, making the approach practical under limited resources.
 
-
+\bibliographystyle{plain}
+\bibliography{references}
 
 \end{document}

@@ -1,0 +1,210 @@
+% references.bib
+% Intrinsic Token Weighting for Credit Assignment in LLM RL (Related Work + extensions)
+
+@article{williams1992reinforce,
+  author  = {Williams, Ronald J.},
+  title   = {Simple statistical gradient-following algorithms for connectionist reinforcement learning},
+  journal = {Machine Learning},
+  volume  = {8},
+  pages   = {229--256},
+  year    = {1992},
+  month   = {may},
+  doi     = {10.1007/BF00992696},
+  url     = {https://doi.org/10.1007/BF00992696}
+}
+
+@inproceedings{schulman2015trpo,
+  title     = {Trust Region Policy Optimization},
+  author    = {Schulman, John and Levine, Sergey and Abbeel, Pieter and Jordan, Michael and Moritz, Philipp},
+  booktitle = {Proceedings of the 32nd International Conference on Machine Learning},
+  pages     = {1889--1897},
+  year      = {2015},
+  editor    = {Bach, Francis and Blei, David},
+  volume    = {37},
+  series    = {Proceedings of Machine Learning Research},
+  address   = {Lille, France},
+  month     = {07--09 Jul},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v37/schulman15.html}
+}
+
+@misc{schulman2015gae,
+  title         = {High-Dimensional Continuous Control Using Generalized Advantage Estimation},
+  author        = {Schulman, John and Moritz, Philipp and Levine, Sergey and Jordan, Michael and Abbeel, Pieter},
+  year          = {2015},
+  eprint        = {1506.02438},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.1506.02438},
+  url           = {https://arxiv.org/abs/1506.02438}
+}
+
+@misc{schulman2017ppo,
+  title         = {Proximal Policy Optimization Algorithms},
+  author        = {Schulman, John and Wolski, Filip and Dhariwal, Prafulla and Radford, Alec and Klimov, Oleg},
+  year          = {2017},
+  eprint        = {1707.06347},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.1707.06347},
+  url           = {https://arxiv.org/abs/1707.06347}
+}
+
+@misc{christiano2017preferences,
+  title         = {Deep reinforcement learning from human preferences},
+  author        = {Christiano, Paul and Leike, Jan and Brown, Tom B. and Martic, Miljan and Legg, Shane and Amodei, Dario},
+  year          = {2017},
+  eprint        = {1706.03741},
+  archivePrefix = {arXiv},
+  primaryClass  = {stat.ML},
+  doi           = {10.48550/arXiv.1706.03741},
+  url           = {https://arxiv.org/abs/1706.03741}
+}
+
+@misc{stiennon2020summarize,
+  title         = {Learning to summarize from human feedback},
+  author        = {Stiennon, Nisan and Ouyang, Long and Wu, Jeff and Ziegler, Daniel M. and Lowe, Ryan and Voss, Chelsea and Radford, Alec and Amodei, Dario and Christiano, Paul},
+  year          = {2020},
+  eprint        = {2009.01325},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi           = {10.48550/arXiv.2009.01325},
+  url           = {https://arxiv.org/abs/2009.01325},
+  note          = {NeurIPS 2020}
+}
+
+@misc{ouyang2022instruct,
+  title         = {Training language models to follow instructions with human feedback},
+  author        = {Ouyang, Long and Wu, Jeff and Jiang, Xu and Almeida, Diogo and Wainwright, Carroll L. and Mishkin, Pamela and Zhang, Chong and Agarwal, Sandhini and Slama, Katarina and Ray, Alex and Schulman, John and Hilton, Jacob and Kelton, Fraser and Miller, Luke and Simens, Maddie and Askell, Amanda and Welinder, Peter and Christiano, Paul and Leike, Jan and Lowe, Ryan},
+  year          = {2022},
+  eprint        = {2203.02155},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi           = {10.48550/arXiv.2203.02155},
+  url           = {https://arxiv.org/abs/2203.02155}
+}
+
+@misc{rafailov2023dpo,
+  title         = {Direct Preference Optimization: Your Language Model is Secretly a Reward Model},
+  author        = {Rafailov, Rafael and Sharma, Archit and Mitchell, Eric and Ermon, Stefano and Manning, Christopher D. and Finn, Chelsea},
+  year          = {2023},
+  eprint        = {2305.18290},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.2305.18290},
+  url           = {https://arxiv.org/abs/2305.18290}
+}
+
+@misc{ahmadian2024backtobasics,
+  title         = {Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in {LLM}s},
+  author        = {Ahmadian, Arash and Cremer, Chris and Gall{\'e}, Matthias and Fadaee, Marzieh and Kreutzer, Julia and Pietquin, Olivier and {\"U}st{\"u}n, Ahmet and Hooker, Sara},
+  year          = {2024},
+  eprint        = {2402.14740},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.2402.14740},
+  url           = {https://arxiv.org/abs/2402.14740}
+}
+
+@misc{li2023remax,
+  title         = {ReMax: A Simple, Effective, and Efficient Reinforcement Learning Method for Aligning Large Language Models},
+  author        = {Li, Ziniu and Xu, Tian and Zhang, Yushun and Lin, Zhihang and Yu, Yang and Sun, Ruoyu and Luo, Zhi-Quan},
+  year          = {2023},
+  eprint        = {2310.10505},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  doi           = {10.48550/arXiv.2310.10505},
+  url           = {https://arxiv.org/abs/2310.10505}
+}
+
+@misc{hu2025reinforcepp,
+  title         = {{REINFORCE}++: An Efficient {RLHF} Algorithm with Robustness to Both Prompt and Reward Models},
+  author        = {Hu, Jian and Liu, Jason Klein and Wei, Shen},
+  year          = {2025},
+  eprint        = {2501.03262},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi           = {10.48550/arXiv.2501.03262},
+  url           = {https://arxiv.org/abs/2501.03262}
+}
+
+@misc{shao2024deepseekmath,
+  title         = {DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models},
+  author        = {Shao, Zhihong and Wang, Peiyi and Zhu, Qihao and Xu, Runxin and Song, Junxiao and Bi, Xiao and Zhang, Haowei and Zhang, Mingchuan and Li, Y. K. and Wu, Y. and Guo, Daya},
+  year          = {2024},
+  eprint        = {2402.03300},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi           = {10.48550/arXiv.2402.03300},
+  url           = {https://arxiv.org/abs/2402.03300}
+}
+
+@inproceedings{yang2023pgtg,
+  author    = {Yang, Shentao and Zhang, Shujian and Xia, Congying and Feng, Yihao and Xiong, Caiming and Zhou, Mingyuan},
+  editor    = {Oh, Alice and Naumann, Tristan and Globerson, Amir and Saenko, Kate and Hardt, Moritz and Levine, Sergey},
+  title     = {Preference-grounded Token-level Guidance for Language Model Fine-tuning},
+  booktitle = {Advances in Neural Information Processing Systems 36: Annual Conference on Neural Information Processing Systems 2023, NeurIPS 2023, New Orleans, LA, USA, December 10--16, 2023},
+  year      = {2023},
+  url       = {http://papers.nips.cc/paper_files/paper/2023/hash/4d4a3b6a34332d80349137bcc98164a5-Abstract-Conference.html}
+}
+
+@misc{cao2025scar,
+  title         = {{SCAR}: Shapley Credit Assignment for More Efficient {RLHF}},
+  author        = {Cao, Meng and Zhang, Shuyuan and Chang, Xiao-Wen and Precup, Doina},
+  year          = {2025},
+  eprint        = {2505.20417},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI},
+  doi           = {10.48550/arXiv.2505.20417},
+  url           = {https://arxiv.org/abs/2505.20417}
+}
+
+@incollection{shapley1953value,
+  author    = {Shapley, Lloyd S.},
+  title     = {A Value for n-Person Games},
+  booktitle = {Contributions to the Theory of Games {II}},
+  editor    = {Kuhn, Harold W. and Tucker, Albert W.},
+  pages     = {307--317},
+  publisher = {Princeton University Press},
+  address   = {Princeton},
+  year      = {1953}
+}
+
+@misc{tran2025tempo,
+  title         = {Exploiting Tree Structure for Credit Assignment in {RL} Training of {LLM}s},
+  author        = {Tran, Hieu and Yao, Zonghai and Yu, Hong},
+  year          = {2025},
+  eprint        = {2509.18314},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  doi           = {10.48550/arXiv.2509.18314},
+  url           = {https://arxiv.org/abs/2509.18314}
+}
+
+@inproceedings{yoon2025confpo,
+  title     = {{C}onf{PO}: Exploiting Policy Model Confidence for Critical Token Selection in Preference Optimization},
+  author    = {Yoon, Hee Suk and Yoon, Eunseop and Hasegawa-Johnson, Mark A. and Kim, Sungwoong and Yoo, Chang D.},
+  booktitle = {Proceedings of the 42nd International Conference on Machine Learning},
+  pages     = {72641--72655},
+  year      = {2025},
+  editor    = {Singh, Aarti and Fazel, Maryam and Hsu, Daniel and Lacoste-Julien, Simon and Berkenkamp, Felix and Maharaj, Tegan and Wagstaff, Kiri and Zhu, Jerry},
+  volume    = {267},
+  series    = {Proceedings of Machine Learning Research},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v267/yoon25b.html},
+  pdf       = {https://raw.githubusercontent.com/mlresearch/v267/main/assets/yoon25b/yoon25b.pdf}
+}
+
+@inproceedings{helm2025tokenweighting,
+  title     = {Token Weighting for Long-Range Language Modeling},
+  author    = {Helm, Falko and Daheim, Nico and Gurevych, Iryna},
+  editor    = {Chiruzzo, Luis and Ritter, Alan and Wang, Lu},
+  booktitle = {Findings of the Association for Computational Linguistics: {NAACL} 2025},
+  month     = apr,
+  year      = {2025},
+  address   = {Albuquerque, New Mexico},
+  publisher = {Association for Computational Linguistics},
+  url       = {https://aclanthology.org/2025.findings-naacl.79/},
+  doi       = {10.18653/v1/2025.findings-naacl.79},
+  pages     = {1440--1459}
+}

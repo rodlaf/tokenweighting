@@ -1,296 +1,311 @@
 # Professor Outreach Email Drafts
 
-## General Template
+## Gold Standard (Izmailov Format)
 
-**To:** [professor@university.edu]
-**Subject:** Research collaboration — NeurIPS 2026
+**To:** [professor@university.edu]  
+**Subject:** Research collaboration
 
 Dear Prof. [Name],
 
-I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory, working on reinforcement learning in distributed environments.
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory, where I worked on reinforcement learning systems in large-scale distributed and online environments.
 
-I have been following your work on [general research area]. Your approach to [topic] connects to my research on intrinsic token weighting for credit assignment in LLM RL.
+I have been following your work on [research area], and I have found it very helpful for thinking about [related topic]. Many of the [issues/challenges] you have studied in [context] show up very naturally once RL is pushed into large or non-ideal regimes.
 
-Recently, my work focuses on two directions: intrinsic token weighting for critic-free LLM fine-tuning, and memory in RL (joint work with Daniela Rus on temporal range, arXiv 2512.06204). I am targeting NeurIPS 2026.
+Recently, my work has focused on RL under these kinds of conditions. That includes work on [related area], as well as diagnostics for understanding how [technical aspect]. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a Jacobian-based metric that makes effective context length explicit and ties it to training behavior.
 
-I wanted to ask whether you might be open to a brief collaboration discussion. This is not regarding PhD admissions—I am in a masters at UT Austin.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, aimed at a joint paper if there is overlap with directions you or your group are interested in. This is not about PhD admissions. I would be glad to share a short summary or talk through ideas informally if helpful, and I completely understand if your schedule does not allow.
 
 Best regards,
-Rodney Lafuente-Mercado
-rodneyslafuente@gmail.com | rlafuente.com
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
-## Individual Professor Emails
+## Individual Emails
 
 ### Trevor Bonjour — UC San Diego
 **To:** tbonjour@ucsd.edu
 
-Dear Prof. Bonjour,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory, where I worked on reinforcement learning in distributed environments.
 
-I hope you are doing well. I am Rodney Lafuente-Mercado, currently at Scale AI and previously at MIT Lincoln Laboratory on RL systems.
+I have been following your work on deep reinforcement learning for educational games and multi-agent systems, and I have found it helpful for thinking about credit assignment when agents must coordinate. The challenges you address in complex game-like settings, where multiple decision-makers interact, show up very naturally once RL is pushed into non-ideal distributed regimes.
 
-I have been following your work on RL for educational applications and multi-agent settings. This connects to my research on intrinsic token weighting for credit assignment.
+Recently, my work has focused on RL under conditions where standard assumptions break down. That includes work on adaptive policy synchronization for distributed training, as well as diagnostics for understanding how policies actually use temporal history. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a Jacobian-based metric that makes effective context length explicit.
 
-My recent work focuses on critic-free LLM fine-tuning and memory in RL (arXiv 2512.06204 with Daniela Rus). Targeting NeurIPS 2026.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, aimed at a joint paper if there is overlap. This is not about PhD admissions, and I completely understand if your schedule does not allow.
 
-Would you be open to a brief discussion? Not regarding PhD admissions—I am in a masters at UT Austin.
-
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Sicun Gao — UC San Diego
 **To:** sicung@ucsd.edu
 
-Dear Prof. Gao,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory, where I worked on RL systems in safety-critical online environments.
 
-I am Rodney Lafuente-Mercado (Scale AI, previously MIT Lincoln Laboratory). I follow your work on safe RL and neural control.
+I have been following your work on safe reinforcement learning and neural control, and I have found it very helpful for thinking about stability in learning without explicit value functions. Many of the formal guarantees you pursue, like reachability under uncertainty, show up very naturally when trying to train language model policies that do not rely on brittle critics.
 
-Your value-free safety frameworks connect to my research on critic-free RL for language models. I recently worked on temporal range in RL (arXiv 2512.06204) and am preparing a NeurIPS 2026 submission on intrinsic token weighting.
+Recently, my work has focused on RL under conditions where value estimation fails. That includes work on critic-free LLM fine-tuning, as well as diagnostics for understanding temporal dependencies. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a Jacobian-based metric for effective context length.
 
-Open to a brief discussion? Not PhD admissions—masters at UT Austin.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Rose Yu — UC San Diego
 **To:** roseyu@ucsd.edu
 
-Dear Prof. Yu,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory on RL systems.
 
-I am Rodney Lafuente-Mercado (Scale AI, ex-MIT Lincoln Laboratory). I follow your spatiotemporal ML and structured prediction work.
+I have been following your work on spatiotemporal modeling and tensor-based methods, and I have found it very helpful for thinking about temporal structure in RL. The methods you have developed for capturing dependencies over time relate directly to questions I have about when policies actually need extended context versus when they can compress effectively.
 
-Your methods for temporal dependencies relate to my questions about context length in RL. Recent work: intrinsic token weighting and memory in RL (arXiv 2512.06204). Targeting NeurIPS 2026.
+Recently, my work has focused on RL where Markov assumptions do not hold well. That includes intrinsic token weighting for LLM fine-tuning, as well as diagnostics for temporal memory use. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric that makes effective context length explicit.
 
-Brief discussion possible? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Hao Zhang — UC San Diego
 **To:** haozhang@ucsd.edu
 
-Dear Prof. Zhang,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory, where I worked on distributed RL infrastructure.
 
-I am Rodney Lafuente-Mercado (Scale AI, previously MIT Lincoln on distributed RL). I follow your ML systems and efficient LLM serving research.
+I have been following your work on efficient LLM serving and ML systems, and I have found it helpful for thinking about throughput optimization at scale. The systems challenges you address, like disaggregating prefill and decoding, show up very naturally once RL training is pushed into large distributed regimes.
 
-Your throughput optimization work connects to my distributed RL experience. Recent: intrinsic token weighting and temporal range (arXiv 2512.06204). NeurIPS 2026 target.
+Recently, my work has focused on RL under conditions where distributed training introduces new dynamics. That includes adaptive policy synchronization, as well as work on intrinsic token weighting. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a Jacobian-based metric for context length.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Sanmi Koyejo — Stanford
 **To:** sanmi@stanford.edu
 
-Dear Prof. Koyejo,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory, where I worked on RL systems.
 
-I am Rodney Lafuente-Mercado (Scale AI, ex-MIT Lincoln Laboratory). I follow your trustworthy AI and robust ML work.
+I have been following your work on trustworthy AI and robust machine learning, and I have found it very helpful for thinking about stability and reliability in RL training. Many of the issues you study, like distributional robustness and fairness, show up very naturally once policies are trained at scale without reliable value estimates.
 
-Your research on reliable systems relates to my work on stable RL without brittle critics. Recent: intrinsic token weighting and memory in RL (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL under conditions where traditional value functions fail. That includes critic-free LLM fine-tuning, as well as diagnostics for temporal structure. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric for effective context.
 
-Brief discussion? Not PhD admissions—masters at UT Austin.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Azalia Mirhoseini — Stanford
 **To:** azalia@stanford.edu
 
-Dear Prof. Mirhoseini,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
 
-I am Rodney Lafuente-Mercado (Scale AI, previously MIT Lincoln). I follow your RL for chip design work.
+I have been following your work on applying reinforcement learning to chip design, and I have found it very helpful for thinking about RL in combinatorial optimization. Many of the challenges you address, like long-horizon credit assignment in large search spaces, show up very naturally once RL is pushed into regimes where value estimation is difficult.
 
-Your approach to sequential combinatorial optimization informs my thinking about credit assignment. Recent: intrinsic token weighting for LLM RL and temporal range (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL under conditions where traditional methods struggle. That includes work on intrinsic token weighting for LLM fine-tuning, as well as diagnostics for memory use. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a Jacobian-based metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Tengyu Ma — Stanford
 **To:** tengyuma@stanford.edu
 
-Dear Prof. Ma,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
 
-I am Rodney Lafuente-Mercado (Scale AI, ex-MIT Lincoln). I follow your deep learning theory and RL foundations work.
+I have been following your work on deep learning theory and self-supervised learning, and I have found it very helpful for thinking about when and why RL training stabilizes. Many of the theoretical questions you pursue, like representation learning and generalization, show up very naturally when trying to train policies without value functions.
 
-Your research on generalization connects to when RL training stabilizes. Recent: intrinsic token weighting and memory in RL (arXiv 2512.06204). Targeting NeurIPS 2026.
+Recently, my work has focused on RL under non-ideal conditions. That includes intrinsic token weighting for LLM fine-tuning, as well as temporal range diagnostics. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric for effective context length.
 
-Brief discussion possible? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Serina Chang — UC Berkeley
 **To:** serinac@berkeley.edu
 
-Dear Prof. Chang,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI.
 
-I am Rodney Lafuente-Mercado (Scale AI). I follow your AI and human behavior research.
+I have been following your work on AI and human behavior, and I have found it helpful for thinking about how learning agents model complex dynamics. The challenges you address in capturing human behavior relate to questions I have about what RL agents actually learn and use.
 
-Your work on modeling human dynamics relates to what RL agents learn. Recent: intrinsic token weighting and temporal range in RL (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL where temporal structure matters. That includes intrinsic token weighting, as well as work on memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a Jacobian-based metric.
 
-Open to discussion? Not PhD admissions—masters at UT Austin.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Song Mei — UC Berkeley
 **To:** songmei@berkeley.edu
 
-Dear Prof. Mei,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
 
-I am Rodney Lafuente-Mercado (Scale AI, ex-MIT Lincoln). I follow your RL theory and transformers as decision makers work.
+I have been following your work on transformers as decision makers and RL theory, and I have found it very helpful for thinking about when value-free methods can work. Many of the theoretical foundations you develop show up very naturally when trying to train LLM policies without learned critics.
 
-Your research on provable guarantees informs my value-free approaches. Recent: intrinsic token weighting and memory in RL (arXiv 2512.06204). NeurIPS 2026 target.
+Recently, my work has focused on RL under conditions where value estimation fails. That includes intrinsic token weighting, as well as temporal range diagnostics. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Brief discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Sewon Min — UC Berkeley
 **To:** sewonm@berkeley.edu
 
-Dear Prof. Min,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI.
 
-I am Rodney Lafuente-Mercado (Scale AI). I follow your LLM and efficiency research.
+I have been following your work on large language models and efficiency, and I have found it helpful for thinking about training dynamics. The questions you address about how models learn and what they attend to relate directly to my work on token-level credit assignment.
 
-Your work on training dynamics relates to my token-level credit assignment research. Recent: intrinsic token weighting and temporal range (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL for LLMs without value functions. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Natasha Jaques — University of Washington
 **To:** natashajaques@cs.washington.edu
 
-Dear Prof. Jaques,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
 
-I am Rodney Lafuente-Mercado (Scale AI, ex-MIT Lincoln). I follow your social RL and RLHF work.
+I have been following your foundational work on social reinforcement learning and RLHF, and I have found it very helpful for thinking about multi-agent and human-AI learning. Many of the challenges you study, like coordination and preference learning, show up very naturally in my work on distributed RL.
 
-Your multi-agent and human-AI interaction research connects to my multi-objective RL questions. Recent: intrinsic token weighting and memory in RL (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL without value functions. That includes intrinsic token weighting for LLMs, as well as memory and temporal range diagnostics. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Abhishek Gupta — University of Washington
 **To:** abhgupta@cs.washington.edu
 
-Dear Prof. Gupta,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
 
-I am Rodney Lafuente-Mercado (Scale AI, previously MIT Lincoln). I follow your robotic RL and sim-to-real work.
+I have been following your work on robotic RL and sim-to-real transfer, and I have found it helpful for thinking about sample efficiency and stability. Your SERL framework addresses challenges that show up very naturally in my work on distributed training.
 
-Your sample-efficient real-world manipulation approach connects to my efficiency interests. Recent: intrinsic token weighting and temporal range (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL where sample efficiency matters. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Brief discussion? Not PhD admissions—masters at UT Austin.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Simon S. Du — University of Washington
 **To:** ssdu@cs.washington.edu
 
-Dear Prof. Du,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
 
-I am Rodney Lafuente-Mercado (Scale AI, ex-MIT Lincoln). I follow your RL theory and neural network foundations work.
+I have been following your theoretical work on RL and infinitely wide neural networks, and I have found it very helpful for understanding when and why RL methods work. Many of the theoretical insights you develop show up very naturally in my practical work on stable training without value functions.
 
-Your theoretical understanding informs my practical value-free methods. Recent: intrinsic token weighting and memory in RL (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL under non-ideal conditions. That includes intrinsic token weighting, as well as memory diagnostics. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Tim Althoff — University of Washington
 **To:** althoff@cs.washington.edu
 
-Dear Prof. Althoff,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
 
-I am Rodney Lafuente-Mercado (Scale AI, ex-MIT Lincoln). I follow your RL for health applications.
+I have been following your work on RL for health and interactive systems, and I have found it helpful for thinking about responsible RL application. Your careful approach to learning in sensitive domains demonstrates principles that show up very naturally in my work on stable training.
 
-Your careful RL in sensitive domains demonstrates responsible application. Recent: intrinsic token weighting and temporal range (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL where reliability matters. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Yuchen Cui — UCLA
 **To:** yui@cs.ucla.edu
 
-Dear Prof. Cui,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI.
 
-I am Rodney Lafuente-Mercado (Scale AI). I follow your interactive robot learning work.
+I have been following your work on interactive robot learning and human-robot interaction, and I have found it helpful for thinking about learning from human feedback. The challenges you address in safe exploration show up very naturally in my work on stable RL without brittle critics.
 
-Your human feedback and safe exploration research connects to my stable RL interests. Recent: intrinsic token weighting and temporal range (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL where safety matters. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Anushri Dixit — UCLA
 **To:** adixit@ucla.edu
 
-Dear Prof. Dixit,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI.
 
-I am Rodney Lafuente-Mercado (Scale AI). I follow your risk-aware planning research.
+I have been following your work on risk-aware planning and motion under uncertainty, and I have found it helpful for thinking about robustness in RL. The formal guarantees you pursue show up very naturally in my work on training without value functions.
 
-Your robust motion planning under uncertainty relates to my stable RL without brittle critics. Recent: intrinsic token weighting and temporal range (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL where robustness matters. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com
 
 ---
 
 ### Eric Mazumdar — Caltech
 **To:** mazumdar@caltech.edu
 
-Dear Prof. Mazumdar,
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI.
 
-I am Rodney Lafuente-Mercado (Scale AI). I follow your strategic learning and game theory work.
+I have been following your work on learning in strategic environments and game-theoretic RL, and I have found it helpful for thinking about multi-agent credit assignment. The challenges you study show up very naturally in my work on token-level credit distribution.
 
-Your research on multi-agent credit assignment informs my questions. Recent: intrinsic token weighting and temporal range (arXiv 2512.06204). NeurIPS 2026.
+Recently, my work has focused on RL where strategic interaction matters. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
 
-Open to discussion? Not PhD admissions.
+I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
 
-Best,
-Rodney
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
+rodneyslafuente@gmail.com

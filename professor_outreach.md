@@ -431,23 +431,6 @@ rodneyslafuente@gmail.com
 
 ---
 
-### Tengyu Ma — Stanford University
-**To:** tengyuma@stanford.edu
-
-I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
-<br><br>
-I have been following your work on deep learning theory and representation learning, and I have found it helpful for thinking about why certain RL architectures generalize better. Your analysis of neural network dynamics shows up naturally in my work on token-level credit assignment without learned critics.
-<br><br>
-Recently, my work has focused on RL where theoretical understanding matters. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
-<br><br>
-I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
-<br><br>
-Best regards,<br>
-Rodney Lafuente-Mercado, rlafuente.com<br>
-rodneyslafuente@gmail.com
-
----
-
 ### C. Karen Liu — Stanford University
 **To:** karenliu@cs.stanford.edu
 

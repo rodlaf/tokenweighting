@@ -1,0 +1,48 @@
+name: Build LaTeX PDF
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'paper/**'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'paper/**'
+  workflow_dispatch:
+
+jobs:
+  build-pdf:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Install TeX Live
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y texlive texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra
+        
+    - name: Compile LaTeX PDF
+      working-directory: ./paper
+      run: |
+        pdflatex main.tex
+        bibtex main
+        pdflatex main.tex
+        pdflatex main.tex
+        
+    - name: Upload PDF artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: main-pdf
+        path: paper/main.pdf
+        
+    - name: Commit updated PDF
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add paper/main.pdf
+        git diff --quiet && git diff --staged --quiet || git commit -m "Auto-build: update main.pdf"
+        git push

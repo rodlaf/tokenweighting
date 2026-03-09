@@ -28,7 +28,7 @@ This document contains 8 high-quality papers (2023-2025) that fill gaps in Secti
 
 ## 2. RLOO / Back to Basics (ACL 2024)
 
-**Ahmadian, Cremer, Gall\\'{e}, et al., "Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs", ACL 2024**
+**Ahmadian, Cremer, Gallé, et al., "Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs", ACL 2024**
 
 - **Why it matters**: Provides systematic evidence that REINFORCE-based methods with group baselines match PPO performance without learned value heads; introduces RLOO as the canonical leave-one-out baseline technique now widely adopted in production RLHF systems.
 
@@ -47,7 +47,7 @@ This document contains 8 high-quality papers (2023-2025) that fill gaps in Secti
 
 ## 3. GRPO Extensions: Off-Policy GRPO (2025)
 
-**Rigotti et al., "Revisiting Group Relative Policy Optimization", arXiv:2502.01456 2025**
+**Rigotti et al., "Revisiting Group Relative Policy Optimization", arXiv:2501.19686 2025**
 
 - **Why it matters**: Provides theoretical grounding for masking zero-variance samples in GRPO and derives an off-policy variant that reduces communication overhead. The analysis explains why GRPO implicitly amplifies success rates above the reference policy through fixed-point iteration.
 
@@ -55,8 +55,8 @@ This document contains 8 high-quality papers (2023-2025) that fill gaps in Secti
 ```bibtex
 @article{rigotti2025revisiting,
   title={Revisiting Group Relative Policy Optimization},
-  author={Rigotti, Mattia and other authors},
-  journal={arXiv preprint arXiv:2502.01456},
+  author={Rigotti, Mattia and others},
+  journal={arXiv preprint arXiv:2501.19686},
   year={2025}
 }
 ```
@@ -71,10 +71,10 @@ This document contains 8 high-quality papers (2023-2025) that fill gaps in Secti
 
 - **BibTeX**:
 ```bibtex
-@article{huang2024red,
+@inproceedings{huang2024red,
   title={RED: Unleashing Token-Level Rewards from Holistic Feedback via Reward Redistribution},
   author={Huang, Zishun and others},
-  journal={arXiv preprint arXiv:2411.08302},
+  booktitle={Advances in Neural Information Processing Systems},
   year={2024}
 }
 ```
@@ -89,11 +89,11 @@ This document contains 8 high-quality papers (2023-2025) that fill gaps in Secti
 
 - **BibTeX**:
 ```bibtex
-@article{kazemnejad2024vineppo,
+@inproceedings{kazemnejad2024vineppo,
   title={VinePPO: Unlocking RL Potential For LLM Reasoning Through Refined Credit Assignment},
   author={Kazemnejad, Amirhossein and Aghajohari, Milad and Portelance, Eva and Sordoni, Alessandro and Reddy, Siva and Courville, Aaron and Roux, Nicolas Le},
-  journal={arXiv preprint arXiv:2410.01679},
-  year={2024}
+  booktitle={Proceedings of the 42nd International Conference on Machine Learning},
+  year={2025}
 }
 ```
 
@@ -137,7 +137,7 @@ This document contains 8 high-quality papers (2023-2025) that fill gaps in Secti
 
 ## 8. Scaffolded GRPO (arXiv 2025)
 
-**Anonymous, "Scaf-GRPO: Scaffolded Group Relative Policy Optimization for Learning to Generate", arXiv:2510.19807 2025**
+**[Authors TBD], "Scaf-GRPO: Scaffolded Group Relative Policy Optimization for Learning to Generate", arXiv:2510.19807 2025**
 
 - **Why it matters**: Addresses the "learning cliff" in GRPO through scaffolded teacher guidance and curriculum-based prefix extension; provides empirical validation that group-based normalization alone struggles without structured exploration guidance.
 
@@ -145,7 +145,7 @@ This document contains 8 high-quality papers (2023-2025) that fill gaps in Secti
 ```bibtex
 @article{scafgrpo2025,
   title={Scaf-GRPO: Scaffolded Group Relative Policy Optimization for Learning to Generate},
-  author={Anonymous},
+  author={[Author names to be updated from arXiv:2510.19807]},
   journal={arXiv preprint arXiv:2510.19807},
   year={2025}
 }

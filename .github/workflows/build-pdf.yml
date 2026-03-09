@@ -22,7 +22,7 @@ jobs:
     - name: Install TeX Live
       run: |
         sudo apt-get update
-        sudo apt-get install -y texlive texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra
+        sudo apt-get install -y texlive texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra texlive-science texlive-pictures
         
     - name: Compile LaTeX PDF
       working-directory: ./paper

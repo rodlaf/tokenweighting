@@ -150,6 +150,43 @@ that redistribute credit using signals derived from the policy distribution itse
 without introducing learned value heads, prefix trees, or Shapley-style counterfactual
 attribution.
 
+\subsection{Advanced Critic-Free Methods}
+
+Recent work has advanced critic-free reinforcement learning through more sophisticated
+baseline and credit assignment mechanisms. ReMax introduces greedy-generated baselines
+for variance reduction in RLHF, demonstrating that simpler alternatives to PPO are
+viable and computationally efficient \cite{li2023remax}. The Back to Basics work
+systematically shows that REINFORCE-based methods with group baselines match PPO
+performance without learned value heads, with RLOO becoming widely adopted in
+production RLHF systems \cite{ahmadian2024backtobasics}.
+
+Extending GRPO, recent work provides theoretical grounding for masking zero-variance
+samples and derives off-policy variants that reduce communication overhead
+\cite{rigotti2025revisiting}. Other work extends GRPO with eligibility traces and
+lambda-returns for TD-style credit propagation without value heads, showing 30-40\%
+improvement over vanilla GRPO on math reasoning tasks across 1.5B-7B parameter models
+\cite{peters2025grpolambda}. Scaf-GRPO addresses learning cliffs through scaffolded
+teacher guidance and curriculum-based prefix extension, validating that group-based
+normalization alone struggles without structured exploration guidance
+\cite{scafgrpo2025}.
+
+\subsection{Token-Level Reward Redistribution}
+
+A parallel line of work focuses on redistributing sequence-level rewards to
+token-level attributions without learned value functions. RED introduces a principled
+method using temporal differentiation of reward model scores, achieving fine-grained
+credit assignment without value heads, prefix trees, or Shapley-style attribution
+\cite{huang2024red}. VinePPO demonstrates that Monte Carlo-based value estimation can
+replace learned value networks entirely, achieving up to 9x fewer gradient updates
+and 3x less wall-clock time than PPO on reasoning tasks
+\cite{kazemnejad2024vineppo}.
+
+Process reinforcement approaches use implicit process reward models trained without
+explicit step-level annotations, fusing token-level dense implicit rewards with sparse
+outcome rewards for advantage estimation \cite{cui2025prime}. These methods complement
+our intrinsic token-weighting approach by showing various mechanisms for achieving
+fine-grained credit assignment in language RL.
+
 \section{Methods}
 
 We consider on-policy reinforcement learning for autoregressive language models with

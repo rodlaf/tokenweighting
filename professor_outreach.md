@@ -60,7 +60,7 @@ rodneyslafuente@gmail.com
 ### Rose Yu — UC San Diego
 **To:** roseyu@ucsd.edu
 
-I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory on RL systems.
+I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI and was previously at MIT Lincoln Laboratory, where I worked on RL systems.
 
 I have been following your work on spatiotemporal modeling and tensor-based methods, and I have found it very helpful for thinking about temporal structure in RL. The methods you have developed for capturing dependencies over time relate directly to questions I have about when policies actually need extended context versus when they can compress effectively.
 

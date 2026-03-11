@@ -1,0 +1,41 @@
+\section{Related Work}
+
+\subsection{Policy Gradient Methods and Advantage Estimation}
+
+Modern reinforcement learning pipelines for neural sequence models inherit heavily from policy-gradient methods, starting from REINFORCE-style score-function estimators \cite{williams1992reinforce} and evolving toward trust-region and clipped-surrogate approaches such as TRPO and PPO \cite{schulman2015trpo,schulman2017ppo}. In parallel, advantage estimation methods such as generalized advantage estimation (GAE) were introduced to reduce gradient variance via learned value functions and temporally-smoothed advantage targets \cite{schulman2015gae}.
+
+These components have been widely adopted in reinforcement learning from human feedback (RLHF) and related alignment pipelines for language models, where reward signals are frequently sequence-level and training often uses PPO-style objectives with additional regularization \cite{ouyang2022instruct,stiennon2020summarize}. The broader paradigm of learning from preference feedback traces back to learning reward models from pairwise comparisons and optimizing policies against them \cite{christiano2017preferences}.
+
+\subsection{Critic-Free Reinforcement Learning for LLMs}
+
+Recent work has re-examined whether learned critics and token-level value modeling are necessary for stable on-policy optimization in language settings. A line of REINFORCE-style RLHF methods removes the learned value function entirely while retaining variance-reduction through baselines and normalization at the prompt or group level \cite{ahmadian2024backtobasics,li2023remax,hu2025reinforcepp}. In settings with verifiable, deterministic rewards, Group Relative Policy Optimization (GRPO) replaces learned values with group-relative normalization across multiple sampled responses \cite{shao2024deepseekmath}.
+
+These critic-free methods simplify the optimization stack relative to PPO, but typically apply sequence-level outcomes uniformly across tokens (modulo a scalar baseline). This leaves open the design question of how credit should be distributed within a generated trajectory when the reward is observed only at the end.
+
+\subsection{Token- and Span-Level Credit Assignment}
+
+Several recent approaches address the granularity mismatch between sequence-level supervision and token-level optimization by constructing token- or span-level learning signals. Preference-grounded token-level guidance methods learn token-level training signals from sequence-level preference data \cite{yang2023pgtg}. Complementarily, SCAR redistributes a sequence-level reward into token- or span-level attributions using Shapley-value ideas from cooperative game theory \cite{cao2025scar,shapley1953value}.
+
+Another direction uses multiple sampled trajectories to recover structure over prefixes. TEMPO converts groups of sampled solutions into a prefix tree and computes nonparametric prefix values to provide branch-gated temporal-difference style corrections without training a learned critic \cite{tran2025tempo}. Compared to purely outcome-based group baselines, these methods inject additional structure about where decisions diverge.
+
+\subsection{Token Weighting and Confidence-Based Optimization}
+
+Outside of on-policy reinforcement learning, non-uniform token weighting has been explored as a mechanism to steer optimization toward more informative or context-dependent tokens. For example, token-level loss weighting has been studied for improving long-context language modeling by assigning different weights to training tokens \cite{helm2025tokenweighting}. In preference optimization, methods such as ConfPO identify and emphasize preference-critical tokens based on policy confidence, rather than uniformly updating all tokens \cite{yoon2025confpo}.
+
+These works suggest that token-level non-uniformity can be beneficial in both supervised and preference-learning objectives, motivating investigation of token weighting as a credit-redistribution mechanism in on-policy reinforcement learning.
+
+\subsection{Positioning}
+
+Taken together, prior work establishes that (i) critics and learned value functions can be removed in several practical LLM optimization regimes \cite{ahmadian2024backtobasics,li2023remax,shao2024deepseekmath,hu2025reinforcepp}, and (ii) distributing sequence-level supervision to finer granularity can improve learning efficiency and interpretability \cite{yang2023pgtg,cao2025scar,tran2025tempo}. This paper studies intrinsic token-weighting schemes for on-policy reinforcement learning that redistribute credit using signals derived from the policy distribution itself, without introducing learned value heads, prefix trees, or Shapley-style counterfactual attribution.
+
+\subsection{Advanced Critic-Free Methods}
+
+Recent work has advanced critic-free reinforcement learning through more sophisticated baseline and credit assignment mechanisms. ReMax introduces greedy-generated baselines for variance reduction in RLHF, demonstrating that simpler alternatives to PPO are viable and computationally efficient \cite{li2023remax}. The Back to Basics work systematically shows that REINFORCE-based methods with group baselines match PPO performance without learned value heads, with RLOO becoming widely adopted in production RLHF systems \cite{ahmadian2024backtobasics}.
+
+Extending GRPO, recent work provides theoretical grounding for masking zero-variance samples and derives off-policy variants that reduce communication overhead \cite{rigotti2025revisiting}. Other work extends GRPO with eligibility traces and lambda-returns for TD-style credit propagation without value heads, showing 30-40\% improvement over vanilla GRPO on math reasoning tasks across 1.5B-7B parameter models \cite{peters2025grpolambda}. Scaf-GRPO addresses learning cliffs through scaffolded teacher guidance and curriculum-based prefix extension, validating that group-based normalization alone struggles without structured exploration guidance \cite{scafgrpo2025}.
+
+\subsection{Token-Level Reward Redistribution}
+
+A parallel line of work focuses on redistributing sequence-level rewards to token-level attributions without learned value functions. RED introduces a principled method using temporal differentiation of reward model scores, achieving fine-grained credit assignment without value heads, prefix trees, or Shapley-style attribution \cite{huang2024red}. VinePPO demonstrates that Monte Carlo-based value estimation can replace learned value networks entirely, achieving up to 9x fewer gradient updates and 3x less wall-clock time than PPO on reasoning tasks \cite{kazemnejad2024vineppo}.
+
+Process reinforcement approaches use implicit process reward models trained without explicit step-level annotations, fusing token-level dense implicit rewards with sparse outcome rewards for advantage estimation \cite{cui2025prime}. These methods complement our intrinsic token-weighting approach by showing various mechanisms for achieving fine-grained credit assignment in language RL.

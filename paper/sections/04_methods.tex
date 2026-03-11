@@ -1,0 +1,74 @@
+\section{Methods}
+
+We consider on-policy reinforcement learning for autoregressive language models with trajectory-level rewards. Let $\pi_\theta$ denote a language model parameterized by $\theta$, generating a sequence of tokens $y = (y_1, \dots, y_T)$ conditioned on a prompt $x$. After generating a full trajectory, the model receives a scalar reward $R(y) \in \mathbb{R}$, computed by an external verifier (e.g., exact answer correctness or unit test pass rate). Our goal is to optimize the expected reward $\mathbb{E}_{y \sim \pi_\theta}[R(y)]$.
+
+\subsection{Policy Gradient with Trajectory-Level Reward}
+
+The standard REINFORCE estimator for this objective is:
+\begin{equation}
+\nabla_\theta J(\theta) = \mathbb{E}_{y \sim \pi_\theta} \left[ R(y) \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x) \right].
+\end{equation}
+
+In practice, a baseline $b$ is often subtracted from $R(y)$ to reduce variance:
+\begin{equation}
+(R(y) - b) \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+Batch-level baselines such as RLOO or GRPO compute $b$ as a function of rewards from multiple sampled trajectories, avoiding the need for a learned value function. Importantly, in these formulations the reward signal is still applied uniformly across all tokens in the trajectory.
+
+\subsection{Token-Level Credit Redistribution}
+
+We generalize the above formulation by introducing \emph{token-level weights} $w_t(y)$ that redistribute the trajectory-level reward across tokens:
+\begin{equation}
+\nabla_\theta J(\theta) = \mathbb{E}_{y \sim \pi_\theta} \left[ (R(y) - b) \sum_{t=1}^{T} w_t(y)\, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x) \right].
+\end{equation}
+
+We require that $w_t(y) \ge 0$ and normalize weights within each trajectory:
+\begin{equation}
+\sum_{t=1}^{T} w_t(y) = 1.
+\end{equation}
+
+Uniform credit assignment corresponds to $w_t = 1/T$ for all $t$. Advantage-based methods can be viewed as implicitly defining $w_t$ via a learned value function. Our focus is on \emph{intrinsic} token-weighting schemes that depend only on the model's predictive distribution, without learning prefix values or critics.
+
+\subsection{Intrinsic Token-Weighting Mechanisms}
+
+We study the following token-weighting schemes.
+
+\paragraph{Uniform Weighting (Baseline).}
+\begin{equation}
+w_t^{\text{uniform}} = \frac{1}{T}.
+\end{equation}
+This corresponds to outcome-only REINFORCE, and to GRPO/RLOO when combined with a batch-level baseline.
+
+\paragraph{Surprisal Weighting.}
+We weight tokens by their negative log-probability under the current policy:
+\begin{equation}
+\tilde{w}_t^{\text{surp}} = -\log \pi_\theta(y_t \mid y_{<t}, x),
+\end{equation}
+followed by normalization:
+\begin{equation}
+w_t^{\text{surp}} = \frac{\tilde{w}_t^{\text{surp}}}{\sum_{k=1}^{T} \tilde{w}_k^{\text{surp}}}.
+\end{equation}
+This assigns greater credit to low-probability (high-surprise) decisions, which often correspond to non-trivial reasoning steps.
+
+\paragraph{Entropy-Reduction Weighting.}
+Let $H_t$ denote the predictive entropy of the model before sampling token $y_t$:
+\begin{equation}
+H_t = - \sum_{v} \pi_\theta(v \mid y_{<t}, x) \log \pi_\theta(v \mid y_{<t}, x).
+\end{equation}
+We define the entropy drop induced by the sampled token as:
+\begin{equation}
+\Delta H_t = \max(0, H_{t-1} - H_t).
+\end{equation}
+Token weights are then given by:
+\begin{equation}
+w_t^{\text{ent}} = \frac{\Delta H_t}{\sum_{k=1}^{T} \Delta H_k}.
+\end{equation}
+This scheme emphasizes tokens that sharply reduce predictive uncertainty, corresponding to commitment or branching decisions during generation.
+
+\paragraph{Batch-Level Baselines.}
+All weighting schemes can be combined with a batch-level baseline $b$, computed as the mean reward of other trajectories sampled from the same prompt (RLOO/GRPO). Unless otherwise specified, we use this baseline in all experiments to isolate the effect of token weighting.
+
+\subsection{Relationship to Existing Methods}
+
+Our formulation subsumes several existing approaches as special cases. Uniform weighting with a batch baseline corresponds to GRPO/RLOO. Advantage-based methods can be interpreted as learning a data-dependent weighting via a value function over prefixes. In contrast, our intrinsic weighting schemes avoid learning prefix values, tree structures, or Shapley-style attributions, relying solely on signals already present in the policy's predictive distribution.

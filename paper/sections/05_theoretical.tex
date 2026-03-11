@@ -1,0 +1,55 @@
+\section{Theoretical Interpretation}
+
+We provide an interpretation of intrinsic token weighting as a variance-control and credit-redistribution mechanism for policy gradient estimation in language models. Our goal is not to derive new convergence guarantees, but to clarify how token weighting relates to advantage estimation and why it can be effective without learning value functions.
+
+\subsection{Token Weighting as Credit Redistribution}
+
+Consider the standard REINFORCE estimator with a batch-level baseline:
+\begin{equation}
+g = (R - b)\sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+This estimator assigns equal credit to all tokens in a trajectory. Introducing token weights yields:
+\begin{equation}
+g_w = (R - b)\sum_{t=1}^{T} w_t(y)\, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x),
+\end{equation}
+where $\sum_t w_t = 1$.
+
+Importantly, this transformation does not change the reward signal itself; it redistributes how the trajectory-level signal is attributed to individual decisions. When $w_t$ depends only on quantities available at sampling time (e.g., log-probabilities or entropy), the estimator remains on-policy and does not require learning additional functions.
+
+\subsection{Relationship to Advantage Estimation}
+
+Advantage-based methods can be interpreted as implicitly defining token-level weights via a learned value function:
+\begin{equation}
+A_t = R - V(y_{<t}, x).
+\end{equation}
+In this view, the contribution of each token is scaled according to how much the observed outcome deviates from an estimated expectation conditioned on the prefix.
+
+However, this interpretation relies on the existence of a meaningful value function over prefixes. In language generation, prefixes are non-Markov and do not form a stable state space, making $V(y_{<t}, x)$ difficult to estimate and prone to bias. Token weighting offers an alternative: rather than estimating expected returns from prefixes, it emphasizes tokens based on intrinsic measures of decision salience, such as uncertainty or information gain.
+
+\subsection{Connection to Control Variates}
+
+From a statistical perspective, subtracting a baseline $b$ is a form of control variate that reduces variance without affecting unbiasedness. Token weighting can be viewed as a complementary mechanism that reshapes the contribution of individual score-function terms:
+\begin{equation}
+\nabla_\theta \log \pi_\theta(y) = \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+Uniform weighting treats all score-function terms equally, regardless of their variance or relevance. Intrinsic weighting schemes effectively reweight these terms, down-weighting low-variance or low-impact contributions (e.g., high-probability continuation tokens) and emphasizing high-variance or high-impact decisions (e.g., low-probability or uncertainty-reducing tokens). While this reweighting introduces bias relative to the uniform estimator, it can substantially reduce variance, leading to improved optimization dynamics in practice.
+
+\subsection{Interpretation of Specific Weighting Schemes}
+
+\paragraph{Surprisal Weighting.}
+Surprisal-based weights emphasize tokens with low conditional probability under the current policy. These tokens correspond to decisions where small parameter changes can induce large changes in likelihood, and therefore often dominate gradient variance. Weighting by surprisal concentrates learning signal on such high-sensitivity decisions.
+
+\paragraph{Entropy-Reduction Weighting.}
+Entropy-reduction weighting emphasizes tokens that sharply reduce predictive entropy. These tokens correspond to commitment points in generation, where the model transitions from a diffuse distribution over continuations to a more concentrated one. This mirrors the role of branching points in tree-based reasoning methods, but is computed locally from the model's predictive distribution without explicit tree construction.
+
+\subsection{Bias--Variance Tradeoff}
+
+Both advantage estimation and intrinsic token weighting introduce bias in exchange for variance reduction. Advantage estimation does so by relying on a learned value function, whose bias can be substantial when the underlying state abstraction is weak. Intrinsic token weighting introduces bias by reshaping the contribution of token-level gradients based on heuristic salience measures. The empirical question is therefore not whether bias is introduced, but whether the bias--variance tradeoff is favorable.
+
+Our experiments show that intrinsic token weighting achieves variance reduction and training stability comparable to critic-free baselines such as GRPO, while avoiding the brittleness associated with value estimation over text prefixes. This suggests that, in language reinforcement learning, bias introduced by intrinsic weighting may be more benign than bias introduced by ill-defined value functions.
+
+\subsection{Summary}
+
+This perspective reframes advantage estimation as one particular approach to credit redistribution in policy gradient methods. Intrinsic token weighting offers an alternative that leverages the structure of the language model's predictive distribution, without assuming the existence of meaningful state values. In settings where prefixes do not form a stable state space, such value-free mechanisms may provide a more appropriate inductive bias.

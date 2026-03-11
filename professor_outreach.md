@@ -435,30 +435,13 @@ rodneyslafuente@gmail.com
 **To:** karenliu@cs.stanford.edu
 
 I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
-<br><br>
+
 I have been following your work on physics-based simulation and motion planning, and I have found it helpful for thinking about model-based RL for sequential decision making. Your research on differentiable physics shows up naturally in my work on gradient estimation without learned critics.
-<br><br>
+
 Recently, my work has focused on RL where simulation and modeling matter. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
-<br><br>
+
 I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
-<br><br>
-Best regards,<br>
-Rodney Lafuente-Mercado, rlafuente.com<br>
-rodneyslafuente@gmail.com
 
----
-
-### Emma Brunskill — Stanford University
-**To:** ebrun@cs.stanford.edu
-
-I hope you are doing well. My name is Rodney Lafuente-Mercado. I am currently a research engineer at Scale AI, and previously was at MIT Lincoln Laboratory.
-<br><br>
-I have been following your work on sample-efficient RL and safety in sequential decision making, and I have found it very helpful for thinking about credit assignment with limited data. Your research on efficient exploration shows up naturally in my work on token-level weighting without value networks.
-<br><br>
-Recently, my work has focused on RL where sample efficiency matters. That includes intrinsic token weighting, as well as memory and temporal range. In Quantifying Memory Use in Reinforcement Learning with Temporal Range (https://arxiv.org/abs/2512.06204), we introduce a metric.
-<br><br>
-I wanted to ask whether you might be open to a research collaboration, possibly remote, if there is overlap. This is not about PhD admissions, and I understand if your schedule does not allow.
-<br><br>
-Best regards,<br>
-Rodney Lafuente-Mercado, rlafuente.com<br>
+Best regards,
+Rodney Lafuente-Mercado, rlafuente.com  
 rodneyslafuente@gmail.com

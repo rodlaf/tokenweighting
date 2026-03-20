@@ -48,7 +48,7 @@ Entropy-reduction weighting emphasizes tokens that sharply reduce predictive ent
 
 Both advantage estimation and intrinsic token weighting introduce bias in exchange for variance reduction. Advantage estimation does so by relying on a learned value function, whose bias can be substantial when the underlying state abstraction is weak. Intrinsic token weighting introduces bias by reshaping the contribution of token-level gradients based on heuristic salience measures. The empirical question is therefore not whether bias is introduced, but whether the bias--variance tradeoff is favorable.
 
-Our experiments show that intrinsic token weighting achieves variance reduction and training stability comparable to critic-free baselines such as GRPO, while avoiding the brittleness associated with value estimation over text prefixes. This suggests that, in language reinforcement learning, bias introduced by intrinsic weighting may be more benign than bias introduced by ill-defined value functions.
+This motivates the empirical comparison implemented in the repository: if intrinsic token weighting improves accuracy, pass@$k$, or optimization behavior under matched settings, then the bias it introduces may be more benign than the bias induced by ill-defined value targets over text prefixes. The point is not that weighting is unbiased, but that its inductive bias may be better aligned with token-level credit assignment in language generation.
 
 \subsection{Summary}
 

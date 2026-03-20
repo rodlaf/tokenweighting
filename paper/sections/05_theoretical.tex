@@ -1,55 +1,45 @@
-\section{Theoretical Interpretation}
+\section{Interpretation and Bias--Variance Considerations}\label{sec:analysis}
 
-We provide an interpretation of intrinsic token weighting as a variance-control and credit-redistribution mechanism for policy gradient estimation in language models. Our goal is not to derive new convergence guarantees, but to clarify how token weighting relates to advantage estimation and why it can be effective without learning value functions.
+This section does not provide a new convergence theorem. Instead, it clarifies how intrinsic token weighting should be interpreted relative to standard advantage estimation and why it can still be useful despite introducing bias.
 
-\subsection{Token Weighting as Credit Redistribution}
+\subsection{Credit Redistribution, Not Reward Redefinition}
 
-Consider the standard REINFORCE estimator with a batch-level baseline:
+The sequence-level reward remains unchanged throughout our method. What changes is the allocation of gradient mass over score-function terms:
 \begin{equation}
-g = (R - b)\sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+ \nabla_\theta \log \pi_\theta(y \mid x) = \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
 \end{equation}
-
-This estimator assigns equal credit to all tokens in a trajectory. Introducing token weights yields:
-\begin{equation}
-g_w = (R - b)\sum_{t=1}^{T} w_t(y)\, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x),
-\end{equation}
-where $\sum_t w_t = 1$.
-
-Importantly, this transformation does not change the reward signal itself; it redistributes how the trajectory-level signal is attributed to individual decisions. When $w_t$ depends only on quantities available at sampling time (e.g., log-probabilities or entropy), the estimator remains on-policy and does not require learning additional functions.
+Uniform token updates treat each summand identically once a sequence-level advantage is fixed. Intrinsic token weighting instead introduces a prior over token salience. This is best viewed as \emph{credit redistribution}: the same verifier reward is being pushed through the trajectory, but some actions are declared more update-worthy than others.
 
 \subsection{Relationship to Advantage Estimation}
 
-Advantage-based methods can be interpreted as implicitly defining token-level weights via a learned value function:
+A learned critic can be interpreted as a mechanism for constructing token- or prefix-specific credit. In actor--critic methods, the update at time $t$ depends on an estimate of how much the observed trajectory outcome differs from the expected future return under the current prefix. This is powerful when the state abstraction is reliable. In language generation, however, the prefix is often a noisy and semantically unstable summary of downstream return. Intrinsic weighting offers a different inductive bias: rather than predicting expected reward from a prefix, it uses local statistics of the policy distribution itself to decide where to place more of the update.
+
+This comparison is deliberately modest. Intrinsic weighting should not be read as a replacement for all forms of advantage estimation. Rather, it is a useful comparison point when one wants to avoid critic training, token-level reward models, or search trees while still moving beyond uniform token treatment.
+
+\subsection{Bias Is the Price of Structured Allocation}
+
+Because $w_t(x,y)$ depends on the sampled trajectory and the policy's own predictive distribution, the estimator
 \begin{equation}
-A_t = R - V(y_{<t}, x).
+ g_w(x,y) = A(x,y) \sum_{t=1}^{T} w_t(x,y) \, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x)
 \end{equation}
-In this view, the contribution of each token is scaled according to how much the observed outcome deviates from an estimated expectation conditioned on the prefix.
+is generally biased relative to the standard REINFORCE estimator. This bias is not a bug in the analysis; it is the intended effect of introducing a structured credit prior. The practical question is therefore whether the bias is \emph{useful}: does the weighting shift optimization toward more semantically consequential decisions and away from filler tokens?
 
-However, this interpretation relies on the existence of a meaningful value function over prefixes. In language generation, prefixes are non-Markov and do not form a stable state space, making $V(y_{<t}, x)$ difficult to estimate and prone to bias. Token weighting offers an alternative: rather than estimating expected returns from prefixes, it emphasizes tokens based on intrinsic measures of decision salience, such as uncertainty or information gain.
+Our controlled experiments suggest that the answer can be yes, but not for the simplistic reason that weighting uniformly reduces gradient variance. In fact, the stronger weighting rules often increase our weighted within-trajectory score-variance proxy. The gains appear to come from \emph{selective concentration} rather than indiscriminate smoothing. This matters for interpretation: intrinsic token weighting is better understood as an inductive bias over update locations than as a classic unbiased variance-reduction trick.
 
-\subsection{Connection to Control Variates}
+\subsection{Why Surprisal and Entropy Reduction?}
 
-From a statistical perspective, subtracting a baseline $b$ is a form of control variate that reduces variance without affecting unbiasedness. Token weighting can be viewed as a complementary mechanism that reshapes the contribution of individual score-function terms:
-\begin{equation}
-\nabla_\theta \log \pi_\theta(y) = \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
-\end{equation}
+The two weighting rules we study encode different hypotheses about token importance.
 
-Uniform weighting treats all score-function terms equally, regardless of their variance or relevance. Intrinsic weighting schemes effectively reweight these terms, down-weighting low-variance or low-impact contributions (e.g., high-probability continuation tokens) and emphasizing high-variance or high-impact decisions (e.g., low-probability or uncertainty-reducing tokens). While this reweighting introduces bias relative to the uniform estimator, it can substantially reduce variance, leading to improved optimization dynamics in practice.
+\paragraph{Surprisal.}
+Low-probability sampled actions often correspond to less routine policy decisions. Weighting by surprisal therefore asks the optimizer to pay disproportionate attention to actions that the current policy considered relatively unlikely. In our arithmetic benchmark, this produces the most consistent improvement in pass@4, suggesting that rare-but-decisive symbolic choices are a useful target for extra credit.
 
-\subsection{Interpretation of Specific Weighting Schemes}
+\paragraph{Entropy reduction.}
+A large entropy drop indicates that, after the current token, the policy's continuation distribution becomes more concentrated. Such tokens are plausible proxies for commitment points or branch-closing decisions. In our program-trace benchmark this signal is particularly effective, strongly increasing both success rate and the fraction of token mass assigned to reward-relevant positions.
 
-\paragraph{Surprisal Weighting.}
-Surprisal-based weights emphasize tokens with low conditional probability under the current policy. These tokens correspond to decisions where small parameter changes can induce large changes in likelihood, and therefore often dominate gradient variance. Weighting by surprisal concentrates learning signal on such high-sensitivity decisions.
+\subsection{Failure Modes}
 
-\paragraph{Entropy-Reduction Weighting.}
-Entropy-reduction weighting emphasizes tokens that sharply reduce predictive entropy. These tokens correspond to commitment points in generation, where the model transitions from a diffuse distribution over continuations to a more concentrated one. This mirrors the role of branching points in tree-based reasoning methods, but is computed locally from the model's predictive distribution without explicit tree construction.
+The same interpretation also reveals failure modes. Entropy reduction can overemphasize formatting or syntactic closure in natural-language tasks, and surprisal can overweight noisy or spurious low-probability actions. The value of intrinsic weighting is therefore task-dependent. This is one reason we prefer a controlled benchmark first: it lets us see whether the weighting actually moves mass toward known important decisions before scaling the method to larger RLVR systems.
 
-\subsection{Bias--Variance Tradeoff}
+\subsection{Takeaway}
 
-Both advantage estimation and intrinsic token weighting introduce bias in exchange for variance reduction. Advantage estimation does so by relying on a learned value function, whose bias can be substantial when the underlying state abstraction is weak. Intrinsic token weighting introduces bias by reshaping the contribution of token-level gradients based on heuristic salience measures. The empirical question is therefore not whether bias is introduced, but whether the bias--variance tradeoff is favorable.
-
-Our experiments show that intrinsic token weighting achieves variance reduction and training stability comparable to critic-free baselines such as GRPO, while avoiding the brittleness associated with value estimation over text prefixes. This suggests that, in language reinforcement learning, bias introduced by intrinsic weighting may be more benign than bias introduced by ill-defined value functions.
-
-\subsection{Summary}
-
-This perspective reframes advantage estimation as one particular approach to credit redistribution in policy gradient methods. Intrinsic token weighting offers an alternative that leverages the structure of the language model's predictive distribution, without assuming the existence of meaningful state values. In settings where prefixes do not form a stable state space, such value-free mechanisms may provide a more appropriate inductive bias.
+The main conceptual takeaway is simple. Sequence-level RL for language always contains an implicit token-credit rule. Uniform weighting is one such rule, not a law of nature. Intrinsic token weighting offers another: a small, biased, but computationally cheap mechanism for redistributing update mass using policy-internal signals. Its promise is not that it solves credit assignment in general, but that it may provide a useful and modular prior in settings where critics, token rewards, or rollout trees are undesirable.

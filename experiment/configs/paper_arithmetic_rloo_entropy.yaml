@@ -1,0 +1,19 @@
+
+seeds: [1, 2, 3]
+task:
+  name: arithmetic_trace
+model:
+  hidden_size: 64
+training:
+  baseline: rloo
+  weighting: entropy_reduction
+  steps: 300
+  prompts_per_step: 16
+  group_size: 4
+  learning_rate: 0.10
+  grad_clip: 5.0
+  temperature: 0.9
+  log_interval: 50
+evaluation:
+  num_prompts: 300
+  passk_samples: 4

@@ -1,0 +1,2708 @@
+{
+  "final_gradient_norm_variance": 0.0005212269152868716,
+  "final_important_mass_mean": 0.5223797397633838,
+  "final_reward_mean": 0.15625,
+  "final_reward_std": 0.3630921887069453,
+  "history": [
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.027029922582012558,
+      "gradient_norm_variance": 4.14228614696285e-05,
+      "important_mass_mean": 0.6667106826152198,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 1
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04824918263321348,
+      "gradient_norm_variance": 6.96022879476793e-05,
+      "important_mass_mean": 0.661698796322854,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 2
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.033338974909589814,
+      "gradient_norm_variance": 7.562672176017583e-05,
+      "important_mass_mean": 0.6604994448201236,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 3
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.053638437169967655,
+      "gradient_norm_variance": 0.00014197595486223504,
+      "important_mass_mean": 0.6687741281538715,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 4
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03601410640133957,
+      "gradient_norm_variance": 4.2693921125934906e-05,
+      "important_mass_mean": 0.6564867582863726,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 5
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.027466635326802952,
+      "gradient_norm_variance": 6.663929308071498e-05,
+      "important_mass_mean": 0.662014801620871,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 6
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03457769208042235,
+      "gradient_norm_variance": 5.385412875330661e-05,
+      "important_mass_mean": 0.6610584762721987,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 7
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03653387854898138,
+      "gradient_norm_variance": 8.881005830604493e-05,
+      "important_mass_mean": 0.6588879129235757,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 8
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04531733609708162,
+      "gradient_norm_variance": 0.00010323186701025157,
+      "important_mass_mean": 0.6532097624144679,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 9
+    },
+    {
+      "advantage_abs_mean": 0.07291666666666666,
+      "grad_norm": 0.03646092959041925,
+      "gradient_norm_variance": 5.33862150461907e-05,
+      "important_mass_mean": 0.6596365142637455,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 10
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666667,
+      "grad_norm": 0.03151327072981228,
+      "gradient_norm_variance": 5.728967348446909e-05,
+      "important_mass_mean": 0.6602649636445158,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 11
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.049244880340353556,
+      "gradient_norm_variance": 9.433361704338608e-05,
+      "important_mass_mean": 0.6595473145065156,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 12
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.04159385412957097,
+      "gradient_norm_variance": 0.00012448215354592167,
+      "important_mass_mean": 0.665887813213536,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 13
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.056261832275601276,
+      "gradient_norm_variance": 9.985818840962352e-05,
+      "important_mass_mean": 0.6682537221953264,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 14
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.05752829548047052,
+      "gradient_norm_variance": 0.00014731352905803668,
+      "important_mass_mean": 0.667014290378295,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 15
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04190209529362461,
+      "gradient_norm_variance": 6.564684535420224e-05,
+      "important_mass_mean": 0.6569544779007651,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 16
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.03535809357014209,
+      "gradient_norm_variance": 0.00010791841098993586,
+      "important_mass_mean": 0.6622163818472127,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 17
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666667,
+      "grad_norm": 0.029260295387286035,
+      "gradient_norm_variance": 6.475895639567346e-05,
+      "important_mass_mean": 0.6612044586074599,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 18
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.026624925247219416,
+      "gradient_norm_variance": 4.1276126494217853e-05,
+      "important_mass_mean": 0.6554584156730334,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 19
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.02288210033641206,
+      "gradient_norm_variance": 5.013554475232146e-05,
+      "important_mass_mean": 0.6581291797463468,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 20
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.03126277252731416,
+      "gradient_norm_variance": 7.019637592367141e-05,
+      "important_mass_mean": 0.6571803135017988,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 21
+    },
+    {
+      "advantage_abs_mean": 0.11458333333333334,
+      "grad_norm": 0.048094166980627094,
+      "gradient_norm_variance": 6.880172815362845e-05,
+      "important_mass_mean": 0.6649645144021372,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 22
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03344574429962128,
+      "gradient_norm_variance": 4.8177513071867235e-05,
+      "important_mass_mean": 0.6648269221589915,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 23
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.037113211050483305,
+      "gradient_norm_variance": 6.200229482969822e-05,
+      "important_mass_mean": 0.6694556469765613,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 24
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.02877572362184738,
+      "gradient_norm_variance": 2.9381295823351392e-05,
+      "important_mass_mean": 0.6605239154375278,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 25
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.03528636968535422,
+      "gradient_norm_variance": 0.00010185445361970245,
+      "important_mass_mean": 0.657511177488129,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 26
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.026618745228109617,
+      "gradient_norm_variance": 5.4487509493644535e-05,
+      "important_mass_mean": 0.6584675541350907,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 27
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333334,
+      "grad_norm": 0.047694242209165065,
+      "gradient_norm_variance": 0.0001710458700377232,
+      "important_mass_mean": 0.6585575553688439,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 28
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.05157785452547569,
+      "gradient_norm_variance": 4.928245433989475e-05,
+      "important_mass_mean": 0.662251555521812,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 29
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.020370761101004532,
+      "gradient_norm_variance": 4.694437762276009e-05,
+      "important_mass_mean": 0.662976346867755,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 30
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.06399161195614445,
+      "gradient_norm_variance": 9.93056081382077e-05,
+      "important_mass_mean": 0.6600088582564609,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 31
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.02904170936778499,
+      "gradient_norm_variance": 2.8356272988683068e-05,
+      "important_mass_mean": 0.6602110495293703,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 32
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.04623289424047847,
+      "gradient_norm_variance": 3.411248581716363e-05,
+      "important_mass_mean": 0.6594046035570182,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 33
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.04907737037683892,
+      "gradient_norm_variance": 0.0001075554885040651,
+      "important_mass_mean": 0.6631021176214071,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 34
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333334,
+      "grad_norm": 0.04278702249229453,
+      "gradient_norm_variance": 0.00011150326074806904,
+      "important_mass_mean": 0.659900219340076,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 35
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04277301427556719,
+      "gradient_norm_variance": 7.976682740192128e-05,
+      "important_mass_mean": 0.6633214464433573,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 36
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.032094796849722954,
+      "gradient_norm_variance": 2.8787847737240887e-05,
+      "important_mass_mean": 0.665975159582396,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 37
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.03308881856874491,
+      "gradient_norm_variance": 8.861944286279408e-05,
+      "important_mass_mean": 0.6647310610953291,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 38
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.050722429830274196,
+      "gradient_norm_variance": 7.16917392984459e-05,
+      "important_mass_mean": 0.6588666689433881,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 39
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04099014152763636,
+      "gradient_norm_variance": 7.990863669233352e-05,
+      "important_mass_mean": 0.6722447632704474,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 40
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.04047228767007784,
+      "gradient_norm_variance": 0.00011385304517738391,
+      "important_mass_mean": 0.6737612593552857,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 41
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333337,
+      "grad_norm": 0.0648439063844285,
+      "gradient_norm_variance": 0.0001793349004787665,
+      "important_mass_mean": 0.6660330623218917,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 42
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666667,
+      "grad_norm": 0.042042165306398975,
+      "gradient_norm_variance": 7.741712305660728e-05,
+      "important_mass_mean": 0.6589000008824408,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 43
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.04076397253861919,
+      "gradient_norm_variance": 0.00011084359612369379,
+      "important_mass_mean": 0.6644702839873506,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 44
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.033840616835031846,
+      "gradient_norm_variance": 0.00010978772117940326,
+      "important_mass_mean": 0.6617691825010517,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 45
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.051517282054197186,
+      "gradient_norm_variance": 0.00010771344036486093,
+      "important_mass_mean": 0.656460734334283,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 46
+    },
+    {
+      "advantage_abs_mean": 0.03125,
+      "grad_norm": 0.016694134590584792,
+      "gradient_norm_variance": 1.7839813919228693e-05,
+      "important_mass_mean": 0.6634725363412473,
+      "reward_mean": 0.015625,
+      "reward_std": 0.12401959270615269,
+      "step": 47
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04763778330932364,
+      "gradient_norm_variance": 6.636298413166007e-05,
+      "important_mass_mean": 0.6596852332497887,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 48
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.035970293370719435,
+      "gradient_norm_variance": 8.006662769742988e-05,
+      "important_mass_mean": 0.6691560909634252,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 49
+    },
+    {
+      "advantage_abs_mean": 0.04166666666666667,
+      "grad_norm": 0.017766707770177716,
+      "gradient_norm_variance": 2.500496202198148e-05,
+      "important_mass_mean": 0.6679956315477007,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 50
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.02899814062906716,
+      "gradient_norm_variance": 4.750908952001082e-05,
+      "important_mass_mean": 0.6704121145852531,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 51
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.06039761391147965,
+      "gradient_norm_variance": 0.00016410921465870516,
+      "important_mass_mean": 0.6548542324775423,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 52
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666667,
+      "grad_norm": 0.035628614589649395,
+      "gradient_norm_variance": 6.503701003940736e-05,
+      "important_mass_mean": 0.6567135413949974,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 53
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04141457329168188,
+      "gradient_norm_variance": 0.00011427456683475266,
+      "important_mass_mean": 0.6620684099568592,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 54
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.029018821702805685,
+      "gradient_norm_variance": 8.102027002138991e-05,
+      "important_mass_mean": 0.653132815616939,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 55
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03229682221445724,
+      "gradient_norm_variance": 5.5467360929412425e-05,
+      "important_mass_mean": 0.6611562345960917,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 56
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.033840979031472866,
+      "gradient_norm_variance": 8.233257663726773e-05,
+      "important_mass_mean": 0.6754937775693742,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 57
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666669,
+      "grad_norm": 0.05055645203107059,
+      "gradient_norm_variance": 0.00010339397925776496,
+      "important_mass_mean": 0.6630953150145343,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 58
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03345654777420369,
+      "gradient_norm_variance": 5.491180816697709e-05,
+      "important_mass_mean": 0.662394171615962,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 59
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.04261076143690907,
+      "gradient_norm_variance": 0.00014481865124103433,
+      "important_mass_mean": 0.6588770889959574,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 60
+    },
+    {
+      "advantage_abs_mean": 0.03125,
+      "grad_norm": 0.02009859815171684,
+      "gradient_norm_variance": 2.4241455680507434e-05,
+      "important_mass_mean": 0.6599316043161461,
+      "reward_mean": 0.015625,
+      "reward_std": 0.12401959270615269,
+      "step": 61
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.0429072996548179,
+      "gradient_norm_variance": 7.845363539107575e-05,
+      "important_mass_mean": 0.6683723728525499,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 62
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03092264211015584,
+      "gradient_norm_variance": 6.44216135064223e-05,
+      "important_mass_mean": 0.6588810884755948,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 63
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.0432738481973715,
+      "gradient_norm_variance": 0.00010134229151805193,
+      "important_mass_mean": 0.6606028549374686,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 64
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.032736274024946346,
+      "gradient_norm_variance": 6.92544009786968e-05,
+      "important_mass_mean": 0.6514549113205899,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 65
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03538417500628258,
+      "gradient_norm_variance": 5.173553462205372e-05,
+      "important_mass_mean": 0.6640714702960859,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 66
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.045538997110204746,
+      "gradient_norm_variance": 0.00010986805658494493,
+      "important_mass_mean": 0.6592885153031705,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 67
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333334,
+      "grad_norm": 0.07053778345427857,
+      "gradient_norm_variance": 0.00012161247435372053,
+      "important_mass_mean": 0.6571880392477238,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 68
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.07224517968849961,
+      "gradient_norm_variance": 0.00010818148109497465,
+      "important_mass_mean": 0.656240596593969,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 69
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.052303100363948196,
+      "gradient_norm_variance": 7.623796043184219e-05,
+      "important_mass_mean": 0.6648280997077148,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 70
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.044860726938301745,
+      "gradient_norm_variance": 9.608699923895219e-05,
+      "important_mass_mean": 0.6536995545561718,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 71
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.049185832008816814,
+      "gradient_norm_variance": 0.00014487474180740692,
+      "important_mass_mean": 0.6502566142968531,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 72
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.06302519608525003,
+      "gradient_norm_variance": 0.00017581186399863837,
+      "important_mass_mean": 0.6514474590074932,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 73
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.041279584238273104,
+      "gradient_norm_variance": 4.8530786600146724e-05,
+      "important_mass_mean": 0.6550894344423175,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 74
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04404268527598535,
+      "gradient_norm_variance": 6.464324773759583e-05,
+      "important_mass_mean": 0.6579282548014536,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 75
+    },
+    {
+      "advantage_abs_mean": 0.0,
+      "grad_norm": 0.0,
+      "gradient_norm_variance": 0.0,
+      "important_mass_mean": 0.6644327557528305,
+      "reward_mean": 0.0,
+      "reward_std": 0.0,
+      "step": 76
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.038843597470460754,
+      "gradient_norm_variance": 7.405358981628825e-05,
+      "important_mass_mean": 0.6545270728492463,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 77
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.04407441983894043,
+      "gradient_norm_variance": 0.00018720115896792895,
+      "important_mass_mean": 0.66262728792579,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 78
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.036184076084435926,
+      "gradient_norm_variance": 0.00011356918466852764,
+      "important_mass_mean": 0.6557462615271195,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 79
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.04310432009153748,
+      "gradient_norm_variance": 0.00015678476171459129,
+      "important_mass_mean": 0.6601213388109949,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 80
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.04269417563567075,
+      "gradient_norm_variance": 0.0001300059709832065,
+      "important_mass_mean": 0.657455377140377,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 81
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.026848855648983257,
+      "gradient_norm_variance": 2.4966314020377597e-05,
+      "important_mass_mean": 0.6614978873276924,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 82
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.07812454930320677,
+      "gradient_norm_variance": 8.076743825885226e-05,
+      "important_mass_mean": 0.6646279475571673,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 83
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.0451646189109029,
+      "gradient_norm_variance": 8.495888529068074e-05,
+      "important_mass_mean": 0.6437369795695924,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 84
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.02914042949724884,
+      "gradient_norm_variance": 9.344702166382978e-05,
+      "important_mass_mean": 0.6570140601525603,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 85
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.07042548679717385,
+      "gradient_norm_variance": 0.00017516272652512655,
+      "important_mass_mean": 0.6546605356828437,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 86
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.02668512770960632,
+      "gradient_norm_variance": 4.878691523685267e-05,
+      "important_mass_mean": 0.6626761982982692,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 87
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.06760482285988503,
+      "gradient_norm_variance": 6.310628229163739e-05,
+      "important_mass_mean": 0.656417107089222,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 88
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.03157941676201752,
+      "gradient_norm_variance": 6.415439336173645e-05,
+      "important_mass_mean": 0.6452364144238436,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 89
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.056393771475606445,
+      "gradient_norm_variance": 0.00010732427027290997,
+      "important_mass_mean": 0.6478209573936002,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 90
+    },
+    {
+      "advantage_abs_mean": 0.03125,
+      "grad_norm": 0.022206052011110717,
+      "gradient_norm_variance": 2.2409125235782538e-05,
+      "important_mass_mean": 0.656351534355672,
+      "reward_mean": 0.015625,
+      "reward_std": 0.12401959270615269,
+      "step": 91
+    },
+    {
+      "advantage_abs_mean": 0.2604166666666667,
+      "grad_norm": 0.05075562208447052,
+      "gradient_norm_variance": 0.00016530480940294562,
+      "important_mass_mean": 0.6740869797838152,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 92
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.0346381198851975,
+      "gradient_norm_variance": 9.671670405108253e-05,
+      "important_mass_mean": 0.6564050077169297,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 93
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.03359202436309174,
+      "gradient_norm_variance": 0.00011360726922186575,
+      "important_mass_mean": 0.6720001136068212,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 94
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.0542469056713517,
+      "gradient_norm_variance": 4.745821606511379e-05,
+      "important_mass_mean": 0.6586601063674487,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 95
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03600902340544702,
+      "gradient_norm_variance": 3.574500131395807e-05,
+      "important_mass_mean": 0.6577332567177638,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 96
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.037945469393517464,
+      "gradient_norm_variance": 0.00010181654963674969,
+      "important_mass_mean": 0.6630395045218518,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 97
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.02999837560899251,
+      "gradient_norm_variance": 6.104285224910381e-05,
+      "important_mass_mean": 0.6562583804037899,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 98
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.046980908955712636,
+      "gradient_norm_variance": 6.885584826137662e-05,
+      "important_mass_mean": 0.6527176226311511,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 99
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.055359348616044364,
+      "gradient_norm_variance": 9.259495218004433e-05,
+      "important_mass_mean": 0.655988691258984,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 100
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.04934948657022303,
+      "gradient_norm_variance": 0.000108711429302948,
+      "important_mass_mean": 0.6537361605123305,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 101
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.0370780505700021,
+      "gradient_norm_variance": 0.00011943851003746698,
+      "important_mass_mean": 0.6605993044707072,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 102
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.041373220656192436,
+      "gradient_norm_variance": 6.847094305329618e-05,
+      "important_mass_mean": 0.6573889200278512,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 103
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.02839862680149551,
+      "gradient_norm_variance": 2.797081425735964e-05,
+      "important_mass_mean": 0.6615246731739293,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 104
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.030232840983592957,
+      "gradient_norm_variance": 7.868285952680124e-05,
+      "important_mass_mean": 0.645259764027076,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 105
+    },
+    {
+      "advantage_abs_mean": 0.03125,
+      "grad_norm": 0.02086083807219578,
+      "gradient_norm_variance": 2.8935533039755252e-05,
+      "important_mass_mean": 0.652253017864038,
+      "reward_mean": 0.015625,
+      "reward_std": 0.12401959270615269,
+      "step": 106
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.047935059274087456,
+      "gradient_norm_variance": 0.00017603594469544468,
+      "important_mass_mean": 0.6563506885938724,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 107
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.0578614869263838,
+      "gradient_norm_variance": 0.00014571745825799033,
+      "important_mass_mean": 0.6580777335612702,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 108
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.05943792825741518,
+      "gradient_norm_variance": 9.151334766537814e-05,
+      "important_mass_mean": 0.657573027628363,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 109
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666667,
+      "grad_norm": 0.031103059173333857,
+      "gradient_norm_variance": 3.334361367998016e-05,
+      "important_mass_mean": 0.6561467160532424,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 110
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.04633771487327693,
+      "gradient_norm_variance": 5.363579716464742e-05,
+      "important_mass_mean": 0.6630372762232665,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 111
+    },
+    {
+      "advantage_abs_mean": 0.07291666666666667,
+      "grad_norm": 0.02927808291593278,
+      "gradient_norm_variance": 4.857737573954902e-05,
+      "important_mass_mean": 0.6445143367490824,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 112
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.028525876724777095,
+      "gradient_norm_variance": 4.349671994695816e-05,
+      "important_mass_mean": 0.6570037896953569,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 113
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.07226715676470725,
+      "gradient_norm_variance": 0.00011417695521067235,
+      "important_mass_mean": 0.6604760094080981,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 114
+    },
+    {
+      "advantage_abs_mean": 0.07291666666666667,
+      "grad_norm": 0.042479839108794486,
+      "gradient_norm_variance": 5.806722872723221e-05,
+      "important_mass_mean": 0.6528070738313902,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 115
+    },
+    {
+      "advantage_abs_mean": 0.04166666666666667,
+      "grad_norm": 0.026241908692559355,
+      "gradient_norm_variance": 2.066250220525221e-05,
+      "important_mass_mean": 0.6572991024824613,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 116
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.0715352200129973,
+      "gradient_norm_variance": 0.00019219922855077986,
+      "important_mass_mean": 0.6560966121955343,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 117
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.04238636418484716,
+      "gradient_norm_variance": 6.419552556511337e-05,
+      "important_mass_mean": 0.6661598106790388,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 118
+    },
+    {
+      "advantage_abs_mean": 0.28125,
+      "grad_norm": 0.06517672037591739,
+      "gradient_norm_variance": 0.00025042508510916866,
+      "important_mass_mean": 0.6472720190971502,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 119
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.037519762733260444,
+      "gradient_norm_variance": 9.108253170733531e-05,
+      "important_mass_mean": 0.6507902723101989,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 120
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.08642951195507326,
+      "gradient_norm_variance": 0.00013276585733163518,
+      "important_mass_mean": 0.6522159580396796,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 121
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.047610020127363845,
+      "gradient_norm_variance": 4.0652929581912344e-05,
+      "important_mass_mean": 0.6564442682943432,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 122
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.04572886770377956,
+      "gradient_norm_variance": 7.094953133234493e-05,
+      "important_mass_mean": 0.647809031260411,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 123
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.052001830315538754,
+      "gradient_norm_variance": 6.849757101962144e-05,
+      "important_mass_mean": 0.6541230660838107,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 124
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.05651666763926293,
+      "gradient_norm_variance": 0.00014478009216921928,
+      "important_mass_mean": 0.6385965924974274,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 125
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.05335256431890408,
+      "gradient_norm_variance": 0.00020891063931019653,
+      "important_mass_mean": 0.6617477087037894,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 126
+    },
+    {
+      "advantage_abs_mean": 0.14583333333333331,
+      "grad_norm": 0.03485876967543971,
+      "gradient_norm_variance": 0.00011719852805587634,
+      "important_mass_mean": 0.6475744024774162,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 127
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.05278959863581171,
+      "gradient_norm_variance": 8.436730976544875e-05,
+      "important_mass_mean": 0.6579289560686483,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 128
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.05812802506787681,
+      "gradient_norm_variance": 0.00013285145774267272,
+      "important_mass_mean": 0.6521242776234972,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 129
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04548405740670259,
+      "gradient_norm_variance": 7.69907816550131e-05,
+      "important_mass_mean": 0.6456024459633563,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 130
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04246416164801434,
+      "gradient_norm_variance": 6.56007271564415e-05,
+      "important_mass_mean": 0.6558615542432863,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 131
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.0751747110193676,
+      "gradient_norm_variance": 0.00012045614163632922,
+      "important_mass_mean": 0.6403948426917117,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 132
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.05246869936559477,
+      "gradient_norm_variance": 0.00012896543849890292,
+      "important_mass_mean": 0.6456046141330402,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 133
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.08096039418113862,
+      "gradient_norm_variance": 0.00018744796408828813,
+      "important_mass_mean": 0.6550141269105242,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 134
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.0588910523961424,
+      "gradient_norm_variance": 0.00024114261664791157,
+      "important_mass_mean": 0.6529214021500862,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 135
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.06199814970217077,
+      "gradient_norm_variance": 0.00015696149797481926,
+      "important_mass_mean": 0.6529812196610911,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 136
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.029972107715545416,
+      "gradient_norm_variance": 8.90979924906307e-05,
+      "important_mass_mean": 0.6595729030867648,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 137
+    },
+    {
+      "advantage_abs_mean": 0.03125,
+      "grad_norm": 0.01256379102091349,
+      "gradient_norm_variance": 7.421414371444147e-06,
+      "important_mass_mean": 0.6479364058955971,
+      "reward_mean": 0.015625,
+      "reward_std": 0.12401959270615269,
+      "step": 138
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.05319912455044567,
+      "gradient_norm_variance": 0.00010495269103627304,
+      "important_mass_mean": 0.6567583190571629,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 139
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.04508743886316369,
+      "gradient_norm_variance": 4.530155693669421e-05,
+      "important_mass_mean": 0.6512915379979713,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 140
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.04453653314944487,
+      "gradient_norm_variance": 0.00016493151893818634,
+      "important_mass_mean": 0.6512397087127685,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 141
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.036532591339898786,
+      "gradient_norm_variance": 4.015968170177587e-05,
+      "important_mass_mean": 0.6596235734637719,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 142
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666663,
+      "grad_norm": 0.06289273677829897,
+      "gradient_norm_variance": 0.00012423389639729815,
+      "important_mass_mean": 0.64279578739157,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 143
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04430875547808764,
+      "gradient_norm_variance": 0.00011097879215392165,
+      "important_mass_mean": 0.6484346901525868,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 144
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.05201835472044979,
+      "gradient_norm_variance": 0.0001324125082589927,
+      "important_mass_mean": 0.6558719449651884,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 145
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.03255370476899457,
+      "gradient_norm_variance": 8.406079535755402e-05,
+      "important_mass_mean": 0.6577616459645854,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 146
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.032587044691086926,
+      "gradient_norm_variance": 6.182458470206866e-05,
+      "important_mass_mean": 0.643187890720827,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 147
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.07388310879949189,
+      "gradient_norm_variance": 0.0001311639884323868,
+      "important_mass_mean": 0.6587077861875836,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 148
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.07118049761374592,
+      "gradient_norm_variance": 0.00018926575477144883,
+      "important_mass_mean": 0.6464781240318542,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 149
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.048526920968107984,
+      "gradient_norm_variance": 0.00016544625456843114,
+      "important_mass_mean": 0.6402460163217714,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 150
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666663,
+      "grad_norm": 0.04395737355554401,
+      "gradient_norm_variance": 0.00020802831153631242,
+      "important_mass_mean": 0.646777521195433,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 151
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.04270435245628253,
+      "gradient_norm_variance": 0.0001780077871770502,
+      "important_mass_mean": 0.6557884520536098,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 152
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04901840395874781,
+      "gradient_norm_variance": 9.352834768366902e-05,
+      "important_mass_mean": 0.6392820120316647,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 153
+    },
+    {
+      "advantage_abs_mean": 0.11458333333333333,
+      "grad_norm": 0.04381675390532476,
+      "gradient_norm_variance": 0.00012296023734116755,
+      "important_mass_mean": 0.650169742691819,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 154
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.06052286958189648,
+      "gradient_norm_variance": 0.00017358918569459285,
+      "important_mass_mean": 0.6364088421759629,
+      "reward_mean": 0.15625,
+      "reward_std": 0.3630921887069453,
+      "step": 155
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.0619590574492938,
+      "gradient_norm_variance": 5.9401996820458976e-05,
+      "important_mass_mean": 0.6469768699813321,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 156
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.07028180512036346,
+      "gradient_norm_variance": 0.00017783105722264604,
+      "important_mass_mean": 0.6349735791115949,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 157
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.04401089968283,
+      "gradient_norm_variance": 0.0001117017993039975,
+      "important_mass_mean": 0.6379402016795068,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 158
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04285564986723022,
+      "gradient_norm_variance": 0.00012600796165028574,
+      "important_mass_mean": 0.6470635904514008,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 159
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.02670067386887628,
+      "gradient_norm_variance": 0.0001332785862428232,
+      "important_mass_mean": 0.6557203788099033,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 160
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.07313803102013845,
+      "gradient_norm_variance": 0.0002181011317494532,
+      "important_mass_mean": 0.6366774888607774,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 161
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.04795100974106379,
+      "gradient_norm_variance": 0.00017360693671215557,
+      "important_mass_mean": 0.635135453372892,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 162
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.03813832938114324,
+      "gradient_norm_variance": 0.00015863987932020348,
+      "important_mass_mean": 0.6604006709445323,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 163
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.06530815648829655,
+      "gradient_norm_variance": 0.00023697292728437576,
+      "important_mass_mean": 0.6509720512958594,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 164
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.042678519465812435,
+      "gradient_norm_variance": 3.711106087734946e-05,
+      "important_mass_mean": 0.6489320657686697,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 165
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.06000987470114295,
+      "gradient_norm_variance": 0.0001232433685732294,
+      "important_mass_mean": 0.6266202761292692,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 166
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.06439198849436657,
+      "gradient_norm_variance": 0.00020460212600301818,
+      "important_mass_mean": 0.6445081408950741,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 167
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.043422858848890314,
+      "gradient_norm_variance": 0.0001620910458207055,
+      "important_mass_mean": 0.6512342991396898,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 168
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.044365254608869885,
+      "gradient_norm_variance": 0.00010460199982307436,
+      "important_mass_mean": 0.6482520974377374,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 169
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.04629705860621354,
+      "gradient_norm_variance": 0.0001026549170284729,
+      "important_mass_mean": 0.6391210398332421,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 170
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.03833961364823436,
+      "gradient_norm_variance": 8.488358035700329e-05,
+      "important_mass_mean": 0.6398027100183815,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 171
+    },
+    {
+      "advantage_abs_mean": 0.11458333333333334,
+      "grad_norm": 0.05150160826763829,
+      "gradient_norm_variance": 0.00010275077477495431,
+      "important_mass_mean": 0.6361949235530456,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 172
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.048726694770147995,
+      "gradient_norm_variance": 0.00020847755776916898,
+      "important_mass_mean": 0.6336728219144314,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 173
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.05518810801246179,
+      "gradient_norm_variance": 0.00012534295272448328,
+      "important_mass_mean": 0.655821402709528,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 174
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.040494902547348034,
+      "gradient_norm_variance": 0.00012527350282172346,
+      "important_mass_mean": 0.6360842853516597,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 175
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.08214267528529484,
+      "gradient_norm_variance": 0.0001327937775311965,
+      "important_mass_mean": 0.6287274404604681,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 176
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.06511955731850287,
+      "gradient_norm_variance": 0.00014089507528469242,
+      "important_mass_mean": 0.6585537340852821,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 177
+    },
+    {
+      "advantage_abs_mean": 0.375,
+      "grad_norm": 0.098189475364884,
+      "gradient_norm_variance": 0.0004763696621012873,
+      "important_mass_mean": 0.6359708824388782,
+      "reward_mean": 0.21875,
+      "reward_std": 0.41339864235384227,
+      "step": 178
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.028571629541015303,
+      "gradient_norm_variance": 3.787296932980214e-05,
+      "important_mass_mean": 0.6538519958032674,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 179
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.024311974508952224,
+      "gradient_norm_variance": 3.980716166176265e-05,
+      "important_mass_mean": 0.6499834029216258,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 180
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.055732567175674944,
+      "gradient_norm_variance": 0.00011515210398834156,
+      "important_mass_mean": 0.6442911552081203,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 181
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.04796430499569071,
+      "gradient_norm_variance": 6.552024885672189e-05,
+      "important_mass_mean": 0.6520028483402828,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 182
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.03063447244493559,
+      "gradient_norm_variance": 0.00013897238339282992,
+      "important_mass_mean": 0.6438180402656888,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 183
+    },
+    {
+      "advantage_abs_mean": 0.07291666666666667,
+      "grad_norm": 0.03278029678269294,
+      "gradient_norm_variance": 3.784551011049406e-05,
+      "important_mass_mean": 0.6421815342907456,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 184
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.039881370001965066,
+      "gradient_norm_variance": 0.00023115109405615875,
+      "important_mass_mean": 0.6350808673068546,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 185
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.03483211018073146,
+      "gradient_norm_variance": 0.00013231844309963218,
+      "important_mass_mean": 0.6430557212690737,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 186
+    },
+    {
+      "advantage_abs_mean": 0.3125,
+      "grad_norm": 0.07921804139604423,
+      "gradient_norm_variance": 0.00025885685019270044,
+      "important_mass_mean": 0.6363023096432388,
+      "reward_mean": 0.1875,
+      "reward_std": 0.3903123748998999,
+      "step": 187
+    },
+    {
+      "advantage_abs_mean": 0.12499999999999999,
+      "grad_norm": 0.04974161614088899,
+      "gradient_norm_variance": 7.450232628042752e-05,
+      "important_mass_mean": 0.6332635131640442,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 188
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.05361155569392654,
+      "gradient_norm_variance": 0.00010925843672983078,
+      "important_mass_mean": 0.6239559190527839,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 189
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.03657368043672695,
+      "gradient_norm_variance": 0.00017478430546039218,
+      "important_mass_mean": 0.6159187171151249,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 190
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.06916298355361454,
+      "gradient_norm_variance": 0.0002223918976031344,
+      "important_mass_mean": 0.619175455037666,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 191
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.04475327591949331,
+      "gradient_norm_variance": 0.00018980948274931322,
+      "important_mass_mean": 0.6296647218536238,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 192
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.03632021503424247,
+      "gradient_norm_variance": 0.0001532964309399253,
+      "important_mass_mean": 0.6337926040118063,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 193
+    },
+    {
+      "advantage_abs_mean": 0.25,
+      "grad_norm": 0.07657792960317358,
+      "gradient_norm_variance": 0.0005101602389802649,
+      "important_mass_mean": 0.6296307855498682,
+      "reward_mean": 0.1875,
+      "reward_std": 0.3903123748998999,
+      "step": 194
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.04349184121296929,
+      "gradient_norm_variance": 0.00012147428129192692,
+      "important_mass_mean": 0.6329910037155808,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 195
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.05490866448391215,
+      "gradient_norm_variance": 0.00018467977539448103,
+      "important_mass_mean": 0.6402616225332391,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 196
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.03114764182318296,
+      "gradient_norm_variance": 7.551840545187097e-05,
+      "important_mass_mean": 0.6312532218592111,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 197
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.060292987929564563,
+      "gradient_norm_variance": 0.00020906864446851965,
+      "important_mass_mean": 0.6215251475448582,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 198
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.033901056163519884,
+      "gradient_norm_variance": 5.8842453835248845e-05,
+      "important_mass_mean": 0.6329323801278284,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 199
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.04928489653838098,
+      "gradient_norm_variance": 0.0001655483395016661,
+      "important_mass_mean": 0.633335463208631,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 200
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.04973033373311237,
+      "gradient_norm_variance": 0.00022925063610271552,
+      "important_mass_mean": 0.6431356295396772,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 201
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.06580095317555193,
+      "gradient_norm_variance": 0.0003216525521707653,
+      "important_mass_mean": 0.6345626116874993,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 202
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.04543276728424609,
+      "gradient_norm_variance": 0.0001958773454473594,
+      "important_mass_mean": 0.6412094070816085,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 203
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.07875173276285197,
+      "gradient_norm_variance": 9.808938918061281e-05,
+      "important_mass_mean": 0.6139778648441917,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 204
+    },
+    {
+      "advantage_abs_mean": 0.14583333333333331,
+      "grad_norm": 0.06002064658049453,
+      "gradient_norm_variance": 0.00025214338825756296,
+      "important_mass_mean": 0.6184774723757962,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 205
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.0334880050057963,
+      "gradient_norm_variance": 0.00022137933142481265,
+      "important_mass_mean": 0.6353601105442315,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 206
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.08958419758371193,
+      "gradient_norm_variance": 0.00024892468817214067,
+      "important_mass_mean": 0.62404480623746,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 207
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666666,
+      "grad_norm": 0.06413287608576623,
+      "gradient_norm_variance": 0.0003139241148429607,
+      "important_mass_mean": 0.6433160437841219,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 208
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.02985399226829428,
+      "gradient_norm_variance": 4.6950943322829805e-05,
+      "important_mass_mean": 0.6344983481889261,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 209
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.06060668189533241,
+      "gradient_norm_variance": 0.00030369963561111316,
+      "important_mass_mean": 0.6312922700063057,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 210
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.08938690648523248,
+      "gradient_norm_variance": 0.00026075000360374634,
+      "important_mass_mean": 0.6282515501947564,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 211
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.048658848125523034,
+      "gradient_norm_variance": 0.00011210737086371855,
+      "important_mass_mean": 0.6108820788123699,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 212
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.048298721521704384,
+      "gradient_norm_variance": 8.1116683934568e-05,
+      "important_mass_mean": 0.6299977247537388,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 213
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.04468331570861091,
+      "gradient_norm_variance": 0.00021203292429251204,
+      "important_mass_mean": 0.617837941133571,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 214
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.07294805275950682,
+      "gradient_norm_variance": 0.00021533300509376434,
+      "important_mass_mean": 0.6333412126194042,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 215
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.058453491873688854,
+      "gradient_norm_variance": 0.0003154079468308873,
+      "important_mass_mean": 0.6384025273871262,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 216
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.07112044486730988,
+      "gradient_norm_variance": 0.00010874458231845629,
+      "important_mass_mean": 0.6316897853227375,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 217
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.08538269256645943,
+      "gradient_norm_variance": 0.00033325043799518656,
+      "important_mass_mean": 0.620789933391987,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 218
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.042951468066534514,
+      "gradient_norm_variance": 0.0003221722509432616,
+      "important_mass_mean": 0.6309519773472904,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 219
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.02405069670670039,
+      "gradient_norm_variance": 7.286267290377287e-05,
+      "important_mass_mean": 0.6260271338759077,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 220
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.08788266873496353,
+      "gradient_norm_variance": 0.0003323690337878432,
+      "important_mass_mean": 0.6138196324928353,
+      "reward_mean": 0.15625,
+      "reward_std": 0.3630921887069453,
+      "step": 221
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.05137334974626871,
+      "gradient_norm_variance": 0.00025894869274602586,
+      "important_mass_mean": 0.6070215624090254,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 222
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.0403768553154906,
+      "gradient_norm_variance": 0.00013246962174789072,
+      "important_mass_mean": 0.6038490212625793,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 223
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.07855237772073766,
+      "gradient_norm_variance": 0.00022377242775403918,
+      "important_mass_mean": 0.6241900997959025,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 224
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.04714868679159903,
+      "gradient_norm_variance": 0.00023320605038984412,
+      "important_mass_mean": 0.6032687862982113,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 225
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.07016651503812502,
+      "gradient_norm_variance": 0.0002337552118429666,
+      "important_mass_mean": 0.6230448441890768,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 226
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.07809949931245931,
+      "gradient_norm_variance": 0.00045071166448701333,
+      "important_mass_mean": 0.6098872067560674,
+      "reward_mean": 0.1875,
+      "reward_std": 0.3903123748998999,
+      "step": 227
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.05194778026807799,
+      "gradient_norm_variance": 0.00023704541883704373,
+      "important_mass_mean": 0.61678542953022,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 228
+    },
+    {
+      "advantage_abs_mean": 0.3229166666666667,
+      "grad_norm": 0.10897563715260473,
+      "gradient_norm_variance": 0.00043347070968218594,
+      "important_mass_mean": 0.6167074462192168,
+      "reward_mean": 0.203125,
+      "reward_std": 0.40232478717449166,
+      "step": 229
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333337,
+      "grad_norm": 0.06407884909872304,
+      "gradient_norm_variance": 0.00029765369967804065,
+      "important_mass_mean": 0.614811024123441,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 230
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.047801165671071004,
+      "gradient_norm_variance": 0.0004084086074109337,
+      "important_mass_mean": 0.6090970660644135,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 231
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.08849497712295334,
+      "gradient_norm_variance": 0.0002276031511143868,
+      "important_mass_mean": 0.6139326606757955,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 232
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.0579466012316751,
+      "gradient_norm_variance": 0.00013205801068281607,
+      "important_mass_mean": 0.6335076750485366,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 233
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.06552399462945284,
+      "gradient_norm_variance": 0.00032665526370624924,
+      "important_mass_mean": 0.6188473234746643,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 234
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.09971369796667628,
+      "gradient_norm_variance": 0.0003961788383430186,
+      "important_mass_mean": 0.6002333764199403,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 235
+    },
+    {
+      "advantage_abs_mean": 0.27083333333333337,
+      "grad_norm": 0.06436357199532107,
+      "gradient_norm_variance": 0.0004415778095121992,
+      "important_mass_mean": 0.5814435441183758,
+      "reward_mean": 0.15625,
+      "reward_std": 0.3630921887069453,
+      "step": 236
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.05945642953712925,
+      "gradient_norm_variance": 0.00013981133859848177,
+      "important_mass_mean": 0.6178213492937329,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 237
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.06300621242995452,
+      "gradient_norm_variance": 0.0002923563140109212,
+      "important_mass_mean": 0.6072413309957468,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 238
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.06792712044326873,
+      "gradient_norm_variance": 0.0005172579252692059,
+      "important_mass_mean": 0.5940504741609831,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 239
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333337,
+      "grad_norm": 0.07913169211114088,
+      "gradient_norm_variance": 0.000310083852258448,
+      "important_mass_mean": 0.5985707625641732,
+      "reward_mean": 0.234375,
+      "reward_std": 0.4236075534914362,
+      "step": 240
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666667,
+      "grad_norm": 0.05422584761624131,
+      "gradient_norm_variance": 0.0003885370756382694,
+      "important_mass_mean": 0.6101534381097192,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 241
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.05590729080807731,
+      "gradient_norm_variance": 0.0006055691733717436,
+      "important_mass_mean": 0.6199034926763365,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 242
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.044168407321928775,
+      "gradient_norm_variance": 0.00010551681318661727,
+      "important_mass_mean": 0.597757065431612,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 243
+    },
+    {
+      "advantage_abs_mean": 0.21874999999999997,
+      "grad_norm": 0.08473118339832132,
+      "gradient_norm_variance": 0.00025455603050440057,
+      "important_mass_mean": 0.5847557698880721,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 244
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.07786546600323699,
+      "gradient_norm_variance": 0.0003207887261365115,
+      "important_mass_mean": 0.5923658413001736,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 245
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.06824292024742776,
+      "gradient_norm_variance": 0.0004379800009382867,
+      "important_mass_mean": 0.6160436097793632,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 246
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666667,
+      "grad_norm": 0.04205566683717969,
+      "gradient_norm_variance": 0.00018763824710271105,
+      "important_mass_mean": 0.6053604971934806,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 247
+    },
+    {
+      "advantage_abs_mean": 0.03125,
+      "grad_norm": 0.022285447632473244,
+      "gradient_norm_variance": 2.1630442120652393e-05,
+      "important_mass_mean": 0.6115136727106492,
+      "reward_mean": 0.015625,
+      "reward_std": 0.12401959270615269,
+      "step": 248
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.05203583207448072,
+      "gradient_norm_variance": 0.00035115234921876,
+      "important_mass_mean": 0.605282861422596,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 249
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.04017896947111719,
+      "gradient_norm_variance": 0.00045886119986912133,
+      "important_mass_mean": 0.6048484297487144,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 250
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.055713404310461595,
+      "gradient_norm_variance": 0.00035221750872110245,
+      "important_mass_mean": 0.6050707852269397,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 251
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.057541688730409345,
+      "gradient_norm_variance": 0.0001692397077662133,
+      "important_mass_mean": 0.6016831360693489,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 252
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.049882646098894284,
+      "gradient_norm_variance": 0.00019659064339639602,
+      "important_mass_mean": 0.6157062241667288,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 253
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666669,
+      "grad_norm": 0.03847516058705327,
+      "gradient_norm_variance": 0.00031305192120795536,
+      "important_mass_mean": 0.6284502783444033,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 254
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.05518942254475138,
+      "gradient_norm_variance": 0.00036541339136912773,
+      "important_mass_mean": 0.5923701326925208,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 255
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666663,
+      "grad_norm": 0.057075568467860605,
+      "gradient_norm_variance": 0.00019563401399953447,
+      "important_mass_mean": 0.6051476034875012,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 256
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.05767321316202185,
+      "gradient_norm_variance": 0.00030436019134789027,
+      "important_mass_mean": 0.6026060595707331,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 257
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.03135770512641617,
+      "gradient_norm_variance": 0.00015800188915659574,
+      "important_mass_mean": 0.6027423701609089,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 258
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333334,
+      "grad_norm": 0.04863273744536008,
+      "gradient_norm_variance": 0.0004159788508676352,
+      "important_mass_mean": 0.6041557293752591,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 259
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.03773507670639169,
+      "gradient_norm_variance": 0.00019388476193660681,
+      "important_mass_mean": 0.5637781099174881,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 260
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.06011081622212293,
+      "gradient_norm_variance": 0.00032963618921877196,
+      "important_mass_mean": 0.6001586033823858,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 261
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.06824294871268966,
+      "gradient_norm_variance": 0.00022184502180984245,
+      "important_mass_mean": 0.6102779257362285,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 262
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.0324094089960914,
+      "gradient_norm_variance": 0.00016202673074119494,
+      "important_mass_mean": 0.5928263534216314,
+      "reward_mean": 0.046875,
+      "reward_std": 0.21137108216357317,
+      "step": 263
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.056062382953424535,
+      "gradient_norm_variance": 0.00039666620783624946,
+      "important_mass_mean": 0.6083399612758995,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 264
+    },
+    {
+      "advantage_abs_mean": 0.1875,
+      "grad_norm": 0.07971966808921561,
+      "gradient_norm_variance": 0.00032191658659645517,
+      "important_mass_mean": 0.5755598954201684,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 265
+    },
+    {
+      "advantage_abs_mean": 0.11458333333333333,
+      "grad_norm": 0.05899994078603085,
+      "gradient_norm_variance": 0.0004992300297639139,
+      "important_mass_mean": 0.6005199859235717,
+      "reward_mean": 0.078125,
+      "reward_std": 0.26836818808308854,
+      "step": 266
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.063344461362594,
+      "gradient_norm_variance": 0.0007622589307357838,
+      "important_mass_mean": 0.5874004766337164,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 267
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.062235559296071594,
+      "gradient_norm_variance": 0.00018218569015445726,
+      "important_mass_mean": 0.576147850721006,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 268
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.05023181416417381,
+      "gradient_norm_variance": 0.00021580824311963389,
+      "important_mass_mean": 0.5781607864759382,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 269
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.08541893096229465,
+      "gradient_norm_variance": 0.0005487420401714658,
+      "important_mass_mean": 0.5753329073877725,
+      "reward_mean": 0.25,
+      "reward_std": 0.4330127018922193,
+      "step": 270
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.062494588952942305,
+      "gradient_norm_variance": 0.000238616668463559,
+      "important_mass_mean": 0.5937768078201573,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 271
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.06635091288624964,
+      "gradient_norm_variance": 0.0004828757348202086,
+      "important_mass_mean": 0.5497002784859313,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 272
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.08539156745793719,
+      "gradient_norm_variance": 0.0003645450034787225,
+      "important_mass_mean": 0.6004385745062,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 273
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.0523508604750137,
+      "gradient_norm_variance": 0.0003255922514670232,
+      "important_mass_mean": 0.5774371076018985,
+      "reward_mean": 0.15625,
+      "reward_std": 0.3630921887069453,
+      "step": 274
+    },
+    {
+      "advantage_abs_mean": 0.28125,
+      "grad_norm": 0.09375275622631986,
+      "gradient_norm_variance": 0.00044502134030532025,
+      "important_mass_mean": 0.5828423217114835,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 275
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.08693807641507353,
+      "gradient_norm_variance": 0.0003783579046040747,
+      "important_mass_mean": 0.5954221680421878,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 276
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666666,
+      "grad_norm": 0.05534958152062519,
+      "gradient_norm_variance": 0.0003371693794686604,
+      "important_mass_mean": 0.5818898694582029,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 277
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.06983067056713245,
+      "gradient_norm_variance": 0.00027485863765545725,
+      "important_mass_mean": 0.5524710755573515,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 278
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.0534307538799253,
+      "gradient_norm_variance": 0.0005531693092371553,
+      "important_mass_mean": 0.5710941244471257,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 279
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666669,
+      "grad_norm": 0.07727518967497836,
+      "gradient_norm_variance": 0.0008004958230051484,
+      "important_mass_mean": 0.5858809962930875,
+      "reward_mean": 0.125,
+      "reward_std": 0.33071891388307384,
+      "step": 280
+    },
+    {
+      "advantage_abs_mean": 0.22916666666666663,
+      "grad_norm": 0.0921116028637478,
+      "gradient_norm_variance": 0.0004949571676553544,
+      "important_mass_mean": 0.5756796021919152,
+      "reward_mean": 0.1875,
+      "reward_std": 0.3903123748998999,
+      "step": 281
+    },
+    {
+      "advantage_abs_mean": 0.23958333333333331,
+      "grad_norm": 0.06533352614479879,
+      "gradient_norm_variance": 0.00039372072985929704,
+      "important_mass_mean": 0.6131267138199272,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 282
+    },
+    {
+      "advantage_abs_mean": 0.125,
+      "grad_norm": 0.050814604186542454,
+      "gradient_norm_variance": 0.00017890426298065762,
+      "important_mass_mean": 0.5762697699786404,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 283
+    },
+    {
+      "advantage_abs_mean": 0.0625,
+      "grad_norm": 0.04055450438751044,
+      "gradient_norm_variance": 0.00014607190555082194,
+      "important_mass_mean": 0.5837385262267972,
+      "reward_mean": 0.03125,
+      "reward_std": 0.17399263633843817,
+      "step": 284
+    },
+    {
+      "advantage_abs_mean": 0.3125,
+      "grad_norm": 0.09082699348845222,
+      "gradient_norm_variance": 0.000857468274087188,
+      "important_mass_mean": 0.5580409506953492,
+      "reward_mean": 0.1875,
+      "reward_std": 0.3903123748998999,
+      "step": 285
+    },
+    {
+      "advantage_abs_mean": 0.14583333333333334,
+      "grad_norm": 0.061024453965426655,
+      "gradient_norm_variance": 0.0002836372368225427,
+      "important_mass_mean": 0.5402098332370526,
+      "reward_mean": 0.15625,
+      "reward_std": 0.3630921887069453,
+      "step": 286
+    },
+    {
+      "advantage_abs_mean": 0.3020833333333333,
+      "grad_norm": 0.13022378768953335,
+      "gradient_norm_variance": 0.0005875327178646876,
+      "important_mass_mean": 0.5784324706957085,
+      "reward_mean": 0.203125,
+      "reward_std": 0.40232478717449166,
+      "step": 287
+    },
+    {
+      "advantage_abs_mean": 0.2916666666666667,
+      "grad_norm": 0.11311709879166307,
+      "gradient_norm_variance": 0.0008130354581389566,
+      "important_mass_mean": 0.5836454217690834,
+      "reward_mean": 0.21875,
+      "reward_std": 0.41339864235384227,
+      "step": 288
+    },
+    {
+      "advantage_abs_mean": 0.21875,
+      "grad_norm": 0.06853102491105921,
+      "gradient_norm_variance": 0.0006927838010749515,
+      "important_mass_mean": 0.5518244739224493,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 289
+    },
+    {
+      "advantage_abs_mean": 0.09375,
+      "grad_norm": 0.05520215032682783,
+      "gradient_norm_variance": 0.0005686422488395871,
+      "important_mass_mean": 0.587137967068003,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 290
+    },
+    {
+      "advantage_abs_mean": 0.04166666666666667,
+      "grad_norm": 0.028354830268218542,
+      "gradient_norm_variance": 0.0001832557357113268,
+      "important_mass_mean": 0.5425410169737025,
+      "reward_mean": 0.09375,
+      "reward_std": 0.2914805954090255,
+      "step": 291
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.05913577627466345,
+      "gradient_norm_variance": 0.0005012081908099166,
+      "important_mass_mean": 0.5469052489448231,
+      "reward_mean": 0.203125,
+      "reward_std": 0.40232478717449166,
+      "step": 292
+    },
+    {
+      "advantage_abs_mean": 0.13541666666666666,
+      "grad_norm": 0.07348522595037361,
+      "gradient_norm_variance": 0.0005284840808138574,
+      "important_mass_mean": 0.5389212737949698,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 293
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666666,
+      "grad_norm": 0.05329892361266184,
+      "gradient_norm_variance": 0.0003314127653199366,
+      "important_mass_mean": 0.5723620638936582,
+      "reward_mean": 0.140625,
+      "reward_std": 0.3476343040826092,
+      "step": 294
+    },
+    {
+      "advantage_abs_mean": 0.19791666666666669,
+      "grad_norm": 0.05473080254211531,
+      "gradient_norm_variance": 0.0005358631915236879,
+      "important_mass_mean": 0.5499532486120927,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 295
+    },
+    {
+      "advantage_abs_mean": 0.10416666666666666,
+      "grad_norm": 0.04132380280540287,
+      "gradient_norm_variance": 0.00018124955238343478,
+      "important_mass_mean": 0.5609040382610335,
+      "reward_mean": 0.0625,
+      "reward_std": 0.24206145913796356,
+      "step": 296
+    },
+    {
+      "advantage_abs_mean": 0.17708333333333331,
+      "grad_norm": 0.0775040315056008,
+      "gradient_norm_variance": 0.0010013293568740635,
+      "important_mass_mean": 0.5383280170575271,
+      "reward_mean": 0.109375,
+      "reward_std": 0.3121091305537215,
+      "step": 297
+    },
+    {
+      "advantage_abs_mean": 0.20833333333333331,
+      "grad_norm": 0.09030930689172452,
+      "gradient_norm_variance": 0.0008339901475376982,
+      "important_mass_mean": 0.55382905897806,
+      "reward_mean": 0.25,
+      "reward_std": 0.4330127018922193,
+      "step": 298
+    },
+    {
+      "advantage_abs_mean": 0.15625,
+      "grad_norm": 0.05139855216850962,
+      "gradient_norm_variance": 0.00020776931016352636,
+      "important_mass_mean": 0.5242899761457145,
+      "reward_mean": 0.171875,
+      "reward_std": 0.37727176461405115,
+      "step": 299
+    },
+    {
+      "advantage_abs_mean": 0.16666666666666669,
+      "grad_norm": 0.048529883710279095,
+      "gradient_norm_variance": 0.0005212269152868716,
+      "important_mass_mean": 0.5223797397633838,
+      "reward_mean": 0.15625,
+      "reward_std": 0.3630921887069453,
+      "step": 300
+    }
+  ]
+}

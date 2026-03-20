@@ -1,0 +1,39 @@
+{
+  "baseline": "rloo",
+  "final_gradient_norm_variance": {
+    "max": 0.0,
+    "mean": 0.0,
+    "min": 0.0,
+    "std": 0.0
+  },
+  "final_reward_mean": {
+    "max": 0.0,
+    "mean": 0.0,
+    "min": 0.0,
+    "std": 0.0
+  },
+  "greedy_accuracy": {
+    "max": 0.0,
+    "mean": 0.0,
+    "min": 0.0,
+    "std": 0.0
+  },
+  "important_mass_mean": {
+    "max": 0.6,
+    "mean": 0.6,
+    "min": 0.6,
+    "std": 0.0
+  },
+  "pass_at_k": {
+    "max": 0.005,
+    "mean": 0.0025,
+    "min": 0.0,
+    "std": 0.0025
+  },
+  "seeds": [
+    1,
+    2
+  ],
+  "task": "arithmetic_trace",
+  "weighting": "uniform"
+}

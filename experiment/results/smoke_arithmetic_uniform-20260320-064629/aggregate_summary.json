@@ -1,0 +1,39 @@
+{
+  "baseline": "rloo",
+  "final_gradient_norm_variance": {
+    "max": 1.0476386492887468e-06,
+    "mean": 8.030097378530845e-07,
+    "min": 5.583808264174222e-07,
+    "std": 2.446289114356623e-07
+  },
+  "final_reward_mean": {
+    "max": 0.0625,
+    "mean": 0.041666666666666664,
+    "min": 0.020833333333333332,
+    "std": 0.020833333333333336
+  },
+  "greedy_accuracy": {
+    "max": 0.215,
+    "mean": 0.15,
+    "min": 0.085,
+    "std": 0.065
+  },
+  "important_mass_mean": {
+    "max": 0.6,
+    "mean": 0.6,
+    "min": 0.6,
+    "std": 0.0
+  },
+  "pass_at_k": {
+    "max": 0.27,
+    "mean": 0.24,
+    "min": 0.21,
+    "std": 0.030000000000000013
+  },
+  "seeds": [
+    1,
+    2
+  ],
+  "task": "arithmetic_trace",
+  "weighting": "uniform"
+}

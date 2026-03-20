@@ -1,0 +1,112 @@
+{
+  "examples": [
+    {
+      "greedy_tokens": [
+        "STYLE_A",
+        "PLAN_X",
+        "OP_REV",
+        "ARG_1",
+        "OUT_0"
+      ],
+      "prompt": {
+        "operation": "OP_REV",
+        "value": 0
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_A",
+        "PLAN_X",
+        "OP_REV",
+        "ARG_0",
+        "OUT_1"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_A",
+        "PLAN_X",
+        "OP_REV",
+        "ARG_1",
+        "OUT_0"
+      ],
+      "prompt": {
+        "operation": "OP_DUP",
+        "value": 0
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_A",
+        "PLAN_X",
+        "OP_DUP",
+        "ARG_0",
+        "OUT_0"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_REV",
+        "ARG_1",
+        "OUT_0"
+      ],
+      "prompt": {
+        "operation": "OP_PARITY",
+        "value": 1
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_PARITY",
+        "ARG_1",
+        "OUT_1"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_REV",
+        "ARG_1",
+        "OUT_0"
+      ],
+      "prompt": {
+        "operation": "OP_PARITY",
+        "value": 1
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_PARITY",
+        "ARG_1",
+        "OUT_1"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_REV",
+        "ARG_1",
+        "OUT_0"
+      ],
+      "prompt": {
+        "operation": "OP_PARITY",
+        "value": 1
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_PARITY",
+        "ARG_1",
+        "OUT_1"
+      ]
+    }
+  ],
+  "greedy_accuracy": 0.1,
+  "important_mass_mean": 0.6,
+  "pass_at_k": 0.2866666666666667
+}

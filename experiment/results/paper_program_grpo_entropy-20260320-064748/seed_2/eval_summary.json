@@ -1,0 +1,112 @@
+{
+  "examples": [
+    {
+      "greedy_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_SHIFT",
+        "ARG_1",
+        "OUT_1"
+      ],
+      "prompt": {
+        "operation": "OP_SHIFT",
+        "value": 3
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_SHIFT",
+        "ARG_0",
+        "OUT_1"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_DUP",
+        "ARG_1",
+        "OUT_0"
+      ],
+      "prompt": {
+        "operation": "OP_DUP",
+        "value": 0
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_A",
+        "PLAN_Y",
+        "OP_DUP",
+        "ARG_0",
+        "OUT_0"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_PARITY",
+        "ARG_1",
+        "OUT_1"
+      ],
+      "prompt": {
+        "operation": "OP_PARITY",
+        "value": 0
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_PARITY",
+        "ARG_0",
+        "OUT_0"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_PARITY",
+        "ARG_1",
+        "OUT_1"
+      ],
+      "prompt": {
+        "operation": "OP_PARITY",
+        "value": 2
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_PARITY",
+        "ARG_0",
+        "OUT_0"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_REV",
+        "ARG_1",
+        "OUT_1"
+      ],
+      "prompt": {
+        "operation": "OP_REV",
+        "value": 3
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_B",
+        "PLAN_X",
+        "OP_REV",
+        "ARG_1",
+        "OUT_0"
+      ]
+    }
+  ],
+  "greedy_accuracy": 0.16333333333333333,
+  "important_mass_mean": 0.8551907632176293,
+  "pass_at_k": 0.49666666666666665
+}

@@ -1,0 +1,112 @@
+{
+  "examples": [
+    {
+      "greedy_tokens": [
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z"
+      ],
+      "prompt": {
+        "a": 4,
+        "b": 1
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "PLAN_Z",
+        "PLAN_Z",
+        "C0",
+        "P1",
+        "B1"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "STYLE_A",
+        "STYLE_A",
+        "C0",
+        "STYLE_A",
+        "P0"
+      ],
+      "prompt": {
+        "a": 0,
+        "b": 6
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "STYLE_A",
+        "STYLE_A",
+        "C0",
+        "P0",
+        "B1"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z"
+      ],
+      "prompt": {
+        "a": 0,
+        "b": 1
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "PLAN_Z",
+        "PLAN_Z",
+        "C0",
+        "P1",
+        "B0"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "B1",
+        "B1",
+        "B1",
+        "B1",
+        "B1"
+      ],
+      "prompt": {
+        "a": 6,
+        "b": 3
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "B1",
+        "B1",
+        "C1",
+        "P1",
+        "B2"
+      ]
+    },
+    {
+      "greedy_tokens": [
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z",
+        "PLAN_Z"
+      ],
+      "prompt": {
+        "a": 2,
+        "b": 1
+      },
+      "reward": 0.0,
+      "target_tokens": [
+        "PLAN_Z",
+        "PLAN_Z",
+        "C0",
+        "P1",
+        "B0"
+      ]
+    }
+  ],
+  "greedy_accuracy": 0.0,
+  "important_mass_mean": 0.6,
+  "pass_at_k": 0.0
+}

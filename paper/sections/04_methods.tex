@@ -1,92 +1,83 @@
-\section{Methods}
+\section{Methods}\label{sec:methods}
 
-We consider on-policy reinforcement learning for autoregressive language models with trajectory-level rewards. Let $\pi_\theta$ denote a language model parameterized by $\theta$, generating a completion $y=(y_1,\dots,y_T)$ conditioned on a prompt $x$. After sampling a full trajectory, the model receives a scalar reward $R(x,y)\in\mathbb{R}$ computed by an external verifier, such as exact-answer correctness or unit-test pass rate. Our objective is
+We consider on-policy reinforcement learning for autoregressive policies with trajectory-level rewards. For an input prompt $x$ and sampled completion $y = (y_1, \ldots, y_T)$, the policy $\pi_\theta$ receives a scalar reward $R(x,y)$ from a verifier. The optimization target is
 \begin{equation}
-J(\theta)=\mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot \mid x)}[R(x,y)],
+J(\theta) = \mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot \mid x)}[R(x,y)].
 \end{equation}
-where $\mathcal{D}$ denotes the prompt distribution. We focus on the regime most relevant to recent reasoning-model training: sparse outcome rewards, on-policy sampling, and no learned value function.
+We focus on the critic-free regime used in much recent RLVR work: the reward is sparse, generation is on-policy, and no learned value function is trained.
 
-\subsection{Policy Gradient with Trajectory-Level Reward}
+\subsection{Uniform Sequence-Level Policy Gradients}
 
-For a fixed prompt $x$, the standard REINFORCE estimator is
+For a fixed $(x,y)$, the REINFORCE estimator is
 \begin{equation}
-g_{\mathrm{rf}}(x,y)=R(x,y)\sum_{t=1}^{T}\nabla_\theta \log \pi_\theta(y_t \mid y_{<t},x).
+ g_{\mathrm{rf}}(x,y) = R(x,y) \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
 \end{equation}
-In practice, a baseline $b(x)$ is subtracted to reduce variance without changing the expected gradient as long as $b(x)$ does not depend on the sampled action at token $t$:
+A baseline can be subtracted without changing the expectation when it is independent of the sampled token at position $t$:
 \begin{equation}
-g_{\mathrm{base}}(x,y)=\left(R(x,y)-b(x)\right)\sum_{t=1}^{T}\nabla_\theta \log \pi_\theta(y_t \mid y_{<t},x).
+ g_{\mathrm{base}}(x,y) = A(x,y) \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x),
 \end{equation}
+where $A(x,y)$ is the resulting sequence-level advantage.
 
-We use prompt-level multi-sample baselines. Given $K$ sampled completions $\{y^{(i)}\}_{i=1}^{K}$ for the same prompt $x$ with rewards $\{R^{(i)}\}_{i=1}^{K}$:
+We study two common prompt-level baselines. Given $K$ rollouts $\{y^{(i)}\}_{i=1}^{K}$ for the same prompt, with rewards $\{R^{(i)}\}_{i=1}^{K}$:
 \begin{equation}
-b_{\mathrm{RLOO}}^{(i)}(x)=\frac{1}{K-1}\sum_{j \neq i}R^{(j)}
+ b_{\mathrm{RLOO}}^{(i)}(x) = \frac{1}{K-1}\sum_{j \neq i} R^{(j)},
 \end{equation}
-is the leave-one-out baseline used in RLOO-style estimators, while GRPO-style normalization can be written as
+and the corresponding advantage is $A^{(i)} = R^{(i)} - b_{\mathrm{RLOO}}^{(i)}$. For GRPO-style normalization we use
 \begin{equation}
-A_{\mathrm{GRPO}}^{(i)}(x)=\frac{R^{(i)}-\mu_R(x)}{\sigma_R(x)+\varepsilon},
+ A_{\mathrm{GRPO}}^{(i)}(x) = \frac{R^{(i)} - \mu_R(x)}{\sigma_R(x) + \varepsilon},
 \end{equation}
-where $\mu_R(x)$ and $\sigma_R(x)$ are the within-prompt mean and standard deviation of the $K$ rewards. In both cases, the resulting scalar advantage is then broadcast uniformly over all tokens in the sampled trajectory. This scalar-broadcast assumption is precisely what we relax.
+where $\mu_R$ and $\sigma_R$ are the within-prompt reward mean and standard deviation. In both estimators, the scalar advantage is broadcast uniformly over tokens.
 
-\subsection{Token-Level Credit Redistribution}
+\subsection{Intrinsic Token Weighting}
 
-We introduce token-level weights $w_t(x,y)$ that redistribute a trajectory-level advantage across tokens:
+We replace uniform broadcasting with token weights $w_t(x,y)$:
 \begin{equation}
-g_{w}(x,y)=A(x,y)\sum_{t=1}^{T} w_t(x,y)\,\nabla_\theta \log \pi_\theta(y_t \mid y_{<t},x),
+ g_w(x,y) = A(x,y) \sum_{t=1}^{T} w_t(x,y) \, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x),
 \end{equation}
-where $A(x,y)$ denotes either $R(x,y)-b_{\mathrm{RLOO}}(x)$ or $A_{\mathrm{GRPO}}(x,y)$ depending on the baseline choice.
-
-The weights satisfy
+subject to
 \begin{equation}
-\sum_{t=1}^{T}w_t(x,y)=1, \qquad w_t(x,y)\ge 0.
+ w_t(x,y) \ge 0, \qquad \sum_{t=1}^{T} w_t(x,y) = 1.
 \end{equation}
-This normalization keeps the total update magnitude comparable across weighting schemes and isolates the effect of credit redistribution from simple rescaling.
+Uniform weighting is recovered by $w_t = 1/T$.
 
-Uniform token credit corresponds to $w_t=1/T$ for all $t$. Our goal is to replace this uniform allocation with \emph{intrinsic} weights derived from quantities already produced by the policy during generation. We do not train token-level reward models, estimate prefix values, or build explicit search trees.
+We emphasize an important point up front: unless the weights are constant with respect to the sampled trajectory, this estimator is generally \emph{biased} relative to the standard sequence-level policy gradient objective. Our goal is therefore not to preserve exact unbiasedness, but to study whether a lightweight, policy-internal credit-allocation prior can produce a favorable optimization trade-off. This framing is important both conceptually and experimentally: intrinsic token weighting changes \emph{where} the update mass is placed within a trajectory, and may thereby change the effective objective pursued by optimization.
 
-\subsection{Intrinsic Token-Weighting Mechanisms}
-
-We define each method through an unnormalized salience score $\alpha_t(x,y)\ge 0$ and then normalize within each trajectory:
+We parameterize each weighting rule through a non-negative token salience score $\alpha_t(x,y)$ and normalize it within the completion:
 \begin{equation}
-w_t(x,y)=\frac{\alpha_t(x,y)+\varepsilon}{\sum_{k=1}^{T}\left(\alpha_k(x,y)+\varepsilon\right)},
+ w_t(x,y) = \frac{\alpha_t(x,y) + \delta}{\sum_{k=1}^{T}(\alpha_k(x,y) + \delta)},
 \end{equation}
-with a small $\varepsilon>0$ to avoid degenerate all-zero cases. In implementation, the weights are treated as \emph{detached} scalars when multiplying the policy-gradient term, so the update does not introduce second-order derivatives through the weighting function itself. This keeps the optimization rule close in spirit and cost to standard critic-free policy gradients.
+with a small floor $\delta > 0$ to avoid degenerate all-zero trajectories. In implementation, the weights are treated as detached scalars multiplying the score-function terms, so the method introduces no second-order derivatives.
 
-\paragraph{Uniform Weighting (Baseline).}
+\paragraph{Uniform weighting.}
 \begin{equation}
-w_t^{\text{uniform}}=\frac{1}{T}.
+ \alpha_t^{\mathrm{uniform}} = 1.
 \end{equation}
-Combined with an RLOO or GRPO baseline, this recovers the standard critic-free estimator that assigns identical credit to every token in the sampled completion.
+This recovers the standard critic-free baseline.
 
-\paragraph{Surprisal Weighting.}
-Our first intrinsic score is token surprisal,
+\paragraph{Surprisal weighting.}
+We define token surprisal as
 \begin{equation}
-\alpha_t^{\text{surp}}(x,y)=-\log \pi_\theta(y_t \mid y_{<t},x).
+ \alpha_t^{\mathrm{surp}}(x,y) = -\log \pi_\theta(y_t \mid y_{<t}, x).
 \end{equation}
-This emphasizes low-probability decisions under the current policy. Intuitively, these are tokens where the model commits to a less routine continuation and where uniform credit assignment may be most diluted by predictable filler tokens.
+This emphasizes sampled actions that the current policy regarded as comparatively unlikely.
 
-\paragraph{Entropy-Reduction Weighting.}
-Our second intrinsic score measures local entropy reduction. Let
+\paragraph{Entropy-reduction weighting.}
+Let
 \begin{equation}
-H_t^{\mathrm{pre}}(x,y)=-\sum_{v}\pi_\theta(v \mid y_{<t},x)\log \pi_\theta(v \mid y_{<t},x)
+ H_t^{\mathrm{pre}}(x,y) = -\sum_v \pi_\theta(v \mid y_{<t}, x) \log \pi_\theta(v \mid y_{<t}, x)
 \end{equation}
-denote the predictive entropy before sampling token $y_t$, and let
+be the predictive entropy before sampling token $y_t$. We define the local entropy reduction as
 \begin{equation}
-\Delta H_t^{\mathrm{ent}}(x,y)=\max\left(0, H_t^{\mathrm{pre}}(x,y)-H_{t+1}^{\mathrm{pre}}(x,y)\right)
+ \alpha_t^{\mathrm{ent}}(x,y) = \max\{0, H_t^{\mathrm{pre}}(x,y) - H_{t+1}^{\mathrm{pre}}(x,y)\},
 \end{equation}
-for $t<T$. For the final token we set $\Delta H_T^{\mathrm{ent}}=0$. We then use
-\begin{equation}
-\alpha_t^{\text{ent}}(x,y)=\Delta H_t^{\mathrm{ent}}(x,y).
-\end{equation}
-This score highlights tokens after which the model's next-step distribution becomes substantially more concentrated. Such events often correspond to commitment points in reasoning, where one branch of continuation becomes much more likely than its alternatives.
+with $\alpha_T^{\mathrm{ent}} = 0$. This emphasizes tokens after which the model's next-step distribution becomes more concentrated.
 
-\paragraph{Length-Robust Normalization.}
-Because reasoning trajectories can vary substantially in length, all weights are normalized within each sampled completion rather than across the minibatch. This ensures that longer trajectories do not automatically receive larger aggregate updates simply because they contain more token positions with nonzero salience. The comparison between weighting schemes therefore reflects \emph{where} credit is assigned within a trajectory, not how much total credit a longer sequence receives.
+\subsection{Why Continuous Weighting?}
 
-\paragraph{Batch-Level Baselines.}
-All weighting schemes can be paired with either RLOO or GRPO-style prompt-level baselines. Unless otherwise specified, we use the same rollout groups, optimizer, sampling hyperparameters, and baseline family across methods. This isolates token redistribution as the only algorithmic difference.
+We focus on continuous weighting rather than hard token masking for two reasons. First, it is a smaller intervention: every token still receives some update mass, but semantically salient positions can receive more. Second, continuous weights can be paired directly with any existing critic-free policy-gradient implementation without changing the rollout structure or verifier API. In this sense, intrinsic weighting is a drop-in modifier of the loss rather than a replacement for the surrounding RLVR pipeline.
 
-\subsection{Relationship to Existing Methods}
+\subsection{Controlled Benchmark Instantiation}
 
-Our formulation recovers standard critic-free RL as a special case: uniform weighting plus a prompt-level batch baseline yields the usual RLOO/GRPO-style estimator. It also clarifies how our method differs from nearby alternatives. Unlike critic-based PPO, we do not learn a value head. Unlike RED, PRIME, or token-level reward-model methods, we do not construct dense rewards from an auxiliary model. Unlike TEMPO or related tree-based methods, we do not build prefix graphs or estimate branch values. Unlike hard token-selection methods based on top-entropy masking, we retain a dense token update but modulate it continuously using intrinsic salience scores.
+To isolate credit assignment from the confounds of large-scale LLM training, we instantiate the method in a controlled benchmark implemented in NumPy. The policy is a small contextual autoregressive model with a learned prompt projection, previous-token embedding, position embedding, tanh hidden state, and linear output head. Each task generates trajectories of length five with a known decomposition into two low-semantic filler positions and three reward-relevant positions. This makes it possible to evaluate not only final task success but also the fraction of update mass placed on semantically important decisions.
 
-The resulting estimator is intentionally minimal. It changes only the within-trajectory allocation of a scalar on-policy advantage, using quantities already available from the forward pass. This makes it easy to layer on top of existing critic-free RLVR pipelines while preserving their computational simplicity.
+The benchmark contains two tasks. In \texttt{arithmetic\_trace}, the prompt contains two integers and the target output includes a carry token, a parity token, and a coarse answer bucket. In \texttt{program\_trace}, the prompt contains a symbolic operation and a small value bucket, and the target output includes an operation token, an argument token, and an output token. Rewards are binary and exactly verifiable. The full implementation is provided in the repository under \texttt{experiment/}.

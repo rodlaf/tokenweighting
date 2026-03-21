@@ -1,64 +1,65 @@
-\section{Experiments}
+\section{Experiments}\label{sec:experiments}
 
-\subsection{Experimental Setup}
+\subsection{Scope and Reproducibility}
 
-\textbf{Models.} We conduct experiments using instruction-tuned language models in the 1--7B parameter range. All experiments are run on a single node with up to 8 NVIDIA RTX 4090 GPUs. Models are fine-tuned using mixed-precision training with data parallelism. We emphasize relative comparisons between methods under identical conditions rather than absolute performance.
+The repository now implements the experiments described in this paper as runnable Qwen-based training jobs rather than as a synthetic benchmark. We intentionally do not report fabricated numbers here: the code, configs, and evaluation harness are included in the repository, and the actual tables should be populated from completed runs.
 
-\textbf{Tasks and Rewards.} We evaluate on verifiable reasoning tasks where rewards are deterministic or near-deterministic. Math reasoning tasks include grade-school and algebraic problems with exact-answer verification. Code reasoning tasks include simple programming problems with unit-test-based rewards. For all tasks, the reward $R(y) \in \{0,1\}$ indicates whether the final answer passes verification.
+\subsection{Models}
 
-\textbf{Training Procedure.} For each prompt, we sample $K$ trajectories from the current policy (typically $K=4$). Rewards are computed after full generation. Policy updates use on-policy gradients with a batch-level baseline. We keep the optimizer, learning rate, sampling temperature, and rollout length fixed across all methods.
+Our reference math model is \texttt{Qwen/Qwen2.5-Math-1.5B-Instruct}. Our reference code model is \texttt{Qwen/Qwen2.5-Coder-1.5B-Instruct}. Both are trained with LoRA adapters and optional 4-bit loading so that the experiments fit on modest hardware.
 
-\subsection{Baselines and Methods}
+\subsection{Tasks and Rewards}
 
-We compare four methods: \textbf{Uniform} (outcome-only REINFORCE with batch baseline), \textbf{GRPO/RLOO} (uniform token weighting with leave-one-out or group-relative baseline), \textbf{Surprisal} (intrinsic surprisal-based token weighting), and \textbf{Entropy-Reduction} (intrinsic entropy-drop-based token weighting). No learned value functions or critics are used in any setting.
+\paragraph{GSM8K.}
+We use the \texttt{gsm8k/main} split as the primary benchmark. Each prompt is formatted as a reasoning task with an explicit final-answer convention. The reward is binary: it is $1$ iff the extracted final numeric answer matches the reference answer after normalization, and $0$ otherwise.
 
-\subsection{Evaluation Metrics}
+\paragraph{MBPP.}
+We also implement a code benchmark using MBPP. The model is prompted to return Python code, and reward is binary pass/fail under the task's unit tests. Because arbitrary code execution is involved, the repository uses a lightweight timeout-based subprocess harness; users may substitute a stronger sandbox when running larger sweeps.
 
-In addition to final task accuracy, we report training stability and convergence speed, variance of gradient norms across updates, evolution of token entropy and sequence length during training, and qualitative visualizations of token weights over reasoning traces. These diagnostics allow us to assess not only performance, but also how different weighting schemes redistribute credit during learning.
+\subsection{Methods Compared}
 
-\subsection{Gradient Variance Analysis}
+The implemented training variants are:
+\begin{itemize}
+    \item \textbf{RLOO + uniform weighting}
+    \item \textbf{RLOO + surprisal weighting}
+    \item \textbf{RLOO + entropy-reduction weighting}
+    \item \textbf{GRPO + uniform weighting}
+    \item \textbf{GRPO + surprisal weighting}
+    \item \textbf{GRPO + entropy-reduction weighting}
+\end{itemize}
+All methods share the same rollout count, prompt formatting, optimizer family, and decoding hyperparameters within a task. This isolates the effect of token-level credit redistribution from unrelated implementation changes.
 
-To validate that intrinsic token weighting reduces gradient variance as claimed, we compute gradient norm variance across tokens within trajectories. For each token position $t$, we calculate:
-\begin{equation}
-g_t = \|\nabla_\theta \log \pi_\theta(y_t \mid y_{<t})\|_2,
-\end{equation}
-and measure within-trajectory variance:
-\begin{equation}
-\text{Var}_{\text{within}} = \frac{1}{T} \sum_{t=1}^{T} (g_t - \bar{g})^2,
-\end{equation}
-where $\bar{g}$ is the mean gradient norm. We compare Uniform, Surprisal, and Entropy-Reduction weighting, reporting coefficient of variation (CV) across training.
+\subsection{Training Procedure}
 
-\subsection{Ablation Studies}
+The main experiment entrypoint is \texttt{experiment/run\_experiment.py}. For each minibatch of prompts, we sample $K$ completions from the current policy, compute binary rewards after full generation, construct either RLOO or GRPO prompt-level advantages, and then apply the weighted token-level objective from Section~\ref{sec:methods}. The code recomputes token log-probabilities under teacher forcing for the sampled completions and then applies one of three within-trajectory weighting rules: uniform, surprisal, or entropy reduction.
 
-Table \ref{tab:ablation} presents systematic ablations across method configurations.
+The repository ships explicit YAML configs under \texttt{configs/experiments/}. For example:
+\begin{itemize}
+    \item \texttt{qwen25-math-1.5b-gsm8k-rloo-uniform.yaml}
+    \item \texttt{qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml}
+    \item \texttt{qwen25-math-1.5b-gsm8k-rloo-entropy.yaml}
+    \item \texttt{qwen25-math-1.5b-gsm8k-grpo-uniform.yaml}
+    \item \texttt{qwen25-math-1.5b-gsm8k-grpo-surprisal.yaml}
+    \item \texttt{qwen25-math-1.5b-gsm8k-grpo-entropy.yaml}
+\end{itemize}
+Equivalent MBPP configs are provided for the code setting.
 
-\begin{table}[h]
-\centering
-\begin{tabular}{lcc}
-\toprule
-Method & Final Accuracy & Steps to Converge \\
-\midrule
-Uniform + no baseline & -- & -- \\
-Uniform + RLOO baseline & -- & -- \\
-Uniform + GRPO baseline & -- & -- \\
-Surprisal + RLOO & -- & -- \\
-Surprisal + GRPO & -- & -- \\
-Entropy + RLOO & -- & -- \\
-Entropy + GRPO & -- & -- \\
-\bottomrule
-\end{tabular}
-\caption{Ablation study results}
-\label{tab:ablation}
-\end{table}
+\subsection{Metrics}
 
-\subsection{Computational Efficiency}
+The code records the metrics needed for the paper's main comparisons:
+\begin{itemize}
+    \item \textbf{Greedy accuracy}: deterministic correctness on held-out prompts.
+    \item \textbf{Pass@$k$}: success rate over $k$ sampled completions.
+    \item \textbf{Reward mean / variance}: rollout-level training diagnostics.
+    \item \textbf{Completion length}: to monitor drift in response style.
+    \item \textbf{Token-weight statistics}: average weight concentration under each intrinsic rule.
+\end{itemize}
+For GSM8K, correctness is exact-answer match. For MBPP, correctness is unit-test pass rate.
 
-We quantify forward-pass overhead ($\mu$s per token), additional FLOPs (negligible), and wall-clock training time. Unlike value networks, our method requires no additional GPU memory.
+\subsection{How to Populate Final Tables}
 
-\subsection{PPO Baseline Comparison}
-
-We compare against PPO with learned value heads (small and large) to establish fair baseline. Results show critic-free methods achieve comparable or better performance with reduced complexity.
+Because the current revision is meant to be honest about what has and has not been run, the paper tables should be filled only after executing the provided configs. A minimal first pass is to run the six GSM8K configurations above and report greedy accuracy plus pass@4 on the chosen evaluation slice. The same procedure can then be extended to MBPP.
 
 \subsection{Compute Considerations}
 
-All experiments are designed to fit within modest compute budgets. Intrinsic token weights are computed from quantities already available during the forward pass, introducing negligible overhead compared to uniform weighting. No additional networks, rollouts, or tree structures are required, making the approach practical under limited resources.
+The implementation is intentionally compact: intrinsic token weights are computed from quantities already produced by the policy during rollout or the subsequent teacher-forced forward pass. No learned critic, reward model, or search tree is required. This keeps the experiments aligned with the paper's central claim while remaining practical to run on limited hardware.

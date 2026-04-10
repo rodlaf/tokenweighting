@@ -25,12 +25,12 @@ python -m pip install -r experiment/requirements.txt
 
 Validate a config without training
 ```bash
-python experiment/run_experiment.py --config configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml --dry-run
+python experiment/run_experiment.py --config experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml --dry-run
 ```
 
 Run an experiment
 ```bash
-python experiment/run_experiment.py --config configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml
+python experiment/run_experiment.py --config experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml
 ```
 
 Notes

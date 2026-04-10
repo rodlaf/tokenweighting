@@ -12,14 +12,14 @@ Main entrypoint
 - `python experiment/run_experiment.py --config <config.yaml>`
 
 Useful configs
-- `configs/experiments/qwen25-math-1.5b-gsm8k-rloo-uniform.yaml`
-- `configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml`
-- `configs/experiments/qwen25-math-1.5b-gsm8k-rloo-entropy.yaml`
-- `configs/experiments/qwen25-math-1.5b-gsm8k-grpo-uniform.yaml`
-- `configs/experiments/qwen25-math-1.5b-gsm8k-grpo-surprisal.yaml`
-- `configs/experiments/qwen25-math-1.5b-gsm8k-grpo-entropy.yaml`
-- `configs/experiments/qwen25-coder-1.5b-mbpp-rloo-uniform.yaml`
-- `configs/experiments/qwen25-coder-1.5b-mbpp-rloo-surprisal.yaml`
-- `configs/experiments/qwen25-coder-1.5b-mbpp-rloo-entropy.yaml`
+- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-uniform.yaml`
+- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml`
+- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-entropy.yaml`
+- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-grpo-uniform.yaml`
+- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-grpo-surprisal.yaml`
+- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-grpo-entropy.yaml`
+- `experiment/configs/experiments/qwen25-coder-1.5b-mbpp-rloo-uniform.yaml`
+- `experiment/configs/experiments/qwen25-coder-1.5b-mbpp-rloo-surprisal.yaml`
+- `experiment/configs/experiments/qwen25-coder-1.5b-mbpp-rloo-entropy.yaml`
 
 See `experiment/README.md` for install and run instructions.

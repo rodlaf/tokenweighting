@@ -1,0 +1,144 @@
+\section{Related Work}
+
+\subsection{From RLHF to RLVR}
+
+Modern language-model post-training inherits its optimization machinery from
+policy-gradient reinforcement learning, from REINFORCE \cite{williams1992reinforce} to
+trust-region and clipped-surrogate methods such as TRPO and PPO
+\cite{schulman2015trpo,schulman2017ppo}. Advantage estimation, especially GAE, became
+the standard variance-reduction device in continuous-control RL by learning value
+functions over states or prefixes \cite{schulman2015gae}. In language modeling, these
+ideas entered mainstream use through RLHF systems that optimize sequence-level rewards
+derived from human preferences or reward models
+\cite{christiano2017preferences,stiennon2020summarize,ouyang2022instruct}.
+
+The recent reasoning-model wave shifted part of the field from preference-based RLHF
+toward reinforcement learning with verifiable rewards (RLVR), where supervision is often
+a deterministic correctness signal on math or code tasks. DeepSeekMath introduced GRPO
+as a practical critic-free alternative for these settings \cite{shao2024deepseekmath},
+and DeepSeek-R1 popularized large-scale RL-only or RL-dominant reasoning pipelines
+\cite{deepseekai2025deepseekr1}. Subsequent surveys document how quickly this regime
+became the default template for open reasoning-model replication and extension
+\cite{zhang2025hundreddays}. This transition matters for our setting because RLVR makes
+sparse outcome rewards and long reasoning trajectories central, thereby exposing the
+credit-assignment problem more directly than earlier short-form RLHF tasks.
+
+\subsection{Critic-Based and Critic-Free Policy Optimization}
+
+The classical solution to delayed reward is to learn a critic or value function and
+convert returns into token- or prefix-level advantages. PPO-style RLHF pipelines follow
+this recipe, but the value-estimation problem is particularly awkward for text
+generation because prefixes are high-dimensional, non-Markov, and semantically
+heterogeneous. A growing body of work therefore revisits whether value heads are
+necessary at all in LLM post-training.
+
+ReMax replaces learned critics with a greedy baseline and shows that much of PPO's
+practical benefit can be retained with a simpler REINFORCE-style objective
+\cite{li2023remax}. Back to Basics systematically compares PPO with RLOO-style
+estimators and finds that critic-free methods can match or exceed value-based baselines
+in RLHF \cite{ahmadian2024backtobasics}. REINFORCE++ further strengthens this line by
+improving robustness to prompt and reward-model variation without reintroducing a
+learned value function \cite{hu2025reinforcepp}. In reasoning-focused RLVR, GRPO
+normalizes rewards across a group of sampled responses rather than learning prefix
+values \cite{shao2024deepseekmath}, and later work refines this family with theoretical
+analyses, off-policy variants, and sequence-level formulations such as GSPO
+\cite{rigotti2025revisiting,zheng2025gspo}. These methods substantially simplify the
+optimization stack, but they generally still broadcast a trajectory-level signal across
+all tokens once a scalar baseline is fixed.
+
+\subsection{Reasoning-Specific Analyses of RLVR}
+
+Another recent line asks why critic-free RLVR works so well for reasoning in the first
+place. A Minimalist Approach to LLM Reasoning argues that strong reasoning gains can
+emerge from a comparatively simple recipe that moves from rejection sampling to
+REINFORCE-style online updates, suggesting that some of the field's complexity is
+optional rather than essential \cite{xiong2025minimalist}. Complementarily, Wen et al.\
+analyze RLVR theoretically and empirically, arguing that answer-level verifiable rewards
+can nonetheless incentivize correct intermediate reasoning early in a trajectory
+\cite{wen2025rlvrimplicit}. These results are important because they show that uniform
+outcome-level objectives already contain nontrivial reasoning signal.
+
+At the same time, they do not eliminate the question of \emph{which} tokens should
+absorb that signal. Recent empirical analysis of RLVR training dynamics suggests that
+improvements are disproportionately driven by a minority of high-entropy ``forking''
+tokens, and that restricting updates to this subset can remain competitive or even
+outperform full-token updates in some settings \cite{wang2025beyond8020}. This is the
+closest recent line to our work conceptually: it supports the claim that token salience
+is highly non-uniform during reasoning RL. Our work differs in scope and mechanism,
+however, by studying general intrinsic weighting schemes based on token surprisal and
+entropy change rather than a hard top-entropy masking rule or an empirical analysis
+specific to one RLVR recipe.
+
+\subsection{Fine-Grained Credit Assignment Beyond Uniform Token Updates}
+
+A large parallel literature attempts to make supervision denser than a single
+end-of-trajectory reward. One family learns explicit token- or process-level reward
+estimators. Preference-grounded Token-level Guidance derives token-level signals from
+preference data for fine-tuning \cite{yang2023pgtg}, while Discriminative Policy
+Optimization learns token-level Q-style reward models from preferences without requiring
+fine-grained annotation \cite{chen2025dpoqrm}. PRIME pushes this direction further for
+reasoning tasks by constructing implicit process rewards and updating process reward
+models online from rollouts and outcome labels \cite{cui2025prime}. These methods can
+produce rich token-level feedback, but they rely on an auxiliary reward-modeling
+component that our approach intentionally avoids.
+
+Another family redistributes outcome rewards algorithmically rather than by training a
+dense reward model. RED derives token-level rewards by redistributing holistic
+reward-model scores over a trajectory \cite{huang2024red}. SCAR uses Shapley-inspired
+attribution to estimate token or span contributions from sequence-level feedback
+\cite{cao2025scar,shapley1953value}. TEMPO uses groups of sampled solutions to build a
+prefix tree and compute nonparametric prefix values, yielding branch-sensitive
+corrections without a learned critic \cite{tran2025tempo}. GRPO-$\lambda$ introduces
+eligibility traces and lambda-returns into critic-free RLVR to propagate outcome
+information backward along the sequence \cite{parthasarathi2025grpolambda}. Compared
+with these approaches, our focus is narrower and cheaper: we do not train auxiliary
+reward models, estimate Shapley values, construct trees, or generate corrective
+interventions, but instead ask how far one can get by reweighting the existing
+policy-gradient terms using intrinsic distributional signals already present in the
+forward pass.
+
+\subsection{Alternative Action Granularities and Token Selection}
+
+Several papers attack the same underlying problem by changing the optimization unit
+rather than by redesigning the reward. MA-RLHF introduces macro actions, grouping tokens
+into higher-level units to shorten the temporal distance between decisions and rewards
+\cite{chai2025marlhf}. GSPO moves importance weighting and clipping from the token level
+to the sequence level for greater stability in large-scale RL training
+\cite{zheng2025gspo}. VinePPO replaces learned value networks with Monte Carlo
+vine-style estimates over continuations, seeking better credit propagation through
+structured rollout reuse \cite{kazemnejad2024vineppo}. These methods reinforce the
+broader point that the granularity of optimization matters as much as the reward
+definition.
+
+Outside on-policy RL proper, token-selective optimization has also been explored in
+adjacent paradigms. ConfPO emphasizes preference-critical tokens based on policy
+confidence in preference optimization \cite{yoon2025confpo}, and token weighting for
+long-range language modeling shows that non-uniform token emphasis can improve
+optimization even in supervised settings \cite{helm2025tokenweighting}. Together with
+high-entropy token analyses in RLVR \cite{wang2025beyond8020}, these results strongly
+suggest that uniform token treatment is an arbitrary design choice rather than a
+necessity.
+
+\subsection{Positioning of This Work}
+
+The literature now makes three points clear. First, critics are not strictly required
+for effective LLM post-training: critic-free estimators such as RLOO, ReMax, GRPO, and
+GSPO are already competitive in both RLHF and RLVR
+\cite{ahmadian2024backtobasics,li2023remax,shao2024deepseekmath,zheng2025gspo}. Second,
+many researchers have concluded that trajectory-level rewards are too coarse and have
+introduced denser supervision through process reward models, redistribution rules, tree
+structures, or temporal traces
+\cite{huang2024red,cui2025prime,tran2025tempo,cao2025scar,parthasarathi2025grpolambda}.
+Third, recent reasoning-focused analyses indicate that only a subset of tokens may be
+responsible for most of the useful RL signal
+\cite{wen2025rlvrimplicit,wang2025beyond8020}.
+
+Our paper sits at the intersection of these trends but occupies a distinct point in the
+design space. We study \emph{intrinsic} token weighting for on-policy language RL:
+credit is redistributed at the token level using signals derived from the policy's own
+predictive distribution, without learned value heads, external reward models, process
+annotations, tree construction, Shapley-style counterfactual attribution, or corrective
+rollouts. This positioning is important for reviewer clarity: our contribution is not
+another dense-reward model or another GRPO variant, but a minimal credit-redistribution
+mechanism that can be layered onto critic-free policy gradients while preserving their
+computational simplicity.

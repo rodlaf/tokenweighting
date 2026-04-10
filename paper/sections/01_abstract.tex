@@ -1,5 +1,0 @@
-\maketitle
-
-\begin{abstract}\noindent
-Policy gradient methods for LLM reinforcement learning often rely on value-function critics, but language-generation prefixes are non-Markov and poorly suited for stable value estimation. Recent critic-free approaches such as GRPO and RLOO avoid value networks, yet they still broadcast the same trajectory-level signal uniformly across tokens. We study an alternative: intrinsic token weighting, which redistributes a prompt-level advantage across tokens using salience signals already available from the policy, including token surprisal and local entropy reduction. These methods require no additional networks, no tree construction, and no reward models. To make the experimental setup concrete and reproducible, the repository implements Qwen-based experiments on GSM8K and MBPP with exact-answer and unit-test rewards. The resulting codebase provides a direct way to evaluate whether redistributing credit via intrinsic distributional signals is a practical alternative to uniform token updates in critic-free language RL.
-\end{abstract}

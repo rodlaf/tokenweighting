@@ -4,7 +4,7 @@ output_dir: outputs/qwen25-math-1.5b-gsm8k
 model:
   name_or_path: Qwen/Qwen2.5-Math-1.5B-Instruct
   torch_dtype: bfloat16
-  load_in_4bit: true
+  load_in_4bit: false
   lora:
     enabled: true
     r: 16
@@ -29,7 +29,7 @@ training:
   warmup_steps: 20
   num_generations: 4
   max_prompt_length: 256
-  max_new_tokens: 192
+  max_new_tokens: 384
   temperature: 0.8
   top_p: 0.95
   max_grad_norm: 1.0

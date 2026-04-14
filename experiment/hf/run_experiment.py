@@ -90,13 +90,15 @@ def build_model_and_tokenizer(model_cfg: dict[str, Any]):
             bnb_4bit_use_double_quant=True,
         )
 
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        torch_dtype=dtype,
-        device_map="auto",
-        quantization_config=quantization_config,
-        trust_remote_code=model_cfg.get("trust_remote_code", False),
-    )
+    load_kwargs: dict[str, Any] = {
+        "device_map": {"": 0},
+        "trust_remote_code": model_cfg.get("trust_remote_code", False),
+    }
+    if quantization_config is not None:
+        load_kwargs["quantization_config"] = quantization_config
+    else:
+        load_kwargs["dtype"] = dtype
+    model = AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
 
     lora_cfg = model_cfg.get("lora", {})
     if lora_cfg.get("enabled", True):

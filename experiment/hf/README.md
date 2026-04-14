@@ -9,12 +9,21 @@ cd experiment/hf
 uv sync
 ```
 
-Requires CUDA. Uses 4-bit quantization by default so experiments fit on a single 24 GB GPU.
+Requires CUDA. Each experiment runs on a single GPU.
 
 ## Run an experiment
 
+Pick a GPU with `CUDA_VISIBLE_DEVICES`:
+
 ```bash
-uv run python run_experiment.py --config configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml
+CUDA_VISIBLE_DEVICES=0 uv run python run_experiment.py --config configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml
+```
+
+Run all 12 configs in parallel across GPUs:
+
+```bash
+bash run_all.sh      # uses 8 GPUs by default
+bash run_all.sh 4    # use fewer GPUs
 ```
 
 Validate config without training:

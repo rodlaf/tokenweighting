@@ -1,0 +1,15 @@
+# Shared base for demo runs. Real model, quick iteration.
+model:
+  name: "Qwen/Qwen3-8B"
+  renderer: "qwen3"
+  lora_rank: 32
+
+training:
+  algorithm: "grpo"
+  train_steps: 20
+  batch_size: 8
+  group_size: 8
+  max_new_tokens: 512
+  learning_rate: 4.0e-5
+  temperature: 0.8
+  topk_entropy: 50

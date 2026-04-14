@@ -1,0 +1,12 @@
+base_config: base.yaml
+
+training:
+  adaptive_zeta: true
+
+credit:
+  alpha: "surprisal"
+  psi: "repo_rescale"
+  psi_kwargs:
+    zeta: 1.0
+
+output_dir: "outputs/demo/surprisal+repo"

@@ -1,0 +1,25 @@
+model:
+  name: "Qwen/Qwen3-8B"
+  renderer: "qwen3"
+  lora_rank: 32
+  reference: true
+
+training:
+  train_steps: 200
+  batch_size: 16
+  group_size: 8
+  max_new_tokens: 512
+  learning_rate: 4.0e-5
+  temperature: 0.8
+  topk_entropy: 50
+
+credit:
+  alpha: "erpo_gating"
+  alpha_kwargs:
+    gamma: 5.0
+  psi: "erpo_progress"
+  psi_kwargs:
+    eta: 0.2
+    beta_progress: 0.1
+
+output_dir: "outputs/gsm8k-erpo"

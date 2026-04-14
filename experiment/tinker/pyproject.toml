@@ -1,0 +1,27 @@
+[project]
+name = "itw-tinker"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "tinker",
+    "tinker-cookbook",
+    "python-dotenv",
+    "click",
+    "torch",
+    "pyyaml",
+    "matplotlib",
+    "seaborn",
+]
+
+[project.optional-dependencies]
+wandb = ["wandb"]
+
+[project.scripts]
+tw = "cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src", "tests", "cli.py"]

@@ -1,0 +1,7 @@
+base_config: base.yaml
+
+credit:
+  alpha: "uniform"
+  psi: "none"
+
+output_dir: "outputs/demo/uniform"

@@ -236,17 +236,6 @@ async def run_training(config: dict[str, Any]) -> None:
     loss_fn = algo_cfg["loss_fn"]
     loss_fn_config = algo_cfg["loss_fn_config"] or None
 
-    # -- W&B logging --
-    wandb_project = config.get("wandb_project")
-    wandb_run = None
-    if wandb_project:
-        import wandb
-        wandb_run = wandb.init(
-            project=wandb_project,
-            name=config.get("wandb_name") or output_dir.name,
-            config=config,
-        )
-
     # -- Build credit function --
     credit_cfg = config.get("credit", {})
     credit_fn = build_credit_function(
@@ -480,6 +469,4 @@ async def run_training(config: dict[str, Any]) -> None:
             record["zeta"] = round(zeta_controller.zeta, 4)
         with metrics_path.open("a") as f:
             f.write(json.dumps(record) + "\n")
-        if wandb_run:
-            wandb_run.log(record, step=step)
         print(json.dumps(record))

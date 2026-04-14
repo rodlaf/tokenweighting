@@ -1,0 +1,20 @@
+# Base config for sweeps. Fixed params live here; scientific/nuisance
+# params are specified via CLI and override these values.
+model:
+  name: "Qwen/Qwen3-8B"
+  renderer: "qwen3"
+  lora_rank: 32
+
+training:
+  algorithm: "grpo"
+  train_steps: 200
+  batch_size: 8
+  group_size: 8
+  max_new_tokens: 512
+  temperature: 0.8
+  topk_entropy: 50
+  learning_rate: 4.0e-5
+
+credit:
+  alpha: "uniform"
+  psi: "none"

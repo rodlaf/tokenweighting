@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Iterable, Optional, Sequence
 
-from experiment.tasks.gsm8k import gsm8k_reward as _gsm8k_reward
-from experiment.tasks.mbpp import estimate_pass_at_k, mbpp_pass_fail_reward
+from tasks.gsm8k import gsm8k_reward as _gsm8k_reward
+from tasks.mbpp import estimate_pass_at_k, mbpp_pass_fail_reward
 
 
 def score_completion(example: dict, completion: str, *, timeout: float = 3.0) -> int:

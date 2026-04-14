@@ -34,6 +34,7 @@ def entropy_reduction_weights(entropies: torch.Tensor, mask: torch.Tensor, eps: 
     next_entropies = torch.zeros_like(entropies)
     next_entropies[:, :-1] = entropies[:, 1:]
     drops = torch.clamp(entropies - next_entropies, min=0.0)
+    drops[:, -1] = 0.0  # Delta H_T = 0 for the final token
     return masked_normalize(drops + eps, mask, eps=eps)
 
 

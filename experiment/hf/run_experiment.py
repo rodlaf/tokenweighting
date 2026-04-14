@@ -16,9 +16,9 @@ from peft import LoraConfig, get_peft_model
 from torch.optim import AdamW
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, get_cosine_schedule_with_warmup
 
-from experiment.data import TASK_SPECS, load_task_dataset
-from experiment.rewards import pass_at_k, score_completions
-from experiment.token_weights import TokenWeightingConfig, build_token_weights, entropy_from_logits
+from data import TASK_SPECS, load_task_dataset
+from rewards import pass_at_k, score_completions
+from token_weights import TokenWeightingConfig, build_token_weights, entropy_from_logits
 
 
 def parse_args() -> argparse.Namespace:

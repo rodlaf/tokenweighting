@@ -8,13 +8,11 @@ dependencies = [
     "python-dotenv",
     "click",
     "torch",
+    "orjson",
     "pyyaml",
     "matplotlib",
     "seaborn",
 ]
-
-[project.optional-dependencies]
-wandb = ["wandb"]
 
 [project.scripts]
 tw = "cli:main"

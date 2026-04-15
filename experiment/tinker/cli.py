@@ -37,8 +37,7 @@ def main():
 @click.option("--lr", default=None, type=float, help="Learning rate")
 @click.option("--group-size", default=None, type=int, help="Group size")
 @click.option("--output", default=None, type=str, help="Output directory")
-@click.option("--wandb", "wandb_project", default=None, type=str, help="W&B project name (enables logging)")
-def train(config, model, algorithm, alpha, psi, steps, lr, group_size, output, wandb_project):
+def train(config, model, algorithm, alpha, psi, steps, lr, group_size, output):
     """Run a training experiment with pluggable algorithm and credit assignment."""
     from src.scripts.grpo import load_config, run_training
 
@@ -77,9 +76,6 @@ def train(config, model, algorithm, alpha, psi, steps, lr, group_size, output, w
     if output:
         cfg["output_dir"] = output
 
-    if wandb_project:
-        cfg["wandb_project"] = wandb_project
-
     # Auto-enable features implied by method choice
     if alpha in ("erpo_gating",) or psi in ("erpo_progress",):
         cfg["model"].setdefault("reference", True)
@@ -104,6 +100,82 @@ def plot(run_dirs, metric, smooth, save):
     from src.scripts.plot import plot_runs
 
     plot_runs(list(run_dirs), metric=metric, output=save, smooth=smooth)
+
+
+@main.command()
+@click.option("--config", type=click.Path(exists=True), default="configs/sweep/base.yaml", help="Base config (fixed params)")
+@click.option("--scientific", "scientific_params", multiple=True, help="Scientific params: 'param=val1,val2,...'")
+@click.option("--nuisance", "nuisance_params", multiple=True, help="Nuisance params: 'param=val1,val2,...'")
+@click.option("--fixed", "fixed_params", default="", help="Fixed param overrides: 'param1=val1 param2=val2'")
+@click.option("--study-name", required=True, help="Name for this study")
+@click.option("--steps", default=200, type=int, help="Steps per trial")
+@click.option("--n-trials", default=None, type=int, help="Max trials (default: full grid)")
+@click.option("--sampling-method", type=click.Choice(["grid", "random"]), default="grid")
+@click.option("--output", default="outputs/sweep", help="Output root directory")
+@click.option("--dry-run", is_flag=True, help="Print plan without launching")
+def sweep(config, scientific_params, nuisance_params, fixed_params, study_name, steps, n_trials, sampling_method, output, dry_run):
+    """Launch a hyperparameter sweep.
+
+    Params are organized per the deep learning tuning playbook:
+
+    \b
+    --scientific: what you're investigating (defines the experiment)
+    --nuisance:   need to tune per method, not the focus
+    --fixed:      held constant, override base config
+    Base config:  everything else (model, group_size, etc.)
+
+    \b
+    Examples:
+        # LR sweep across credit methods (9 trials)
+        tw sweep --study-name lr-sweep-v1 \\
+            --scientific "alpha=uniform,surprisal,entropy_reduction" \\
+            --nuisance "lr=2e-5,4e-5,8e-5"
+
+    \b
+        # Add DAPO comparison
+        tw sweep --study-name algo-comparison \\
+            --scientific "alpha=uniform,surprisal,entropy_reduction" \\
+            --scientific "algorithm=grpo,dapo" \\
+            --nuisance "lr=2e-5,4e-5,8e-5"
+
+    \b
+        # Quick test
+        tw sweep --study-name test --steps 10 --dry-run \\
+            --scientific "alpha=uniform,surprisal" \\
+            --nuisance "lr=4e-5"
+    """
+    from src.scripts.sweep import (
+        generate_grid,
+        launch_sweep,
+        parse_fixed_params,
+        parse_param_spec,
+        print_sweep_plan,
+    )
+
+    scientific_space = {}
+    for spec in scientific_params:
+        param, values = parse_param_spec(spec)
+        scientific_space[param] = values
+
+    nuisance_space = {}
+    for spec in nuisance_params:
+        param, values = parse_param_spec(spec)
+        nuisance_space[param] = values
+
+    fixed = parse_fixed_params(fixed_params)
+
+    combined = {**scientific_space, **nuisance_space}
+    if not combined:
+        click.echo("Error: specify at least one --scientific or --nuisance param", err=True)
+        raise SystemExit(1)
+
+    trials = generate_grid(combined, n_trials, sampling_method)
+    print_sweep_plan(scientific_space, nuisance_space, fixed, trials, study_name, config, steps)
+    launch_sweep(
+        trials, scientific_space, nuisance_space, fixed,
+        base_config=config, steps=steps, study_name=study_name,
+        output_root=output, dry_run=dry_run,
+    )
 
 
 @main.command()

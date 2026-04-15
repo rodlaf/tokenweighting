@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Protocol, runtime_checkable
+from typing import Protocol
 
 import torch
 
@@ -54,7 +54,6 @@ class TokenSignals:
 # Protocols
 # ---------------------------------------------------------------------------
 
-@runtime_checkable
 class MultiplicativeWeight(Protocol):
     """Computes alpha_t: normalized redistribution weights over tokens."""
 
@@ -63,7 +62,6 @@ class MultiplicativeWeight(Protocol):
         ...
 
 
-@runtime_checkable
 class AdditiveSignal(Protocol):
     """Computes psi_t: per-token credit, optionally dependent on advantage."""
 
@@ -94,14 +92,14 @@ def _masked_zscore(x: torch.Tensor, mask: torch.Tensor, eps: float = 1e-8) -> to
 # Multiplicative weights (alpha_t)
 # ---------------------------------------------------------------------------
 
-class Uniform:
+class Uniform(MultiplicativeWeight):
     """alpha_t = 1/T. Recovers standard GRPO/RLOO."""
 
     def __call__(self, signals: TokenSignals) -> torch.Tensor:
         return _masked_normalize(torch.ones_like(signals.mask), signals.mask)
 
 
-class Surprisal:
+class Surprisal(MultiplicativeWeight):
     """alpha_t proportional to -log pi(y_t). Emphasizes low-probability tokens."""
 
     def __call__(self, signals: TokenSignals) -> torch.Tensor:
@@ -109,7 +107,7 @@ class Surprisal:
         return _masked_normalize(raw, signals.mask)
 
 
-class EntropyReduction:
+class EntropyReduction(MultiplicativeWeight):
     """alpha_t proportional to max(0, H_t - H_{t+1}). Emphasizes commitment points."""
 
     def __call__(self, signals: TokenSignals) -> torch.Tensor:
@@ -121,7 +119,7 @@ class EntropyReduction:
         return _masked_normalize(drops, signals.mask)
 
 
-class EntropyMagnitude:
+class EntropyMagnitude(MultiplicativeWeight):
     """alpha_t proportional to H_t. Emphasizes high-uncertainty positions."""
 
     def __call__(self, signals: TokenSignals) -> torch.Tensor:
@@ -130,7 +128,7 @@ class EntropyMagnitude:
         return _masked_normalize(signals.entropies, signals.mask)
 
 
-class TopKMask:
+class TopKMask(MultiplicativeWeight):
     """alpha_t = 1 for top-p% highest entropy positions, 0 elsewhere.
 
     Approximates the hard masking in Wang et al. (Beyond 80/20).
@@ -150,7 +148,7 @@ class TopKMask:
         return _masked_normalize(raw, signals.mask)
 
 
-class ERPOGating:
+class ERPOGating(MultiplicativeWeight):
     """alpha_t = sigma(gamma * z-score(H_t)).
 
     ERPO's entropy-aware gating (Eq 8, Yu et al. 2603.28204).
@@ -174,14 +172,14 @@ class ERPOGating:
 # Additive signals (psi_t)
 # ---------------------------------------------------------------------------
 
-class NoAdditive:
+class NoAdditive(AdditiveSignal):
     """psi_t = 0. No additive process signal."""
 
     def __call__(self, signals: TokenSignals, advantage: float) -> torch.Tensor:
         return torch.zeros_like(signals.mask)
 
 
-class CenteredLogprob:
+class CenteredLogprob(AdditiveSignal):
     """psi_t = -beta * (log pi(y_t) - mean log pi).
 
     Simplified REPO-style correction with trajectory-level centering.
@@ -197,7 +195,7 @@ class CenteredLogprob:
         return -self.beta * centered * signals.mask
 
 
-class REPORescale:
+class REPORescale(AdditiveSignal):
     """REPO-R (Petrenko et al. 2603.11682): psi_t = -zeta * |A| * L_t.
 
     L_t = log pi(y_t) - E[log pi(.|y_{<t})] = log pi(y_t) + H_t
@@ -220,7 +218,7 @@ class REPORescale:
         return -self.zeta * abs(advantage) * L * signals.mask
 
 
-class ERPOProgress:
+class ERPOProgress(AdditiveSignal):
     """ERPO's result-anchored progress signal (Eq 7+10, Yu et al. 2603.28204).
 
     psi_t = eta * W_t * sgn(A) * s_t

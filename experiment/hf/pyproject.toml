@@ -10,6 +10,8 @@ dependencies = [
     "bitsandbytes",
     "accelerate",
     "pyyaml",
+    "matplotlib",
+    "pandas",
 ]
 
 [project.optional-dependencies]

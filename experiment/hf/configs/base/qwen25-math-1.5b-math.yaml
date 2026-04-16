@@ -23,8 +23,8 @@ training:
   weighting: uniform
   sharpening: 2.0
   train_steps: 300
-  batch_size: 4
-  grad_accum_steps: 4
+  batch_size: 2
+  grad_accum_steps: 8
   learning_rate: 1.0e-5
   weight_decay: 0.0
   warmup_steps: 20

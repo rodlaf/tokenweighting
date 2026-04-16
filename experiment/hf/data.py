@@ -10,6 +10,10 @@ GSM8K_SYSTEM_PROMPT = (
     "'Final answer: <number>'."
 )
 
+MATH_SYSTEM_PROMPT = (
+    "Solve this math problem step by step. Put your final answer in \\boxed{}."
+)
+
 MBPP_SYSTEM_PROMPT = (
     "You are a careful Python programmer. Return only Python code inside one ```python``` block."
 )
@@ -25,6 +29,7 @@ class TaskSpec:
 
 TASK_SPECS = {
     "gsm8k": TaskSpec(name="gsm8k", train_split="train", eval_split="test", reward_key="answer"),
+    "math": TaskSpec(name="math", train_split="train", eval_split="test", reward_key="solution"),
     "mbpp": TaskSpec(name="mbpp", train_split="train", eval_split="test", reward_key="test_list"),
 }
 
@@ -54,6 +59,22 @@ def load_task_dataset(
                 ),
                 "answer": row["answer"],
                 "question": row["question"],
+            }
+
+        return _limit(ds.map(_map), max_samples)
+
+    if name == "math":
+        ds = load_dataset("DigitalLearningGmbH/MATH-lighteval", split=split)
+
+        def _map(row):
+            return {
+                "task": "math",
+                "prompt": (
+                    f"{MATH_SYSTEM_PROMPT}\n\n"
+                    f"Problem: {row['problem']}\n"
+                ),
+                "solution": row["solution"],
+                "problem": row["problem"],
             }
 
         return _limit(ds.map(_map), max_samples)

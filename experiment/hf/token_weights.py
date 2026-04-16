@@ -11,6 +11,7 @@ import torch.nn.functional as F
 class TokenWeightingConfig:
     mode: str = "uniform"  # uniform | surprisal | entropy_reduction
     eps: float = 1e-8
+    sharpening: float = 1.0  # raise raw weights to this power before normalizing
     detach: bool = True
 
 
@@ -44,6 +45,31 @@ def entropy_from_logits(logits: torch.Tensor) -> torch.Tensor:
     return -(probs * log_probs).sum(dim=-1)
 
 
+def _raw_scores(
+    mode: str,
+    completion_mask: torch.Tensor,
+    per_token_logps: Optional[torch.Tensor],
+    entropies: Optional[torch.Tensor],
+    eps: float,
+) -> torch.Tensor:
+    """Compute unnormalized salience scores for each token."""
+    if mode == "uniform":
+        return torch.ones_like(completion_mask, dtype=torch.float32)
+    if mode == "surprisal":
+        if per_token_logps is None:
+            raise ValueError("per_token_logps required for surprisal weighting")
+        return (-per_token_logps).float() + eps
+    if mode == "entropy_reduction":
+        if entropies is None:
+            raise ValueError("entropies required for entropy_reduction weighting")
+        next_ent = torch.zeros_like(entropies)
+        next_ent[:, :-1] = entropies[:, 1:]
+        drops = torch.clamp(entropies - next_ent, min=0.0)
+        drops[:, -1] = 0.0
+        return drops + eps
+    raise ValueError(f"Unknown weighting mode: {mode}")
+
+
 def build_token_weights(
     cfg: TokenWeightingConfig,
     completion_mask: torch.Tensor,
@@ -51,17 +77,8 @@ def build_token_weights(
     per_token_logps: Optional[torch.Tensor] = None,
     entropies: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
-    if cfg.mode == "uniform":
-        weights = uniform_weights(completion_mask, eps=cfg.eps)
-    elif cfg.mode == "surprisal":
-        if per_token_logps is None:
-            raise ValueError("per_token_logps required for surprisal weighting")
-        weights = surprisal_weights(per_token_logps, completion_mask, eps=cfg.eps)
-    elif cfg.mode == "entropy_reduction":
-        if entropies is None:
-            raise ValueError("entropies required for entropy_reduction weighting")
-        weights = entropy_reduction_weights(entropies, completion_mask, eps=cfg.eps)
-    else:
-        raise ValueError(f"Unknown weighting mode: {cfg.mode}")
-
+    scores = _raw_scores(cfg.mode, completion_mask, per_token_logps, entropies, cfg.eps)
+    if cfg.sharpening != 1.0 and cfg.mode != "uniform":
+        scores = scores.pow(cfg.sharpening)
+    weights = masked_normalize(scores, completion_mask, eps=cfg.eps)
     return weights.detach() if cfg.detach else weights

@@ -221,6 +221,7 @@ def compute_loss(
     completion_mask: torch.Tensor,
     advantages: torch.Tensor,
     weighting_mode: str,
+    sharpening: float = 1.0,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     token_logps, entropies = gather_completion_logps(model, sequences, prompt_width, tokenizer.pad_token_id)
     steps = min(token_logps.size(1), completion_mask.size(1))
@@ -229,7 +230,7 @@ def compute_loss(
     completion_mask = completion_mask[:, :steps]
 
     weights = build_token_weights(
-        TokenWeightingConfig(mode=weighting_mode),
+        TokenWeightingConfig(mode=weighting_mode, sharpening=sharpening),
         completion_mask,
         per_token_logps=token_logps.detach(),
         entropies=entropies,
@@ -309,6 +310,7 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
         "dataset": config["dataset"]["name"],
         "algorithm": config["training"]["algorithm"],
         "weighting": config["training"]["weighting"],
+        "sharpening": config["training"].get("sharpening", 1.0),
         "train_examples": len(train_ds),
         "eval_examples": len(eval_ds),
         "dry_run": dry_run,
@@ -360,6 +362,7 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
                 completion_mask,
                 advantages,
                 train_cfg["weighting"],
+                sharpening=train_cfg.get("sharpening", 1.0),
             )
             (loss / grad_accum).backward()
             step_rewards.extend(rewards)

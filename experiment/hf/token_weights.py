@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 @dataclass
 class TokenWeightingConfig:
-    mode: str = "uniform"  # uniform | surprisal | entropy_reduction
+    mode: str = "uniform"  # uniform | surprisal | entropy_reduction | divergence
     eps: float = 1e-8
     sharpening: float = 1.0  # raise raw weights to this power before normalizing
     detach: bool = True
@@ -51,6 +51,7 @@ def _raw_scores(
     per_token_logps: Optional[torch.Tensor],
     entropies: Optional[torch.Tensor],
     eps: float,
+    ref_token_logps: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
     """Compute unnormalized salience scores for each token."""
     if mode == "uniform":
@@ -67,6 +68,12 @@ def _raw_scores(
         drops = torch.clamp(entropies - next_ent, min=0.0)
         drops[:, -1] = 0.0
         return drops + eps
+    if mode == "divergence":
+        if per_token_logps is None:
+            raise ValueError("per_token_logps required for divergence weighting")
+        if ref_token_logps is None:
+            raise ValueError("ref_token_logps required for divergence weighting")
+        return (per_token_logps - ref_token_logps).abs().float() + eps
     raise ValueError(f"Unknown weighting mode: {mode}")
 
 
@@ -76,8 +83,9 @@ def build_token_weights(
     *,
     per_token_logps: Optional[torch.Tensor] = None,
     entropies: Optional[torch.Tensor] = None,
+    ref_token_logps: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
-    scores = _raw_scores(cfg.mode, completion_mask, per_token_logps, entropies, cfg.eps)
+    scores = _raw_scores(cfg.mode, completion_mask, per_token_logps, entropies, cfg.eps, ref_token_logps=ref_token_logps)
     if cfg.sharpening != 1.0 and cfg.mode != "uniform":
         scores = scores.pow(cfg.sharpening)
     weights = masked_normalize(scores, completion_mask, eps=cfg.eps)

@@ -165,6 +165,20 @@ def gather_completion_logps(model, sequences: torch.Tensor, prompt_width: int, p
     return token_logps, entropies
 
 
+def gather_ref_logps(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None) -> torch.Tensor:
+    """Forward pass with LoRA adapters disabled to get reference (base model) log-probs."""
+    attention_mask = torch.ones_like(sequences, dtype=torch.long)
+    if pad_token_id is not None:
+        attention_mask = sequences.ne(pad_token_id).long()
+    with model.disable_adapter():
+        with torch.no_grad():
+            outputs = model(input_ids=sequences[:, :-1], attention_mask=attention_mask[:, :-1], use_cache=False)
+    logits = outputs.logits[:, prompt_width - 1 :, :]
+    labels = sequences[:, prompt_width:]
+    log_probs = F.log_softmax(logits.float(), dim=-1)
+    return torch.gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1).detach()
+
+
 def generate_group(
     model,
     tokenizer,
@@ -229,11 +243,17 @@ def compute_loss(
     entropies = entropies[:, :steps]
     completion_mask = completion_mask[:, :steps]
 
+    ref_token_logps = None
+    if weighting_mode == "divergence":
+        ref_token_logps = gather_ref_logps(model, sequences, prompt_width, tokenizer.pad_token_id)
+        ref_token_logps = ref_token_logps[:, :steps]
+
     weights = build_token_weights(
         TokenWeightingConfig(mode=weighting_mode, sharpening=sharpening),
         completion_mask,
         per_token_logps=token_logps.detach(),
         entropies=entropies,
+        ref_token_logps=ref_token_logps,
     )
     objective = (weights * token_logps * completion_mask).sum(dim=-1)
     loss = -(advantages.to(objective.dtype) * objective).mean()
@@ -410,8 +430,8 @@ def validate_config(config: dict[str, Any]) -> None:
         raise ValueError(f"Unsupported dataset: {config['dataset']['name']}")
     if config["training"]["algorithm"] not in {"rloo", "grpo"}:
         raise ValueError("training.algorithm must be 'rloo' or 'grpo'")
-    if config["training"]["weighting"] not in {"uniform", "surprisal", "entropy_reduction"}:
-        raise ValueError("training.weighting must be uniform, surprisal, or entropy_reduction")
+    if config["training"]["weighting"] not in {"uniform", "surprisal", "entropy_reduction", "divergence"}:
+        raise ValueError("training.weighting must be uniform, surprisal, entropy_reduction, or divergence")
     if config["training"]["num_generations"] < 2:
         raise ValueError("training.num_generations must be >= 2")
 

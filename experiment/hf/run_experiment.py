@@ -72,13 +72,9 @@ def pick_dtype(name: str | None) -> torch.dtype:
     return mapping[name]
 
 
-def build_model_and_tokenizer(model_cfg: dict[str, Any]):
+def _load_base_model(model_cfg: dict[str, Any]):
+    """Load the base pretrained model (no LoRA, no freezing)."""
     model_name = model_cfg["name_or_path"]
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
-    tokenizer.padding_side = "left"
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-
     dtype = pick_dtype(model_cfg.get("torch_dtype", "bfloat16"))
     load_in_4bit = model_cfg.get("load_in_4bit", True)
     quantization_config = None
@@ -98,8 +94,19 @@ def build_model_and_tokenizer(model_cfg: dict[str, Any]):
         load_kwargs["quantization_config"] = quantization_config
     else:
         load_kwargs["dtype"] = dtype
-    model = AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
+    return AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
 
+
+def build_model_and_tokenizer(model_cfg: dict[str, Any]):
+    model_name = model_cfg["name_or_path"]
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+    tokenizer.padding_side = "left"
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+
+    model = _load_base_model(model_cfg)
+
+    uses_lora = False
     lora_cfg = model_cfg.get("lora", {})
     if lora_cfg.get("enabled", True):
         peft_config = LoraConfig(
@@ -115,8 +122,18 @@ def build_model_and_tokenizer(model_cfg: dict[str, Any]):
         )
         model = get_peft_model(model, peft_config)
         model.print_trainable_parameters()
+        uses_lora = True
 
-    return model, tokenizer
+    return model, tokenizer, uses_lora
+
+
+def build_ref_model(model_cfg: dict[str, Any]):
+    """Load a frozen copy of the base model for divergence weighting (non-LoRA path)."""
+    model = _load_base_model(model_cfg)
+    model.eval()
+    for p in model.parameters():
+        p.requires_grad = False
+    return model
 
 
 def sample_batch(dataset, batch_size: int, rng: random.Random) -> list[dict[str, Any]]:
@@ -165,14 +182,13 @@ def gather_completion_logps(model, sequences: torch.Tensor, prompt_width: int, p
     return token_logps, entropies
 
 
-def gather_ref_logps(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None) -> torch.Tensor:
-    """Forward pass with LoRA adapters disabled to get reference (base model) log-probs."""
+def gather_ref_logps(ref_model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None) -> torch.Tensor:
+    """Forward pass on a reference model to get base log-probs."""
     attention_mask = torch.ones_like(sequences, dtype=torch.long)
     if pad_token_id is not None:
         attention_mask = sequences.ne(pad_token_id).long()
-    with model.disable_adapter():
-        with torch.no_grad():
-            outputs = model(input_ids=sequences[:, :-1], attention_mask=attention_mask[:, :-1], use_cache=False)
+    with torch.no_grad():
+        outputs = ref_model(input_ids=sequences[:, :-1], attention_mask=attention_mask[:, :-1], use_cache=False)
     logits = outputs.logits[:, prompt_width - 1 :, :]
     labels = sequences[:, prompt_width:]
     log_probs = F.log_softmax(logits.float(), dim=-1)
@@ -236,6 +252,8 @@ def compute_loss(
     advantages: torch.Tensor,
     weighting_mode: str,
     sharpening: float = 1.0,
+    ref_model=None,
+    uses_lora: bool = True,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     token_logps, entropies = gather_completion_logps(model, sequences, prompt_width, tokenizer.pad_token_id)
     steps = min(token_logps.size(1), completion_mask.size(1))
@@ -245,7 +263,13 @@ def compute_loss(
 
     ref_token_logps = None
     if weighting_mode == "divergence":
-        ref_token_logps = gather_ref_logps(model, sequences, prompt_width, tokenizer.pad_token_id)
+        if ref_model is not None:
+            ref_token_logps = gather_ref_logps(ref_model, sequences, prompt_width, tokenizer.pad_token_id)
+        elif uses_lora:
+            with model.disable_adapter():
+                ref_token_logps = gather_ref_logps(model, sequences, prompt_width, tokenizer.pad_token_id)
+        else:
+            raise ValueError("divergence weighting requires ref_model when LoRA is disabled")
         ref_token_logps = ref_token_logps[:, :steps]
 
     weights = build_token_weights(
@@ -321,7 +345,14 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
     output_dir = ensure_dir(Path(config["output_dir"]))
     save_json(output_dir / "resolved_config.json", config)
 
-    model, tokenizer = build_model_and_tokenizer(config["model"])
+    model, tokenizer, uses_lora = build_model_and_tokenizer(config["model"])
+
+    ref_model = None
+    weighting = config["training"]["weighting"]
+    if weighting == "divergence" and not uses_lora:
+        print("Loading frozen reference model for divergence weighting...")
+        ref_model = build_ref_model(config["model"])
+
     train_ds = load_task_dataset(config["dataset"]["name"], config["dataset"]["train_split"], max_samples=config["dataset"].get("max_train_samples"))
     eval_ds = load_task_dataset(config["dataset"]["name"], config["dataset"]["eval_split"], max_samples=config["dataset"].get("max_eval_samples"))
 
@@ -329,7 +360,8 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
         "model": config["model"]["name_or_path"],
         "dataset": config["dataset"]["name"],
         "algorithm": config["training"]["algorithm"],
-        "weighting": config["training"]["weighting"],
+        "weighting": weighting,
+        "uses_lora": uses_lora,
         "sharpening": config["training"].get("sharpening", 1.0),
         "train_examples": len(train_ds),
         "eval_examples": len(eval_ds),
@@ -383,6 +415,8 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
                 advantages,
                 train_cfg["weighting"],
                 sharpening=train_cfg.get("sharpening", 1.0),
+                ref_model=ref_model,
+                uses_lora=uses_lora,
             )
             (loss / grad_accum).backward()
             step_rewards.extend(rewards)

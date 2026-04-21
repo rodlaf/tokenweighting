@@ -18,6 +18,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 from data import TASK_SPECS, load_task_dataset
 from rewards import pass_at_k, score_completions
+from token_critic import TokenValueHead
 from token_weights import TokenWeightingConfig, build_token_weights, entropy_from_logits
 
 
@@ -169,16 +170,19 @@ def compute_advantages(rewards: torch.Tensor, algorithm: str, eps: float = 1e-8)
     raise ValueError(f"Unsupported algorithm: {algorithm}")
 
 
-def gather_completion_logps(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None):
+def gather_completion_logps(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None, return_hidden: bool = False):
     attention_mask = torch.ones_like(sequences, dtype=torch.long)
     if pad_token_id is not None:
         attention_mask = sequences.ne(pad_token_id).long()
-    outputs = model(input_ids=sequences[:, :-1], attention_mask=attention_mask[:, :-1], use_cache=False)
+    outputs = model(input_ids=sequences[:, :-1], attention_mask=attention_mask[:, :-1], use_cache=False, output_hidden_states=return_hidden)
     logits = outputs.logits[:, prompt_width - 1 :, :]
     labels = sequences[:, prompt_width:]
     log_probs = F.log_softmax(logits.float(), dim=-1)
     token_logps = torch.gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
     entropies = entropy_from_logits(logits.detach())
+    if return_hidden:
+        hidden = outputs.hidden_states[-1][:, prompt_width - 1 :, :]
+        return token_logps, entropies, hidden
     return token_logps, entropies
 
 
@@ -193,6 +197,32 @@ def gather_ref_logps(ref_model, sequences: torch.Tensor, prompt_width: int, pad_
     labels = sequences[:, prompt_width:]
     log_probs = F.log_softmax(logits.float(), dim=-1)
     return torch.gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1).detach()
+
+
+def compute_critic_loss(
+    value_head: TokenValueHead,
+    hidden_states: torch.Tensor,
+    completion_mask: torch.Tensor,
+    rewards: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Train the value head and produce token-level advantages.
+
+    Args:
+        value_head: the learned value head
+        hidden_states: (batch, seq, hidden_size) from the policy model, detached
+        completion_mask: (batch, seq) binary mask
+        rewards: (batch,) per-sequence scalar rewards
+
+    Returns:
+        critic_loss: scalar MSE loss for the value head
+        token_advantages: (batch, seq) detached advantages for the policy
+        values: (batch, seq) predicted values (for logging)
+    """
+    values = value_head(hidden_states.detach())
+    targets = rewards.unsqueeze(-1).expand_as(values)
+    critic_loss = ((values - targets) ** 2 * completion_mask).sum() / completion_mask.sum().clamp_min(1)
+    token_advantages = (targets - values).detach()
+    return critic_loss, token_advantages, values
 
 
 def generate_group(
@@ -254,12 +284,36 @@ def compute_loss(
     sharpening: float = 1.0,
     ref_model=None,
     uses_lora: bool = True,
+    value_head: TokenValueHead | None = None,
+    raw_rewards: torch.Tensor | None = None,
+    critic_coef: float = 0.5,
 ) -> tuple[torch.Tensor, dict[str, float]]:
-    token_logps, entropies = gather_completion_logps(model, sequences, prompt_width, tokenizer.pad_token_id)
+    need_hidden = weighting_mode == "critic"
+    result = gather_completion_logps(model, sequences, prompt_width, tokenizer.pad_token_id, return_hidden=need_hidden)
+    if need_hidden:
+        token_logps, entropies, hidden_states = result
+    else:
+        token_logps, entropies = result
+
     steps = min(token_logps.size(1), completion_mask.size(1))
     token_logps = token_logps[:, :steps]
     entropies = entropies[:, :steps]
     completion_mask = completion_mask[:, :steps]
+
+    if weighting_mode == "critic":
+        hidden_states = hidden_states[:, :steps, :]
+        c_loss, token_advs, values = compute_critic_loss(value_head, hidden_states, completion_mask, raw_rewards)
+        policy_obj = (token_advs * token_logps * completion_mask).sum(dim=-1)
+        policy_loss = -policy_obj.mean()
+        loss = policy_loss + critic_coef * c_loss
+        metrics = {
+            "policy_loss": float(policy_loss.item()),
+            "critic_loss": float(c_loss.item()),
+            "mean_value": float((values * completion_mask).sum().item() / completion_mask.sum().clamp_min(1).item()),
+            "mean_completion_length": float(completion_mask.sum(dim=-1).float().mean().item()),
+            "mean_surprisal": float((-token_logps.detach() * completion_mask).sum().item() / completion_mask.sum().clamp_min(1).item()),
+        }
+        return loss, metrics
 
     ref_token_logps = None
     if weighting_mode == "divergence":
@@ -372,6 +426,9 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
         return
 
     train_cfg = config["training"]
+    use_critic = weighting == "critic"
+    critic_cfg = train_cfg.get("critic", {})
+
     model.train()
     optimizer = AdamW(model.parameters(), lr=train_cfg["learning_rate"], weight_decay=train_cfg.get("weight_decay", 0.0))
     total_steps = train_cfg["train_steps"]
@@ -380,8 +437,18 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
     rng = random.Random(config["seed"])
     metrics_path = output_dir / "train_metrics.jsonl"
 
+    value_head = None
+    critic_optimizer = None
+    if use_critic:
+        hidden_size = model.config.hidden_size if hasattr(model, "config") else model.base_model.config.hidden_size
+        value_head = TokenValueHead(hidden_size=hidden_size, critic_hidden=critic_cfg.get("hidden_dim", 256)).to(model.device)
+        critic_optimizer = AdamW(value_head.parameters(), lr=critic_cfg.get("learning_rate", 1e-3))
+        value_head.train()
+
     grad_accum = train_cfg.get("grad_accum_steps", 1)
     optimizer.zero_grad(set_to_none=True)
+    if critic_optimizer is not None:
+        critic_optimizer.zero_grad(set_to_none=True)
     for step in range(1, total_steps + 1):
         step_rewards = []
         step_losses = []
@@ -405,19 +472,36 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
             )
             rewards = score_completions(repeated_examples, completions, timeout=config["evaluation"].get("code_timeout", 3.0))
             reward_tensor = torch.tensor(rewards, device=model.device, dtype=torch.float32).view(len(batch), train_cfg["num_generations"])
-            advantages = compute_advantages(reward_tensor, train_cfg["algorithm"]).reshape(-1)
-            loss, aux = compute_loss(
-                model,
-                tokenizer,
-                sequences,
-                prompt_width,
-                completion_mask,
-                advantages,
-                train_cfg["weighting"],
-                sharpening=train_cfg.get("sharpening", 1.0),
-                ref_model=ref_model,
-                uses_lora=uses_lora,
-            )
+
+            if use_critic:
+                raw_rewards_flat = reward_tensor.reshape(-1)
+                loss, aux = compute_loss(
+                    model,
+                    tokenizer,
+                    sequences,
+                    prompt_width,
+                    completion_mask,
+                    advantages=torch.zeros(1),
+                    weighting_mode="critic",
+                    value_head=value_head,
+                    raw_rewards=raw_rewards_flat,
+                    critic_coef=critic_cfg.get("loss_coef", 0.5),
+                    uses_lora=uses_lora,
+                )
+            else:
+                advantages = compute_advantages(reward_tensor, train_cfg["algorithm"]).reshape(-1)
+                loss, aux = compute_loss(
+                    model,
+                    tokenizer,
+                    sequences,
+                    prompt_width,
+                    completion_mask,
+                    advantages,
+                    train_cfg["weighting"],
+                    sharpening=train_cfg.get("sharpening", 1.0),
+                    ref_model=ref_model,
+                    uses_lora=uses_lora,
+                )
             (loss / grad_accum).backward()
             step_rewards.extend(rewards)
             step_losses.append(float(loss.item()))
@@ -426,6 +510,9 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
         optimizer.step()
         scheduler.step()
         optimizer.zero_grad(set_to_none=True)
+        if critic_optimizer is not None:
+            critic_optimizer.step()
+            critic_optimizer.zero_grad(set_to_none=True)
 
         record = {
             "step": step,
@@ -464,8 +551,8 @@ def validate_config(config: dict[str, Any]) -> None:
         raise ValueError(f"Unsupported dataset: {config['dataset']['name']}")
     if config["training"]["algorithm"] not in {"rloo", "grpo"}:
         raise ValueError("training.algorithm must be 'rloo' or 'grpo'")
-    if config["training"]["weighting"] not in {"uniform", "surprisal", "entropy_reduction", "divergence"}:
-        raise ValueError("training.weighting must be uniform, surprisal, entropy_reduction, or divergence")
+    if config["training"]["weighting"] not in {"uniform", "surprisal", "entropy_reduction", "divergence", "critic"}:
+        raise ValueError("training.weighting must be uniform, surprisal, entropy_reduction, divergence, or critic")
     if config["training"]["num_generations"] < 2:
         raise ValueError("training.num_generations must be >= 2")
 

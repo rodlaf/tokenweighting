@@ -1,0 +1,9 @@
+base_config: ../base/qwen25-math-1.5b-math.yaml
+output_dir: outputs/qwen25-math-1.5b-math-rloo-critic
+training:
+  algorithm: rloo
+  weighting: critic
+  critic:
+    learning_rate: 1.0e-3
+    hidden_dim: 256
+    loss_coef: 0.5

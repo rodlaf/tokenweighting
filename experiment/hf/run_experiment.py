@@ -18,8 +18,12 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 from data import TASK_SPECS, load_task_dataset
 from rewards import pass_at_k, score_completions
-from token_critic import TokenValueHead
-from token_weights import TokenWeightingConfig, build_token_weights, entropy_from_logits
+from token_weights import (
+    TokenWeightingConfig,
+    build_token_weights,
+    entropy_from_logits,
+    weight_concentration_metrics,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -199,30 +203,34 @@ def gather_ref_logps(ref_model, sequences: torch.Tensor, prompt_width: int, pad_
     return torch.gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1).detach()
 
 
-def compute_critic_loss(
-    value_head: TokenValueHead,
-    hidden_states: torch.Tensor,
-    completion_mask: torch.Tensor,
-    rewards: torch.Tensor,
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Train the value head and produce token-level advantages.
+def gather_base_hidden_states(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None, uses_lora: bool) -> torch.Tensor:
+    """Run a forward pass with the adapter disabled (or plain model) to obtain base-model hidden states."""
+    attention_mask = torch.ones_like(sequences, dtype=torch.long)
+    if pad_token_id is not None:
+        attention_mask = sequences.ne(pad_token_id).long()
+    with torch.no_grad():
+        if uses_lora:
+            with model.disable_adapter():
+                outputs = model(
+                    input_ids=sequences[:, :-1],
+                    attention_mask=attention_mask[:, :-1],
+                    use_cache=False,
+                    output_hidden_states=True,
+                )
+        else:
+            outputs = model(
+                input_ids=sequences[:, :-1],
+                attention_mask=attention_mask[:, :-1],
+                use_cache=False,
+                output_hidden_states=True,
+            )
+    return outputs.hidden_states[-1][:, prompt_width - 1 :, :].detach()
 
-    Args:
-        value_head: the learned value head
-        hidden_states: (batch, seq, hidden_size) from the policy model, detached
-        completion_mask: (batch, seq) binary mask
-        rewards: (batch,) per-sequence scalar rewards
 
-    Returns:
-        critic_loss: scalar MSE loss for the value head
-        token_advantages: (batch, seq) detached advantages for the policy
-        values: (batch, seq) predicted values (for logging)
-    """
-    values = value_head(hidden_states.detach())
-    targets = rewards.unsqueeze(-1).expand_as(values)
-    critic_loss = ((values - targets) ** 2 * completion_mask).sum() / completion_mask.sum().clamp_min(1)
-    token_advantages = (targets - values).detach()
-    return critic_loss, token_advantages, values
+def adapter_residual_norms_from_hidden(adapted_hidden: torch.Tensor, base_hidden: torch.Tensor) -> torch.Tensor:
+    """Compute ||h_adapted_t - h_base_t||_2 at each token position."""
+    delta = adapted_hidden.float() - base_hidden.float()
+    return delta.norm(dim=-1)
 
 
 def generate_group(
@@ -284,11 +292,8 @@ def compute_loss(
     sharpening: float = 1.0,
     ref_model=None,
     uses_lora: bool = True,
-    value_head: TokenValueHead | None = None,
-    raw_rewards: torch.Tensor | None = None,
-    critic_coef: float = 0.5,
 ) -> tuple[torch.Tensor, dict[str, float]]:
-    need_hidden = weighting_mode == "critic"
+    need_hidden = weighting_mode == "adapter_residual"
     result = gather_completion_logps(model, sequences, prompt_width, tokenizer.pad_token_id, return_hidden=need_hidden)
     if need_hidden:
         token_logps, entropies, hidden_states = result
@@ -299,21 +304,6 @@ def compute_loss(
     token_logps = token_logps[:, :steps]
     entropies = entropies[:, :steps]
     completion_mask = completion_mask[:, :steps]
-
-    if weighting_mode == "critic":
-        hidden_states = hidden_states[:, :steps, :]
-        c_loss, token_advs, values = compute_critic_loss(value_head, hidden_states, completion_mask, raw_rewards)
-        policy_obj = (token_advs * token_logps * completion_mask).sum(dim=-1)
-        policy_loss = -policy_obj.mean()
-        loss = policy_loss + critic_coef * c_loss
-        metrics = {
-            "policy_loss": float(policy_loss.item()),
-            "critic_loss": float(c_loss.item()),
-            "mean_value": float((values * completion_mask).sum().item() / completion_mask.sum().clamp_min(1).item()),
-            "mean_completion_length": float(completion_mask.sum(dim=-1).float().mean().item()),
-            "mean_surprisal": float((-token_logps.detach() * completion_mask).sum().item() / completion_mask.sum().clamp_min(1).item()),
-        }
-        return loss, metrics
 
     ref_token_logps = None
     if weighting_mode == "divergence":
@@ -326,12 +316,21 @@ def compute_loss(
             raise ValueError("divergence weighting requires ref_model when LoRA is disabled")
         ref_token_logps = ref_token_logps[:, :steps]
 
+    adapter_residual_norms = None
+    if weighting_mode == "adapter_residual":
+        if not uses_lora:
+            raise ValueError("adapter_residual weighting requires LoRA to be enabled")
+        adapted_hidden = hidden_states[:, :steps, :].detach()
+        base_hidden = gather_base_hidden_states(model, sequences, prompt_width, tokenizer.pad_token_id, uses_lora=True)[:, :steps, :]
+        adapter_residual_norms = adapter_residual_norms_from_hidden(adapted_hidden, base_hidden).detach()
+
     weights = build_token_weights(
         TokenWeightingConfig(mode=weighting_mode, sharpening=sharpening),
         completion_mask,
         per_token_logps=token_logps.detach(),
         entropies=entropies,
         ref_token_logps=ref_token_logps,
+        adapter_residual_norms=adapter_residual_norms,
     )
     objective = (weights * token_logps * completion_mask).sum(dim=-1)
     loss = -(advantages.to(objective.dtype) * objective).mean()
@@ -339,7 +338,13 @@ def compute_loss(
         "mean_weight_on_nonzero": float(weights[completion_mask > 0].mean().item()) if (completion_mask > 0).any() else 0.0,
         "mean_completion_length": float(completion_mask.sum(dim=-1).float().mean().item()),
         "mean_surprisal": float((-token_logps.detach() * completion_mask).sum().item() / completion_mask.sum().clamp_min(1).item()),
+        **weight_concentration_metrics(weights.detach(), completion_mask),
     }
+    if adapter_residual_norms is not None:
+        nonzero = completion_mask > 0
+        if nonzero.any():
+            metrics["mean_adapter_residual_norm"] = float(adapter_residual_norms[nonzero].mean().item())
+            metrics["max_adapter_residual_norm"] = float(adapter_residual_norms[nonzero].max().item())
     return loss, metrics
 
 
@@ -426,8 +431,6 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
         return
 
     train_cfg = config["training"]
-    use_critic = weighting == "critic"
-    critic_cfg = train_cfg.get("critic", {})
 
     model.train()
     optimizer = AdamW(model.parameters(), lr=train_cfg["learning_rate"], weight_decay=train_cfg.get("weight_decay", 0.0))
@@ -437,18 +440,8 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
     rng = random.Random(config["seed"])
     metrics_path = output_dir / "train_metrics.jsonl"
 
-    value_head = None
-    critic_optimizer = None
-    if use_critic:
-        hidden_size = model.config.hidden_size if hasattr(model, "config") else model.base_model.config.hidden_size
-        value_head = TokenValueHead(hidden_size=hidden_size, critic_hidden=critic_cfg.get("hidden_dim", 256)).to(model.device)
-        critic_optimizer = AdamW(value_head.parameters(), lr=critic_cfg.get("learning_rate", 1e-3))
-        value_head.train()
-
     grad_accum = train_cfg.get("grad_accum_steps", 1)
     optimizer.zero_grad(set_to_none=True)
-    if critic_optimizer is not None:
-        critic_optimizer.zero_grad(set_to_none=True)
     for step in range(1, total_steps + 1):
         step_rewards = []
         step_losses = []
@@ -473,35 +466,19 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
             rewards = score_completions(repeated_examples, completions, timeout=config["evaluation"].get("code_timeout", 3.0))
             reward_tensor = torch.tensor(rewards, device=model.device, dtype=torch.float32).view(len(batch), train_cfg["num_generations"])
 
-            if use_critic:
-                raw_rewards_flat = reward_tensor.reshape(-1)
-                loss, aux = compute_loss(
-                    model,
-                    tokenizer,
-                    sequences,
-                    prompt_width,
-                    completion_mask,
-                    advantages=torch.zeros(1),
-                    weighting_mode="critic",
-                    value_head=value_head,
-                    raw_rewards=raw_rewards_flat,
-                    critic_coef=critic_cfg.get("loss_coef", 0.5),
-                    uses_lora=uses_lora,
-                )
-            else:
-                advantages = compute_advantages(reward_tensor, train_cfg["algorithm"]).reshape(-1)
-                loss, aux = compute_loss(
-                    model,
-                    tokenizer,
-                    sequences,
-                    prompt_width,
-                    completion_mask,
-                    advantages,
-                    train_cfg["weighting"],
-                    sharpening=train_cfg.get("sharpening", 1.0),
-                    ref_model=ref_model,
-                    uses_lora=uses_lora,
-                )
+            advantages = compute_advantages(reward_tensor, train_cfg["algorithm"]).reshape(-1)
+            loss, aux = compute_loss(
+                model,
+                tokenizer,
+                sequences,
+                prompt_width,
+                completion_mask,
+                advantages,
+                train_cfg["weighting"],
+                sharpening=train_cfg.get("sharpening", 1.0),
+                ref_model=ref_model,
+                uses_lora=uses_lora,
+            )
             (loss / grad_accum).backward()
             step_rewards.extend(rewards)
             step_losses.append(float(loss.item()))
@@ -510,9 +487,6 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
         optimizer.step()
         scheduler.step()
         optimizer.zero_grad(set_to_none=True)
-        if critic_optimizer is not None:
-            critic_optimizer.step()
-            critic_optimizer.zero_grad(set_to_none=True)
 
         record = {
             "step": step,
@@ -551,8 +525,16 @@ def validate_config(config: dict[str, Any]) -> None:
         raise ValueError(f"Unsupported dataset: {config['dataset']['name']}")
     if config["training"]["algorithm"] not in {"rloo", "grpo"}:
         raise ValueError("training.algorithm must be 'rloo' or 'grpo'")
-    if config["training"]["weighting"] not in {"uniform", "surprisal", "entropy_reduction", "divergence", "critic"}:
-        raise ValueError("training.weighting must be uniform, surprisal, entropy_reduction, divergence, or critic")
+    if config["training"]["weighting"] not in {
+        "uniform",
+        "surprisal",
+        "entropy_reduction",
+        "divergence",
+        "adapter_residual",
+    }:
+        raise ValueError(
+            "training.weighting must be uniform, surprisal, entropy_reduction, divergence, or adapter_residual"
+        )
     if config["training"]["num_generations"] < 2:
         raise ValueError("training.num_generations must be >= 2")
 

@@ -12,6 +12,7 @@ dependencies = [
     "pyyaml",
     "matplotlib",
     "pandas",
+    "pytest",
 ]
 
 [project.optional-dependencies]

@@ -1,4 +1,4 @@
-\section{Related Work}
+\section{Related Work}\label{sec:related-work}
 
 \subsection{From RLHF to RLVR}
 
@@ -72,12 +72,15 @@ setting and proves that the credit a token can carry is upper-bounded by its ent
 motivating an entropy-aware modulation of per-token learning signals
 \cite{wang2026eapo}. ERPO similarly identifies ``critical decision pivots'' at
 high-entropy states and applies targeted exploration at those positions
-\cite{chen2026erpo}. These entropy-based methods are among the closest concurrent work
-to our entropy-reduction weighting: they demonstrate that entropy-guided credit
-assignment can improve reasoning RL when applied with sufficient theoretical grounding.
-Our work differs by systematically evaluating multiple intrinsic signals (surprisal,
-entropy reduction, policy divergence) under a unified framework and documenting the
-conditions under which they do and do not differentiate from uniform weighting.
+\cite{chen2026erpo}. \emph{Sparse but Critical} argues, via an advantage-concentration
+analysis, that a small fraction of tokens accounts for most of the useful
+update-magnitude in RLVR, and proposes a divergence-based selection rule for
+identifying them~\cite{sparsebutcritical2026}. These entropy- and divergence-based
+methods are the closest concurrent work to the intrinsic weighting schemes that form
+our baselines; the present paper does \emph{not} claim priority over them. Instead,
+our contribution is to show that their underlying signals are structurally degraded
+under LoRA, and to provide a credit-assignment mechanism (ARTW) that does not suffer
+the same degradation.
 
 \subsection{Fine-Grained Credit Assignment Beyond Uniform Token Updates}
 
@@ -85,17 +88,28 @@ A large parallel literature attempts to make supervision denser than a single
 end-of-trajectory reward. One family learns explicit token- or process-level reward
 estimators. Preference-grounded Token-level Guidance derives token-level signals from
 preference data for fine-tuning \cite{yang2023pgtg}, while Discriminative Policy
-Optimization learns token-level Q-style reward models from preferences without requiring
-fine-grained annotation \cite{chen2025dpoqrm}. PRIME pushes this direction further for
-reasoning tasks by constructing implicit process rewards and updating process reward
-models online from rollouts and outcome labels \cite{cui2025prime}. Reinforced Token
-Optimization (RTO) frames RLHF as a token-level MDP and derives an optimal
-Q-function-based policy from the preference model, producing per-token credit without a
-separate value head \cite{zhong2025rto}. These methods can produce rich token-level
-feedback, but they rely on an auxiliary reward-modeling component that our approach
-intentionally avoids.
+Optimization learns token-level Q-style reward models from preferences without
+requiring fine-grained annotation \cite{chen2025dpoqrm}. PRIME pushes this direction
+further for reasoning tasks by constructing implicit process rewards and updating
+process reward models online from rollouts and outcome labels \cite{cui2025prime}.
+Reinforced Token Optimization (RTO) frames RLHF as a token-level MDP and derives an
+optimal Q-function-based policy from the preference model, producing per-token credit
+without a separate value head \cite{zhong2025rto}. These methods can produce rich
+token-level feedback, but they rely on an auxiliary reward-modeling component that our
+approach intentionally avoids.
 
-Another family redistributes outcome rewards algorithmically rather than by training a
+A second family learns a small token-level critic on top of the policy's own hidden
+states (rather than an external reward model) and uses its predictions to form
+token-level advantages. This corresponds closely to an earlier version of our own
+framework, and we found through an extensive literature review that the token-level
+actor--critic design space was already well-covered: VinePPO~\cite{kazemnejad2024vineppo}
+and GenAC~\cite{genac2026} cover non-parametric and generative critics
+respectively, and OTB~\cite{li2026otb} provides a principled variance-minimizing
+position-dependent baseline. We therefore do \emph{not} position our critic-based
+configuration as a proposed method; we include it purely as a strong within-family
+baseline in our comparisons, and acknowledge this prior art explicitly.
+
+A third family redistributes outcome rewards algorithmically rather than by training a
 dense reward model. RED derives token-level rewards by redistributing holistic
 reward-model scores over a trajectory \cite{huang2024red}. SCAR uses Shapley-inspired
 attribution to estimate token or span contributions from sequence-level feedback
@@ -105,15 +119,12 @@ corrections without a learned critic \cite{tran2025tempo}. GRPO-$\lambda$ introd
 eligibility traces and lambda-returns into critic-free RLVR to propagate outcome
 information backward along the sequence \cite{parthasarathi2025grpolambda}. OTB derives
 an optimal token-level baseline as the ratio of expected squared advantage to expected
-advantage at each position, showing theoretically and empirically that position-dependent
-baselines can significantly reduce gradient variance in long-horizon LLM-RL
-\cite{li2026otb}. PSPO applies potential-based reward shaping theory to construct
-dense token rewards from outcome signals without altering the optimal policy
-\cite{zhang2026pspo}. Compared with these approaches, our focus is narrower and cheaper:
-we do not train auxiliary reward models, estimate Shapley values, construct trees, or
-solve for optimal baselines, but instead ask how far one can get by reweighting the
-existing policy-gradient terms using intrinsic distributional signals already present in
-the forward pass.
+advantage at each position~\cite{li2026otb}. PSPO applies potential-based reward
+shaping theory to construct dense token rewards from outcome signals without altering
+the optimal policy \cite{zhang2026pspo}. Compared with these approaches, our focus is
+orthogonal: we do not propose a new redistribution rule, but instead diagnose a failure
+mode that affects essentially all intrinsic-signal-based redistribution methods when
+applied inside LoRA.
 
 \subsection{Alternative Action Granularities and Token Selection}
 
@@ -134,32 +145,64 @@ high-entropy token analyses in RLVR \cite{wang2025beyond8020}, these results str
 suggest that uniform token treatment is an arbitrary design choice rather than a
 necessity.
 
+\subsection{PEFT and Low-Rank Adaptation in Language RL}\label{sec:rw-peft}
+
+Parameter-efficient fine-tuning, and in particular LoRA~\cite{hu2021lora}, has become
+the default adaptation strategy for essentially all open-source LLM-RL work. TinyLoRA
+showed that small, aggressively parameter-efficient adapters can match full fine-tuning
+on RLHF benchmarks~\cite{tinylora2026}. Tina demonstrated the same for RLVR reasoning
+tasks, obtaining DeepSeek-R1-class reasoning behaviour on significantly smaller budgets
+by combining LoRA with GRPO~\cite{tina2025}. A broader evaluation of PEFT for RLVR
+systematically compared LoRA with full fine-tuning across tasks and scales, finding
+that LoRA is competitive or preferable once regularisation and data scale are
+controlled~\cite{peftrlvr2025}. Token-Efficient RL explicitly optimises the number of
+tokens required to achieve a given RLVR accuracy level and reports that full-token
+GRPO~+~LoRA can fail to train reliably on some
+reasoning tasks, an empirical observation for which we now provide a mechanistic
+explanation via signal collapse~\cite{tokenefficientrl2025}. \emph{LoRA as Implicit KL
+Regulariser} analyses how LoRA restricts the policy to a rank-constrained neighbourhood
+of the reference, arguing that this restriction implicitly bounds the KL divergence
+between policy and reference throughout training~\cite{implicitklra2025}. Our Section
+\ref{sec:collapse} builds directly on this observation: an implicit KL bound is the
+same mechanism that forces per-token log-probability differentials to be small and
+approximately uniform, which is the formal content of our collapse result.
+
+On the analysis side, \emph{Narrow Finetuning Traces} studies how LoRA's rank-$r$
+updates appear in hidden states and gradients, finding that the adapter residual is
+a highly informative trace of what the adapter has
+learned~\cite{narrowfinetuning2026}. This is directly relevant to ARTW, because it
+supplies empirical evidence that the adapter residual is both position-varying and
+semantically meaningful---exactly the property our method exploits. Concurrent work on
+TopLoRA/GateRA studies how to concentrate LoRA capacity on a small number of
+high-impact tokens via gating~\cite{toplora2026}. This can be viewed as a complementary
+response to the same underlying problem: TopLoRA modifies the adapter itself so that
+its capacity is allocated more selectively, while ARTW leaves the adapter unchanged but
+reweights the policy gradient so that token updates reflect where the adapter actually
+had non-trivial influence. To our knowledge, no prior work has characterized the
+interaction between LoRA and token-level credit assignment, nor proposed an
+adaptation-aware intrinsic weighting scheme.
+
 \subsection{Positioning of This Work}
 
-The literature now makes three points clear. First, critics are not strictly required
-for effective LLM post-training: critic-free estimators such as RLOO, ReMax, GRPO, and
-GSPO are already competitive in both RLHF and RLVR
+The literature makes three points clear. First, critics are not strictly required for
+effective LLM post-training: critic-free estimators such as RLOO, ReMax, GRPO, and GSPO
+are already competitive in both RLHF and RLVR
 \cite{ahmadian2024backtobasics,li2023remax,shao2024deepseekmath,zheng2025gspo}. Second,
 many researchers have concluded that trajectory-level rewards are too coarse and have
 introduced denser supervision through process reward models, redistribution rules, tree
-structures, optimal baselines, or temporal traces
-\cite{huang2024red,cui2025prime,tran2025tempo,cao2025scar,parthasarathi2025grpolambda,li2026otb,zhang2026pspo}.
-Third, recent reasoning-focused analyses and entropy-aware methods indicate that only a
-subset of tokens may be responsible for most of the useful RL signal, and that
-entropy-guided modulation of per-token credit can improve training
-\cite{wang2025beyond8020,wang2026eapo,chen2026erpo}.
+structures, optimal baselines, temporal traces, or entropy-based modulation
+\cite{huang2024red,cui2025prime,tran2025tempo,cao2025scar,parthasarathi2025grpolambda,li2026otb,zhang2026pspo,wang2026eapo,chen2026erpo,sparsebutcritical2026}.
+Third, the overwhelming majority of practical LLM-RL pipelines are \emph{trained with
+LoRA}, and a focused sub-literature has studied PEFT-specific effects in this
+regime~\cite{hu2021lora,tinylora2026,tina2025,peftrlvr2025,implicitklra2025,tokenefficientrl2025,narrowfinetuning2026,toplora2026}.
 
-Our paper sits at the intersection of these trends but occupies a distinct point in the
-design space. We study \emph{intrinsic} token weighting for on-policy language RL:
-credit is redistributed at the token level using signals derived from the policy's own
-predictive distribution---surprisal, entropy reduction, and policy divergence---without
-learned value heads, external reward models, process annotations, tree construction,
-Shapley-style counterfactual attribution, or corrective rollouts. While concurrent work
-such as EAPO \cite{wang2026eapo} and ERPO \cite{chen2026erpo} has independently
-validated the utility of entropy as a credit signal, our contribution is complementary:
-we provide a unified framework for comparing multiple intrinsic signals and a systematic
-empirical analysis of when and why these signals differentiate from uniform weighting.
-Rather than proposing a single method and claiming superiority, we map the space of
-cheap, forward-pass-only credit signals and characterize the conditions (model
-adaptation method, training regime, task difficulty) under which they do and do not
-provide meaningful structure beyond a uniform baseline.
+Our contribution is to bridge the second and third of these threads. Existing intrinsic
+credit-assignment signals (surprisal, entropy, divergence) are not novel as standalone
+objects, and we do not claim otherwise; they are our baselines. Our novel claim is that
+these signals \emph{interact pathologically with the adaptation strategy that the field
+has converged on}: under LoRA they collapse toward uniform, so any paper that reports a
+null result for ``fancy intrinsic weighting versus uniform'' under LoRA is observing a
+LoRA artefact, not evidence against token-level credit assignment. We formalize this,
+supply a unified diagnostic (Gini/EffN) that makes the collapse visible at training
+time, and propose ARTW as an adaptation-aware alternative whose construction directly
+avoids the failure mode we identify.

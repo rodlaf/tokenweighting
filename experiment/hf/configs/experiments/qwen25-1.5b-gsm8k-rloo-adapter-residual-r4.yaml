@@ -1,0 +1,9 @@
+base_config: ../base/qwen25-1.5b-gsm8k.yaml
+output_dir: outputs/qwen25-1.5b-gsm8k-rloo-adapter-residual-r4
+model:
+  lora:
+    r: 4
+    alpha: 8
+training:
+  algorithm: rloo
+  weighting: adapter_residual

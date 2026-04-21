@@ -1,9 +1,0 @@
-base_config: ../base/qwen25-1.5b-gsm8k.yaml
-output_dir: outputs/qwen25-1.5b-gsm8k-rloo-critic-lowlr
-training:
-  algorithm: rloo
-  weighting: critic
-  critic:
-    learning_rate: 1.0e-4
-    hidden_dim: 256
-    loss_coef: 0.5

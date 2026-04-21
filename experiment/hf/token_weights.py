@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 @dataclass
 class TokenWeightingConfig:
-    mode: str = "uniform"  # uniform | surprisal | entropy_reduction | divergence
+    mode: str = "uniform"  # uniform | surprisal | entropy_reduction | divergence | adapter_residual
     eps: float = 1e-8
     sharpening: float = 1.0  # raise raw weights to this power before normalizing
     detach: bool = True
@@ -52,6 +52,7 @@ def _raw_scores(
     entropies: Optional[torch.Tensor],
     eps: float,
     ref_token_logps: Optional[torch.Tensor] = None,
+    adapter_residual_norms: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
     """Compute unnormalized salience scores for each token."""
     if mode == "uniform":
@@ -74,6 +75,10 @@ def _raw_scores(
         if ref_token_logps is None:
             raise ValueError("ref_token_logps required for divergence weighting")
         return (per_token_logps - ref_token_logps).abs().float() + eps
+    if mode == "adapter_residual":
+        if adapter_residual_norms is None:
+            raise ValueError("adapter_residual_norms required for adapter_residual weighting")
+        return adapter_residual_norms.float() + eps
     raise ValueError(f"Unknown weighting mode: {mode}")
 
 
@@ -84,9 +89,53 @@ def build_token_weights(
     per_token_logps: Optional[torch.Tensor] = None,
     entropies: Optional[torch.Tensor] = None,
     ref_token_logps: Optional[torch.Tensor] = None,
+    adapter_residual_norms: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
-    scores = _raw_scores(cfg.mode, completion_mask, per_token_logps, entropies, cfg.eps, ref_token_logps=ref_token_logps)
+    scores = _raw_scores(
+        cfg.mode,
+        completion_mask,
+        per_token_logps,
+        entropies,
+        cfg.eps,
+        ref_token_logps=ref_token_logps,
+        adapter_residual_norms=adapter_residual_norms,
+    )
     if cfg.sharpening != 1.0 and cfg.mode != "uniform":
         scores = scores.pow(cfg.sharpening)
     weights = masked_normalize(scores, completion_mask, eps=cfg.eps)
     return weights.detach() if cfg.detach else weights
+
+
+def weight_concentration_metrics(weights: torch.Tensor, mask: torch.Tensor) -> dict[str, float]:
+    """Compute concentration/dispersion metrics for token weights.
+
+    Returns:
+        gini: Gini coefficient averaged across the batch (0=uniform, 1=all-on-one-token)
+        effective_n_ratio: mean(1 / (L * sum(w_t^2))), where L is completion length.
+            Equals 1.0 when uniform; tends to 0 when concentrated on a few tokens.
+    """
+    w = weights * mask
+    lengths = mask.sum(dim=-1).clamp_min(1.0)
+
+    sum_sq = (w * w).sum(dim=-1).clamp_min(1e-12)
+    effective_n = 1.0 / sum_sq
+    effective_n_ratio = (effective_n / lengths).mean().item()
+
+    batch = w.size(0)
+    ginis = []
+    for i in range(batch):
+        vals = w[i][mask[i] > 0]
+        if vals.numel() <= 1:
+            continue
+        sorted_vals, _ = torch.sort(vals)
+        n = sorted_vals.numel()
+        idx = torch.arange(1, n + 1, device=vals.device, dtype=vals.dtype)
+        numerator = (2 * idx - n - 1) * sorted_vals
+        denom = n * sorted_vals.sum().clamp_min(1e-12)
+        ginis.append((numerator.sum() / denom).item())
+    gini_mean = float(sum(ginis) / len(ginis)) if ginis else 0.0
+
+    return {
+        "weight_gini": gini_mean,
+        "weight_effective_n_ratio": float(effective_n_ratio),
+    }

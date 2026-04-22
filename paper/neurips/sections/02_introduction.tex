@@ -9,14 +9,14 @@ a generation should be distributed across hundreds or thousands of token
 decisions. Recent work has responded with a rapidly growing toolbox of
 token-level credit-assignment methods, including entropy-aware modulation,
 process reward models, tree-based prefix values, and reward
-redistribution~\citep{cui2025prime,huang2024red,tran2025tempo,wang2025beyond8020,wang2026eapo,chen2026erpo,kazemnejad2024vineppo}.
+redistribution~\citep{cui2025prime,huang2024red,tran2025tempo,wang2025beyond8020,he2026eapo,yu2026erpo,kazemnejad2024vineppo}.
 
 In parallel, essentially all open-source and academic LLM-RL training uses
 parameter-efficient fine-tuning, most commonly LoRA~\citep{hu2021lora}. This
 is an empirical reality driven by memory and compute constraints: every
 widely used RL framework, from TRL to verl, uses LoRA by default, and recent
 results show that LoRA + RL can be dramatically more sample- and
-parameter-efficient than full fine-tuning~\citep{tinylora2026,tina2025}. Yet
+parameter-efficient than full fine-tuning~\citep{wang2025tina}. Yet
 the two research threads are developed in near-total isolation. Papers on
 token-level credit assignment specify methods without reference to the
 adaptation strategy, and PEFT is treated as an orthogonal implementation
@@ -37,7 +37,7 @@ uniform broadcast, characterize it via its Gini coefficient and effective
 token count, and show that the collapse reproduces across surprisal-,
 entropy-reduction-, and divergence-based weighting. This provides a mechanistic
 explanation for the empirically observed failure of full-token
-GRPO~+~LoRA~\citep{tokenefficientrl2025}: the weighting signal itself is
+GRPO~+~LoRA~\citep{lee2025tokenefficientrl}: the weighting signal itself is
 degraded before training ever begins.
 
 \paragraph{Method: Adapter-Residual Token Weighting.} Rather than attempting

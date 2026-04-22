@@ -176,7 +176,7 @@ exactly the policy change that the RL update is trying to drive. Under LoRA,
 however, this quantity is small and approximately uniform across positions for
 a different reason: the KL budget $\mathrm{KL}(\pi_\theta \| \pi_{\mathrm{ref}})$
 is bounded by the rank-$r$ adapter's capacity, so the per-token
-log-probability ratios are compressed toward zero~\citep{implicitklra2025}.
+log-probability ratios are compressed toward zero~\citep{anon2026implicitklra}.
 Under the within-trajectory normalization in
 equation~\eqref{eq:normalize}, this compression maps any approximately
 constant score function to the uniform distribution, giving
@@ -252,8 +252,8 @@ estimator. The intrinsic weighting schemes (surprisal, entropy reduction,
 policy divergence) are the natural baselines within our framework and map
 cleanly to published methods (e.g., divergence weighting corresponds to the
 divergence-advantage analyses of \emph{Sparse but
-Critical}~\cite{sparsebutcritical2026}, entropy-based weighting
-to~\cite{wang2026eapo,chen2026erpo}). ARTW is the only scheme we
+Critical}~\cite{meng2026sparsebutcritical}, entropy-based weighting
+to~\cite{he2026eapo,yu2026erpo}). ARTW is the only scheme we
 study that uses an explicitly \emph{adaptation-aware} signal. Unlike
 critic-based PPO, ARTW does not learn a value head. Unlike RED, PRIME, or
 token-level reward-model methods, ARTW does not construct dense rewards from

@@ -39,10 +39,20 @@ def entropy_reduction_weights(entropies: torch.Tensor, mask: torch.Tensor, eps: 
     return masked_normalize(drops + eps, mask, eps=eps)
 
 
-def entropy_from_logits(logits: torch.Tensor) -> torch.Tensor:
-    log_probs = F.log_softmax(logits.float(), dim=-1)
-    probs = log_probs.exp()
-    return -(probs * log_probs).sum(dim=-1)
+def entropy_from_logits(logits: torch.Tensor, chunk_size: int = 2) -> torch.Tensor:
+    """Compute per-token entropy H = -sum(p * log p) chunked along the batch dim
+    to avoid materializing a full [B, T, V] fp32 softmax tensor at once."""
+    if logits.dim() != 3:
+        log_probs = F.log_softmax(logits.float(), dim=-1)
+        return -(log_probs.exp() * log_probs).sum(dim=-1)
+    B = logits.size(0)
+    out = torch.empty(logits.shape[:-1], dtype=torch.float32, device=logits.device)
+    for start in range(0, B, chunk_size):
+        end = min(start + chunk_size, B)
+        lp = F.log_softmax(logits[start:end].float(), dim=-1)
+        out[start:end] = -(lp.exp() * lp).sum(dim=-1)
+        del lp
+    return out
 
 
 def _raw_scores(

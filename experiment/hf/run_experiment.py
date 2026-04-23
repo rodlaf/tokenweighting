@@ -181,8 +181,11 @@ def gather_completion_logps(model, sequences: torch.Tensor, prompt_width: int, p
     outputs = model(input_ids=sequences[:, :-1], attention_mask=attention_mask[:, :-1], use_cache=False, output_hidden_states=return_hidden)
     logits = outputs.logits[:, prompt_width - 1 :, :]
     labels = sequences[:, prompt_width:]
-    log_probs = F.log_softmax(logits.float(), dim=-1)
-    token_logps = torch.gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
+    logits_f = logits.float()
+    token_logits = torch.gather(logits_f, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
+    log_Z = torch.logsumexp(logits_f, dim=-1)
+    token_logps = token_logits - log_Z
+    del logits_f, token_logits, log_Z
     entropies = entropy_from_logits(logits.detach())
     if return_hidden:
         hidden = outputs.hidden_states[-1][:, prompt_width - 1 :, :]
@@ -199,8 +202,10 @@ def gather_ref_logps(ref_model, sequences: torch.Tensor, prompt_width: int, pad_
         outputs = ref_model(input_ids=sequences[:, :-1], attention_mask=attention_mask[:, :-1], use_cache=False)
     logits = outputs.logits[:, prompt_width - 1 :, :]
     labels = sequences[:, prompt_width:]
-    log_probs = F.log_softmax(logits.float(), dim=-1)
-    return torch.gather(log_probs, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1).detach()
+    logits_f = logits.float()
+    token_logits = torch.gather(logits_f, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
+    log_Z = torch.logsumexp(logits_f, dim=-1)
+    return (token_logits - log_Z).detach()
 
 
 def gather_base_hidden_states(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None, uses_lora: bool) -> torch.Tensor:

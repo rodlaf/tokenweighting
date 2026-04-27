@@ -18,6 +18,16 @@ MBPP_SYSTEM_PROMPT = (
     "You are a careful Python programmer. Return only Python code inside one ```python``` block."
 )
 
+POLARIS_SYSTEM_PROMPT = (
+    "Solve this math problem step by step. Put your final answer in \\boxed{}."
+)
+
+# Deterministic seed used ONLY to define the POLARIS train/test split. Kept
+# independent of the experiment's training seed so the eval set is identical
+# across all runs/seeds.
+POLARIS_SPLIT_SEED = 20260427
+POLARIS_EVAL_SIZE = 1000
+
 
 @dataclass(frozen=True)
 class TaskSpec:
@@ -31,6 +41,7 @@ TASK_SPECS = {
     "gsm8k": TaskSpec(name="gsm8k", train_split="train", eval_split="test", reward_key="answer"),
     "math": TaskSpec(name="math", train_split="train", eval_split="test", reward_key="solution"),
     "mbpp": TaskSpec(name="mbpp", train_split="train", eval_split="test", reward_key="test_list"),
+    "polaris": TaskSpec(name="polaris", train_split="train", eval_split="test", reward_key="answer"),
 }
 
 
@@ -95,6 +106,33 @@ def load_task_dataset(
                 "text": row["text"],
                 "code": row.get("code", ""),
                 "test_list": tests,
+            }
+
+        return _limit(ds.map(_map), max_samples)
+
+    if name == "polaris":
+        # POLARIS-53k ships as a single jsonl with no train/test split. We
+        # build a deterministic split here so all runs share the same eval set.
+        ds = load_dataset("POLARIS-Project/Polaris-Dataset-53K", split="train")
+        ds = ds.shuffle(seed=POLARIS_SPLIT_SEED)
+        eval_size = min(POLARIS_EVAL_SIZE, len(ds) // 4)
+        if split in {"train", "training"}:
+            ds = ds.select(range(0, len(ds) - eval_size))
+        elif split in {"test", "eval", "validation"}:
+            ds = ds.select(range(len(ds) - eval_size, len(ds)))
+        else:
+            raise ValueError(f"Unsupported polaris split: {split}")
+
+        def _map(row):
+            return {
+                "task": "polaris",
+                "prompt": (
+                    f"{POLARIS_SYSTEM_PROMPT}\n\n"
+                    f"Problem: {row['problem']}\n"
+                ),
+                "answer": str(row["answer"]),
+                "problem": row["problem"],
+                "difficulty": row.get("difficulty"),
             }
 
         return _limit(ds.map(_map), max_samples)

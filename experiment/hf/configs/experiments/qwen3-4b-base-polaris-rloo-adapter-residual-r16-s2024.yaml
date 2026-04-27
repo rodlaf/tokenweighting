@@ -1,0 +1,10 @@
+base_config: ../base/qwen3-4b-base-polaris.yaml
+seed: 2024
+output_dir: outputs/qwen3-4b-base-polaris-rloo-adapter-residual-r16-s2024
+model:
+  lora:
+    r: 16
+    alpha: 32
+training:
+  algorithm: rloo
+  weighting: adapter_residual

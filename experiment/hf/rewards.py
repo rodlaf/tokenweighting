@@ -5,6 +5,7 @@ from typing import Iterable, Optional, Sequence
 from tasks.gsm8k import gsm8k_reward as _gsm8k_reward
 from tasks.math_task import math_reward as _math_reward
 from tasks.mbpp import estimate_pass_at_k, mbpp_pass_fail_reward
+from tasks.polaris import polaris_reward as _polaris_reward
 
 
 def score_completion(example: dict, completion: str, *, timeout: float = 3.0) -> int:
@@ -15,6 +16,8 @@ def score_completion(example: dict, completion: str, *, timeout: float = 3.0) ->
         return _math_reward(completion, example["solution"])
     if task == "mbpp":
         return mbpp_pass_fail_reward(completion, example.get("test_list", []), timeout=timeout)
+    if task == "polaris":
+        return _polaris_reward(completion, example["answer"])
     raise ValueError(f"Unsupported task: {task}")
 
 

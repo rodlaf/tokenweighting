@@ -520,6 +520,22 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
     maybe_save_checkpoint(model, tokenizer, output_dir, total_steps)
     save_json(output_dir / "final_eval.json", evaluate(model, tokenizer, eval_ds, config))
 
+    # Optional: extra out-of-distribution evals run only at end-of-training.
+    bonus_evals = config["evaluation"].get("bonus_evals") or []
+    for bonus in bonus_evals:
+        bonus_name = bonus["name"]
+        bonus_split = bonus.get("split", "test")
+        bonus_n = bonus.get("num_examples", config["evaluation"]["num_examples"])
+        print(f"Running bonus eval: {bonus_name} (split={bonus_split}, n={bonus_n})")
+        bonus_ds = load_task_dataset(bonus_name, bonus_split, max_samples=bonus_n)
+        bonus_cfg = deepcopy(config)
+        bonus_cfg["evaluation"]["num_examples"] = bonus_n
+        bonus_metrics = evaluate(model, tokenizer, bonus_ds, bonus_cfg)
+        bonus_metrics["dataset"] = bonus_name
+        bonus_metrics["split"] = bonus_split
+        save_json(output_dir / f"final_eval_{bonus_name}.json", bonus_metrics)
+        print(json.dumps({"bonus_eval": bonus_name, **bonus_metrics}))
+
 
 def validate_config(config: dict[str, Any]) -> None:
     required_top = {"seed", "output_dir", "model", "dataset", "training", "evaluation"}

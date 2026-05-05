@@ -1,28 +1,23 @@
 \begin{abstract}\noindent Token-level credit assignment for language-model
-reinforcement learning is an active area of research, with a rapidly growing
-literature of methods that reweight or redistribute policy-gradient credit using
-intrinsic signals such as surprisal, entropy, and divergence from a reference
-policy. In parallel, nearly all practical LLM-RL pipelines rely on
-parameter-efficient fine-tuning, most commonly LoRA. Yet these two threads are
-studied in isolation: credit-assignment methods are developed and evaluated
-under full-parameter training assumptions, while PEFT is treated as an
-implementation detail orthogonal to the learning signal. We show this
-separation is incorrect. Because LoRA constrains the policy to a small
-neighbourhood of the reference, the \emph{per-token} differences between
-policy and reference that drive intrinsic credit signals become approximately
-position-uniform, collapsing surprisal-, entropy-reduction-, and
-divergence-weighted updates to near-uniform broadcast. We provide a theoretical
-characterization of this collapse, supported by a unified diagnostic
-measurement (weight Gini and effective-token-count) across five weighting
-schemes. We then propose \emph{Adapter-Residual Credit Assignment} (ARCA), a
-credit-assignment mechanism that sidesteps the collapse by deriving per-token
-salience directly from the adapter's own hidden-state residual
-$\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$, a signal that is guaranteed
-to be non-degenerate whenever the adapter is non-trivially active. ARCA
-requires no additional networks, reward models, or tree construction, and
-reuses infrastructure already needed for KL-regularized LoRA RL. Experiments
-on GSM8K with Qwen2.5 demonstrate that ARCA is the only intrinsic weighting
-scheme that maintains non-degenerate per-token structure under LoRA, and
-provides a concrete fix for the PEFT-credit interaction that no prior
-token-level method addresses.
+reinforcement learning is an active area of research, with methods that
+reweight policy-gradient credit using intrinsic signals such as surprisal,
+entropy, and divergence from a reference policy. At the same time, practical
+LLM-RL pipelines overwhelmingly rely on parameter-efficient fine-tuning,
+especially LoRA. These threads are usually studied separately: token-credit
+methods are specified as if the policy were fully trainable, while PEFT is
+treated as an implementation detail. We argue that this separation is
+misleading. Under LoRA, the policy is restricted to a low-rank neighbourhood of
+the reference, which can flatten the per-token differences used by common
+intrinsic credit signals and drive their normalized weights toward uniform
+broadcast. We formalize this failure mode and propose measuring it directly
+with concentration diagnostics such as weight Gini and effective-token ratio.
+We then introduce \emph{Adapter-Residual Credit Assignment} (ARCA), a
+lightweight alternative that derives token salience from the adapter's own
+hidden-state residual,
+$\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$. This signal asks where the
+adapter actually changes the model, rather than where the output distribution
+appears uncertain or shifted, and requires no reward model, value head, or tree
+construction. Our experiments are designed to test whether adapter-residual
+credit remains non-degenerate under LoRA and whether preserving that structure
+improves RL fine-tuning under matched rollout budgets.
 \end{abstract}

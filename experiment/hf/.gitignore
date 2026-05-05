@@ -3,3 +3,8 @@ uv.lock
 *.egg-info/
 __pycache__/
 outputs/
+outputs_*/
+sprint_logs/
+sprint_logs_*/
+*.lock
+.nfs*

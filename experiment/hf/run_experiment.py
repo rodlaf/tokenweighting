@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import random
 import time
 from copy import deepcopy
@@ -29,6 +30,7 @@ from token_weights import (
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run ITW experiments on Qwen + GSM8K/MBPP.")
     parser.add_argument("--config", required=True, help="Path to a YAML experiment config.")
+    parser.add_argument("--output-root", help="Override config output_dir parent while preserving the run directory name.")
     parser.add_argument("--dry-run", action="store_true", help="Validate config, model, and dataset without training.")
     return parser.parse_args()
 
@@ -95,6 +97,8 @@ def _load_base_model(model_cfg: dict[str, Any]):
         "device_map": {"": 0},
         "trust_remote_code": model_cfg.get("trust_remote_code", False),
     }
+    if model_cfg.get("attn_implementation"):
+        load_kwargs["attn_implementation"] = model_cfg["attn_implementation"]
     if quantization_config is not None:
         load_kwargs["quantization_config"] = quantization_config
     else:
@@ -128,6 +132,13 @@ def build_model_and_tokenizer(model_cfg: dict[str, Any]):
         model = get_peft_model(model, peft_config)
         model.print_trainable_parameters()
         uses_lora = True
+
+    if model_cfg.get("gradient_checkpointing", False):
+        if hasattr(model, "enable_input_require_grads"):
+            model.enable_input_require_grads()
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+        if hasattr(model.config, "use_cache"):
+            model.config.use_cache = False
 
     return model, tokenizer, uses_lora
 
@@ -174,7 +185,14 @@ def compute_advantages(rewards: torch.Tensor, algorithm: str, eps: float = 1e-8)
     raise ValueError(f"Unsupported algorithm: {algorithm}")
 
 
-def gather_completion_logps(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None, return_hidden: bool = False):
+def gather_completion_logps(
+    model,
+    sequences: torch.Tensor,
+    prompt_width: int,
+    pad_token_id: int | None,
+    return_hidden: bool = False,
+    return_entropy: bool = False,
+):
     attention_mask = torch.ones_like(sequences, dtype=torch.long)
     if pad_token_id is not None:
         attention_mask = sequences.ne(pad_token_id).long()
@@ -186,7 +204,7 @@ def gather_completion_logps(model, sequences: torch.Tensor, prompt_width: int, p
     log_Z = torch.logsumexp(logits_f, dim=-1)
     token_logps = token_logits - log_Z
     del logits_f, token_logits, log_Z
-    entropies = entropy_from_logits(logits.detach())
+    entropies = entropy_from_logits(logits.detach()) if return_entropy else None
     if return_hidden:
         hidden = outputs.hidden_states[-1][:, prompt_width - 1 :, :]
         return token_logps, entropies, hidden
@@ -206,6 +224,21 @@ def gather_ref_logps(ref_model, sequences: torch.Tensor, prompt_width: int, pad_
     token_logits = torch.gather(logits_f, dim=-1, index=labels.unsqueeze(-1)).squeeze(-1)
     log_Z = torch.logsumexp(logits_f, dim=-1)
     return (token_logits - log_Z).detach()
+
+
+def gather_hidden_states(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None) -> torch.Tensor:
+    """Run a no-grad forward pass to obtain final hidden states for weighting."""
+    attention_mask = torch.ones_like(sequences, dtype=torch.long)
+    if pad_token_id is not None:
+        attention_mask = sequences.ne(pad_token_id).long()
+    with torch.no_grad():
+        outputs = model(
+            input_ids=sequences[:, :-1],
+            attention_mask=attention_mask[:, :-1],
+            use_cache=False,
+            output_hidden_states=True,
+        )
+    return outputs.hidden_states[-1][:, prompt_width - 1 :, :].detach()
 
 
 def gather_base_hidden_states(model, sequences: torch.Tensor, prompt_width: int, pad_token_id: int | None, uses_lora: bool) -> torch.Tensor:
@@ -262,11 +295,19 @@ def generate_group(
     prompt_width = repeated["input_ids"].size(1)
 
     was_training = model.training
+    was_gradient_checkpointing = bool(getattr(model, "is_gradient_checkpointing", False))
+    previous_use_cache = getattr(model.config, "use_cache", None) if hasattr(model, "config") else None
     model.eval()
+    if was_gradient_checkpointing and hasattr(model, "gradient_checkpointing_disable"):
+        # Rollout generation is no-grad inference; keep checkpointing only for the training forward.
+        model.gradient_checkpointing_disable()
+    if hasattr(model, "config"):
+        model.config.use_cache = True
     generate_kwargs = dict(
         **repeated,
         max_new_tokens=max_new_tokens,
         do_sample=do_sample,
+        use_cache=True,
         pad_token_id=tokenizer.pad_token_id,
         eos_token_id=tokenizer.eos_token_id,
         return_dict_in_generate=True,
@@ -274,10 +315,16 @@ def generate_group(
     if do_sample:
         generate_kwargs["temperature"] = temperature
         generate_kwargs["top_p"] = top_p
-    with torch.no_grad():
-        outputs = model.generate(**generate_kwargs)
-    if was_training:
-        model.train()
+    try:
+        with torch.no_grad():
+            outputs = model.generate(**generate_kwargs)
+    finally:
+        if hasattr(model, "config") and previous_use_cache is not None:
+            model.config.use_cache = previous_use_cache
+        if was_gradient_checkpointing and hasattr(model, "gradient_checkpointing_enable"):
+            model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+        if was_training:
+            model.train()
 
     sequences = outputs.sequences
     completion_ids = sequences[:, prompt_width:]
@@ -298,16 +345,19 @@ def compute_loss(
     ref_model=None,
     uses_lora: bool = True,
 ) -> tuple[torch.Tensor, dict[str, float]]:
-    need_hidden = weighting_mode == "adapter_residual"
-    result = gather_completion_logps(model, sequences, prompt_width, tokenizer.pad_token_id, return_hidden=need_hidden)
-    if need_hidden:
-        token_logps, entropies, hidden_states = result
-    else:
-        token_logps, entropies = result
+    need_entropy = weighting_mode == "entropy_reduction"
+    token_logps, entropies = gather_completion_logps(
+        model,
+        sequences,
+        prompt_width,
+        tokenizer.pad_token_id,
+        return_entropy=need_entropy,
+    )
 
     steps = min(token_logps.size(1), completion_mask.size(1))
     token_logps = token_logps[:, :steps]
-    entropies = entropies[:, :steps]
+    if entropies is not None:
+        entropies = entropies[:, :steps]
     completion_mask = completion_mask[:, :steps]
 
     ref_token_logps = None
@@ -325,7 +375,7 @@ def compute_loss(
     if weighting_mode == "adapter_residual":
         if not uses_lora:
             raise ValueError("adapter_residual weighting requires LoRA to be enabled")
-        adapted_hidden = hidden_states[:, :steps, :].detach()
+        adapted_hidden = gather_hidden_states(model, sequences, prompt_width, tokenizer.pad_token_id)[:, :steps, :]
         base_hidden = gather_base_hidden_states(model, sequences, prompt_width, tokenizer.pad_token_id, uses_lora=True)[:, :steps, :]
         adapter_residual_norms = adapter_residual_norms_from_hidden(adapted_hidden, base_hidden).detach()
 
@@ -357,34 +407,41 @@ def evaluate(model, tokenizer, dataset, config: dict[str, Any]) -> dict[str, Any
     eval_cfg = config["evaluation"]
     train_cfg = config["training"]
     examples = [dataset[i] for i in range(min(eval_cfg["num_examples"], len(dataset)))]
-    prompts = [example["prompt"] for example in examples]
+    batch_size = eval_cfg.get("batch_size", 8)
 
-    _, _, _, _, greedy_texts, _ = generate_group(
-        model,
-        tokenizer,
-        prompts,
-        num_generations=1,
-        max_prompt_length=train_cfg["max_prompt_length"],
-        max_new_tokens=train_cfg["max_new_tokens"],
-        temperature=train_cfg.get("temperature", 0.8),
-        top_p=train_cfg.get("top_p", 0.95),
-        do_sample=False,
-    )
-    greedy_rewards = score_completions(examples, greedy_texts, timeout=eval_cfg.get("code_timeout", 3.0))
+    greedy_rewards = []
+    sampled_rewards = []
+    for start in range(0, len(examples), batch_size):
+        batch_examples = examples[start : start + batch_size]
+        prompts = [example["prompt"] for example in batch_examples]
 
-    _, _, _, _, sampled_texts, _ = generate_group(
-        model,
-        tokenizer,
-        prompts,
-        num_generations=eval_cfg["pass_k"],
-        max_prompt_length=train_cfg["max_prompt_length"],
-        max_new_tokens=train_cfg["max_new_tokens"],
-        temperature=train_cfg.get("temperature", 0.8),
-        top_p=train_cfg.get("top_p", 0.95),
-        do_sample=True,
-    )
-    repeated_examples = [example for example in examples for _ in range(eval_cfg["pass_k"])]
-    sampled_rewards = score_completions(repeated_examples, sampled_texts, timeout=eval_cfg.get("code_timeout", 3.0))
+        _, _, _, _, greedy_texts, _ = generate_group(
+            model,
+            tokenizer,
+            prompts,
+            num_generations=1,
+            max_prompt_length=train_cfg["max_prompt_length"],
+            max_new_tokens=train_cfg["max_new_tokens"],
+            temperature=train_cfg.get("temperature", 0.8),
+            top_p=train_cfg.get("top_p", 0.95),
+            do_sample=False,
+        )
+        greedy_rewards.extend(score_completions(batch_examples, greedy_texts, timeout=eval_cfg.get("code_timeout", 3.0)))
+
+        _, _, _, _, sampled_texts, _ = generate_group(
+            model,
+            tokenizer,
+            prompts,
+            num_generations=eval_cfg["pass_k"],
+            max_prompt_length=train_cfg["max_prompt_length"],
+            max_new_tokens=train_cfg["max_new_tokens"],
+            temperature=train_cfg.get("temperature", 0.8),
+            top_p=train_cfg.get("top_p", 0.95),
+            do_sample=True,
+        )
+        repeated_examples = [example for example in batch_examples for _ in range(eval_cfg["pass_k"])]
+        sampled_rewards.extend(score_completions(repeated_examples, sampled_texts, timeout=eval_cfg.get("code_timeout", 3.0)))
+
     grouped_rewards = [sampled_rewards[i : i + eval_cfg["pass_k"]] for i in range(0, len(sampled_rewards), eval_cfg["pass_k"])]
 
     return {
@@ -407,6 +464,19 @@ def maybe_save_checkpoint(model, tokenizer, output_dir: Path, step: int) -> None
 def run_training(config: dict[str, Any], dry_run: bool) -> None:
     seed_everything(config["seed"])
     output_dir = ensure_dir(Path(config["output_dir"]))
+    final_eval_path = output_dir / "final_eval.json"
+    if final_eval_path.exists() and not dry_run:
+        raise FileExistsError(
+            f"{final_eval_path} already exists; refusing to overwrite a completed run. "
+            "Use a fresh output_dir or move the existing artifacts first."
+        )
+    if not dry_run:
+        for stale in output_dir.glob("eval_step_*.json"):
+            stale.unlink()
+        for stale_name in ["train_metrics.jsonl", "final_eval.json", "final_eval_math.json", "final_eval_gsm8k.json"]:
+            stale = output_dir / stale_name
+            if stale.exists():
+                stale.unlink()
     save_json(output_dir / "resolved_config.json", config)
 
     model, tokenizer, uses_lora = build_model_and_tokenizer(config["model"])
@@ -563,6 +633,9 @@ def validate_config(config: dict[str, Any]) -> None:
 def main() -> None:
     args = parse_args()
     config = load_config(args.config)
+    output_root = args.output_root or os.environ.get("EXPERIMENT_OUTPUT_ROOT")
+    if output_root:
+        config["output_dir"] = str(Path(output_root) / Path(config["output_dir"]).name)
     validate_config(config)
     run_training(config, dry_run=args.dry_run)
 

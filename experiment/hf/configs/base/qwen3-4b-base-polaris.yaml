@@ -6,9 +6,9 @@
 #   - Internal company recipe for verifiable-reward RL on Qwen2.5-7B.
 #
 # Notes:
-#   * batch_size=1 + grad_accum=16 -> effective batch 16 prompts/step.
+#   * batch_size=2 + grad_accum=8 -> effective batch 16 prompts/step.
 #     With num_generations=8 that is 128 rollouts/step.
-#   * Training runs for 400 steps (-> ~51k rollouts seen, ~1 epoch over POLARIS).
+#   * Deadline run trains for 150 steps (19.2k rollouts) to finish by May 6.
 #   * Primary eval: POLARIS held-out 1k (deterministic split).
 #     Bonus end-of-training evals: MATH-500, GSM8K-200 (OOD generalization).
 #
@@ -22,6 +22,8 @@ model:
   name_or_path: Qwen/Qwen3-4B-Base
   torch_dtype: bfloat16
   load_in_4bit: false
+  attn_implementation: sdpa
+  gradient_checkpointing: true
   lora:
     enabled: true
     r: 64
@@ -38,12 +40,12 @@ dataset:
 training:
   algorithm: rloo
   weighting: uniform
-  train_steps: 400
-  batch_size: 1
-  grad_accum_steps: 16
+  train_steps: 150
+  batch_size: 2
+  grad_accum_steps: 8
   learning_rate: 5.0e-6
   weight_decay: 0.0
-  warmup_steps: 40
+  warmup_steps: 15
   num_generations: 8
   max_prompt_length: 512
   max_new_tokens: 1024
@@ -51,11 +53,12 @@ training:
   top_p: 0.95
   max_grad_norm: 1.0
   eval_every: 50
-  save_every: 100
+  save_every: 50
 
 evaluation:
   num_examples: 1000
   pass_k: 4
+  batch_size: 4
   code_timeout: 3.0
   bonus_evals:
     - name: math

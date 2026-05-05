@@ -24,50 +24,50 @@ detail.
 
 In this work we argue that this separation is a mistake, and that the
 \emph{interaction} between PEFT and credit assignment is itself a first-class
-scientific object. We make the case through three contributions.
-
-\paragraph{Diagnosis: LoRA collapses intrinsic credit signals.} Intrinsic
-token-level weighting schemes derive per-token salience from quantities such
-as surprisal, entropy reduction, or divergence between the policy and a
-reference model. Under LoRA, however, the policy is constrained to a small
-low-rank neighbourhood of the reference, and the per-token differences that
-these signals measure become approximately uniform across positions. We
-formalize this as a collapse of the per-token salience distribution toward
-uniform broadcast, characterize it via its Gini coefficient and effective
-token count, and show that the collapse reproduces across surprisal-,
-entropy-reduction-, and divergence-based weighting. This provides a mechanistic
+scientific object. Intrinsic token-level weighting schemes derive per-token
+salience from quantities such as surprisal, entropy reduction, or divergence
+between the policy and a reference model. Under LoRA, however, the policy is
+constrained to a small low-rank neighbourhood of the reference, and the
+per-token differences that these signals measure become approximately uniform
+across positions. We formalize this as a collapse of the salience distribution
+toward uniform broadcast, characterize it with Gini coefficient and effective
+token count, and show that the collapse reproduces across multiple
+output-distribution-based weighting rules. This gives a mechanistic
 explanation for the empirically observed failure of full-token
 GRPO~+~LoRA~\citep{lee2025tokenefficientrl}: the weighting signal itself is
 degraded before training ever begins.
 
-\paragraph{Method: Adapter-Residual Token Weighting.} Rather than attempting
-to recover per-token structure from signals that are intrinsically flattened
-under LoRA, we propose to measure per-token salience directly from the
-adapter's own contribution to the forward pass. Adapter-Residual Token
-Weighting (ARTW) sets the salience at position $t$ equal to the norm of the
-adapter residual, $\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$, computed
-via a forward pass with the adapter disabled. This signal is positive
-whenever the adapter is active, non-uniform across positions by construction
-(because adapter input activations are non-uniform), and requires no
-additional networks, reward models, or tree constructions. It reuses exactly
-the adapter-disabled forward pass already needed for KL regularization and
-divergence weighting.
+Rather than trying to recover per-token structure from signals that LoRA
+intrinsically flattens, we measure salience directly from the adapter's own
+contribution to the forward pass. Adapter-Residual Credit Assignment (ARCA)
+sets the salience at position $t$ equal to the norm of the adapter residual,
+$\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$, computed via a forward pass
+with the adapter disabled. This signal is positive whenever the adapter is
+active, non-uniform across positions because adapter input activations are
+non-uniform, and requires no additional networks, reward models, or tree
+construction. It reuses the same adapter-disabled forward pass already needed
+for KL regularization and divergence weighting.
 
-\paragraph{Framework: Unified diagnostic evaluation.} We reframe our
-experimental comparison from "which weighting scheme wins" to "which
-weighting schemes remain non-degenerate under PEFT." We report a unified set
-of concentration diagnostics (Gini coefficient, effective token count,
-greedy accuracy, pass@$k$) across uniform, surprisal, entropy-reduction,
-divergence, critic, and ARTW weighting under both RLOO and GRPO, and
-characterize how these diagnostics change with LoRA rank. The framework
-makes it possible to distinguish between credit-assignment methods that
-\emph{could} work in principle and methods that actually
-\emph{retain signal} under the adaptation strategy in use.
+Concretely, this paper makes three contributions:
+\begin{enumerate}
+    \item We identify and formalize a PEFT-specific failure mode of intrinsic
+    token weighting: under LoRA, surprisal-, entropy-, and
+    divergence-derived salience can collapse toward uniform token credit even
+    when the underlying RL objective is unchanged.
+    \item We introduce ARCA, a lightweight adapter-residual credit assignment
+    rule whose normalized token weights remain non-degenerate whenever the
+    adapter has position-varying hidden-state impact.
+    \item We provide a diagnostic evaluation framework that reports both
+    downstream reward metrics and concentration metrics, making it possible
+    to separate methods that merely define token weights from methods whose
+    weights retain usable signal under the adaptation regime actually used in
+    LLM-RL.
+\end{enumerate}
 
 The remainder of the paper develops these contributions. Section
 \ref{sec:related-work} positions the work relative to the token-level
 credit-assignment and PEFT-for-RL literatures. Section \ref{sec:methods}
 presents the weighting schemes, proves the collapse result formally, and
-defines ARTW. Section \ref{sec:theoretical} analyses the bias--variance
+defines ARCA. Section \ref{sec:theoretical} analyses the bias--variance
 behaviour of the method. Section \ref{sec:experiments} reports the diagnostic
 and performance comparison on GSM8K with Qwen2.5 under multiple LoRA ranks.

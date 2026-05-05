@@ -14,14 +14,14 @@ position-uniform, collapsing surprisal-, entropy-reduction-, and
 divergence-weighted updates to near-uniform broadcast. We provide a theoretical
 characterization of this collapse, supported by a unified diagnostic
 measurement (weight Gini and effective-token-count) across five weighting
-schemes. We then propose \emph{Adapter-Residual Token Weighting} (ARTW), a
+schemes. We then propose \emph{Adapter-Residual Credit Assignment} (ARCA), a
 credit-assignment mechanism that sidesteps the collapse by deriving per-token
 salience directly from the adapter's own hidden-state residual
 $\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$, a signal that is guaranteed
-to be non-degenerate whenever the adapter is non-trivially active. ARTW
+to be non-degenerate whenever the adapter is non-trivially active. ARCA
 requires no additional networks, reward models, or tree construction, and
 reuses infrastructure already needed for KL-regularized LoRA RL. Experiments
-on GSM8K with Qwen2.5 demonstrate that ARTW is the only intrinsic weighting
+on GSM8K with Qwen2.5 demonstrate that ARCA is the only intrinsic weighting
 scheme that maintains non-degenerate per-token structure under LoRA, and
 provides a concrete fix for the PEFT-credit interaction that no prior
 token-level method addresses.

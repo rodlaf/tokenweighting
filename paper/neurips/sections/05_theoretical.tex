@@ -159,13 +159,13 @@ property of measuring per-token variation through the output distribution
 when the policy has been constrained to a small neighbourhood of the
 reference.
 
-\subsection{ARTW and Position-Discriminative Signal}\label{sec:theory-artw}
+\subsection{ARCA and Position-Discriminative Signal}\label{sec:theory-arca}
 
-ARTW side-steps the collapse by measuring a quantity that is position-varying
+ARCA side-steps the collapse by measuring a quantity that is position-varying
 even when the adapter's logit-space impact is small.
 
-\begin{proposition}[ARTW remains non-degenerate]
-\label{prop:artw-nondeg}
+\begin{proposition}[ARCA remains non-degenerate]
+\label{prop:arca-nondeg}
 Suppose the adapter-induced residual admits the decomposition $\Delta h_t =
 \sum_\ell B_\ell A_\ell x_{\ell,t}^{\mathrm{pre}} + e_t$, where
 $x_{\ell,t}^{\mathrm{pre}}$ is the pre-adapter activation at layer $\ell$ and
@@ -174,23 +174,23 @@ $v_{\ell,t} = B_\ell A_\ell x_{\ell,t}^{\mathrm{pre}}$ and define
 $V_\ell = \mathrm{Var}_t(\|v_{\ell,t}\|)$ and $\bar{V}_\ell =
 \mathbb{E}_t[\|v_{\ell,t}\|]$. Then
 \[
-\mathrm{Var}_t(\alpha_t^{\mathrm{ARTW}}) \ge \max_\ell V_\ell
+\mathrm{Var}_t(\alpha_t^{\mathrm{ARCA}}) \ge \max_\ell V_\ell
 - O\!\left(\sum_{\ell}\bar{V}_\ell \, \|e_t\|\right).
 \]
 In particular, as long as the pre-adapter activations
 $x_{\ell,t}^{\mathrm{pre}}$ have non-trivial position-to-position variance at
-any layer, $\alpha_t^{\mathrm{ARTW}}$ has bounded-below variance across
-positions, and its normalized weights $w_t^{\mathrm{ARTW}}$ do not converge
+any layer, $\alpha_t^{\mathrm{ARCA}}$ has bounded-below variance across
+positions, and its normalized weights $w_t^{\mathrm{ARCA}}$ do not converge
 to the uniform distribution as the adapter shrinks uniformly.
 \end{proposition}
 
-The intuitive content of Proposition~\ref{prop:artw-nondeg} is that ARTW
+The intuitive content of Proposition~\ref{prop:arca-nondeg} is that ARCA
 inherits its position-discrimination from the \emph{base model's own
 activation pattern} (which is already non-uniform because attention and
 layer norm routing produce content-versus-filler distinctions) rather than
 from a quantity that LoRA is specifically constrained to make small. Scaling
-the adapter weights uniformly scales $\alpha^{\mathrm{ARTW}}$ uniformly, so
-the normalized weights $w^{\mathrm{ARTW}}$ are scale-invariant in the
+the adapter weights uniformly scales $\alpha^{\mathrm{ARCA}}$ uniformly, so
+the normalized weights $w^{\mathrm{ARCA}}$ are scale-invariant in the
 adapter magnitude.
 
 \subsection{Bias--Variance Tradeoff}
@@ -214,5 +214,5 @@ offers an alternative that leverages the structure of the language model's
 predictive distribution, without assuming the existence of meaningful state
 values. Under LoRA, however, the output-distribution-based signals that
 most published weighting methods rely on are driven toward uniform; the
-adapter-residual signal that ARTW uses is, by Proposition~\ref{prop:artw-nondeg},
+adapter-residual signal that ARCA uses is, by Proposition~\ref{prop:arca-nondeg},
 provably non-degenerate in the same regime.

@@ -196,7 +196,7 @@ benefit they were designed to deliver. This is \emph{not} a problem with the
 underlying signals; it is a structural consequence of applying them inside a
 low-rank adaptation.
 
-\subsection{Adapter-Residual Token Weighting (ARTW)}\label{sec:artw}
+\subsection{Adapter-Residual Credit Assignment (ARCA)}\label{sec:arca}
 
 The collapse result motivates a different design choice. Rather than measuring
 per-token properties of the \emph{output distribution} (whose shape is
@@ -207,22 +207,22 @@ properties of the \emph{adapter's own contribution} to the forward pass.
 Given a model with a LoRA adapter, let $h_t^{\mathrm{adapted}}$ denote the
 last-layer hidden state at position $t$ with the adapter enabled, and
 $h_t^{\mathrm{base}}$ the same hidden state with the adapter disabled.
-Define the Adapter-Residual Token Weighting salience as
+Define the Adapter-Residual Credit Assignment salience as
 \begin{equation}
-\alpha_t^{\mathrm{ARTW}}(x, y) = \lVert h_t^{\mathrm{adapted}} -
+\alpha_t^{\mathrm{ARCA}}(x, y) = \lVert h_t^{\mathrm{adapted}} -
 h_t^{\mathrm{base}} \rVert_2,
 \end{equation}
 and normalize within the trajectory as in
 equation~\eqref{eq:normalize} to obtain per-token weights
-$w_t^{\mathrm{ARTW}}$. The adapter residual is computed once per minibatch
+$w_t^{\mathrm{ARCA}}$. The adapter residual is computed once per minibatch
 via an extra no-grad forward pass with the adapter disabled, using
 \texttt{model.disable\_adapter()} in frameworks such as PEFT. This is exactly
 the same call already required to compute a KL regularizer against the
-reference policy or to support divergence weighting, so ARTW adds no new
+reference policy or to support divergence weighting, so ARCA adds no new
 infrastructure.
 
-\paragraph{Why ARTW does not collapse.}
-The key property that distinguishes ARTW from the intrinsic schemes above is
+\paragraph{Why ARCA does not collapse.}
+The key property that distinguishes ARCA from the intrinsic schemes above is
 that it measures a quantity whose \emph{per-token} value is actively shaped by
 the attention and MLP pathways through which the adapter input activations are
 routed. Even for a low-rank adapter with small $\|B_\ell A_\ell\|$, the
@@ -230,12 +230,12 @@ input activations $x_{\ell,t}$ are non-uniform across positions (attention
 patterns, layer norms, and content-versus-filler distinctions are already
 non-uniform in the base model), so $\|\Delta h_t\|$ retains non-trivial
 position-to-position variation. Formally, as the adapter rank goes to zero
-the signal $\alpha_t^{\mathrm{ARTW}}$ vanishes uniformly, but its
-\emph{normalized} counterpart $w_t^{\mathrm{ARTW}}$ remains non-degenerate
+the signal $\alpha_t^{\mathrm{ARCA}}$ vanishes uniformly, but its
+\emph{normalized} counterpart $w_t^{\mathrm{ARCA}}$ remains non-degenerate
 as long as the adapter is nontrivially active at \emph{any} position.
 
 \paragraph{Interpretation as implicit gradient-informed credit.}
-ARTW can be read as a cheap proxy for a gradient-based notion of token
+ARCA can be read as a cheap proxy for a gradient-based notion of token
 importance. Positions at which the adapter contribution is large are
 positions at which the adapter's parameter gradient has high contribution to
 the loss, and therefore positions where a policy-gradient update can have
@@ -253,13 +253,13 @@ policy divergence) are the natural baselines within our framework and map
 cleanly to published methods (e.g., divergence weighting corresponds to the
 divergence-advantage analyses of \emph{Sparse but
 Critical}~\cite{meng2026sparsebutcritical}, entropy-based weighting
-to~\cite{he2026eapo,yu2026erpo}). ARTW is the only scheme we
+to~\cite{he2026eapo,yu2026erpo}). ARCA is the only scheme we
 study that uses an explicitly \emph{adaptation-aware} signal. Unlike
-critic-based PPO, ARTW does not learn a value head. Unlike RED, PRIME, or
-token-level reward-model methods, ARTW does not construct dense rewards from
-an auxiliary model. Unlike TEMPO or related tree-based methods, ARTW does not
+critic-based PPO, ARCA does not learn a value head. Unlike RED, PRIME, or
+token-level reward-model methods, ARCA does not construct dense rewards from
+an auxiliary model. Unlike TEMPO or related tree-based methods, ARCA does not
 build prefix graphs or estimate branch values. Unlike hard token-selection
-methods based on top-entropy masking, ARTW retains a dense token update but
+methods based on top-entropy masking, ARCA retains a dense token update but
 modulates it continuously using an intrinsic salience score derived from the
 adapter itself.
 

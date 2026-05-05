@@ -84,7 +84,7 @@ divergence-based selection rule for identifying them~\cite{meng2026sparsebutcrit
 methods are the closest concurrent work to the intrinsic weighting schemes that form
 our baselines; the present paper does \emph{not} claim priority over them. Instead,
 our contribution is to show that their underlying signals are structurally degraded
-under LoRA, and to provide a credit-assignment mechanism (ARTW) that does not suffer
+under LoRA, and to provide a credit-assignment mechanism (ARCA) that does not suffer
 the same degradation.
 
 \subsection{Fine-Grained Credit Assignment Beyond Uniform Token Updates}
@@ -183,7 +183,7 @@ finetuning leaves clearly readable traces in the activation differences between
 base and finetuned hidden states, and that the finetuning domain can be
 recovered from those differences alone using simple diffing tools such as
 patchscopes and activation steering~\cite{minder2025narrowfinetuning}. This is
-directly relevant to ARTW because the adapter residual
+directly relevant to ARCA because the adapter residual
 $h^{\mathrm{adapted}}_t - h^{\mathrm{base}}_t$ is a per-position activation
 difference of exactly the kind they study; their results supply empirical
 evidence that this difference carries meaningful, semantically non-trivial
@@ -191,7 +191,7 @@ content---the property our method exploits. Concurrent work on
 TopLoRA studies how to concentrate LoRA capacity on a small number of
 high-impact tokens via token-wise input-output projections~\cite{li2025toplora}. This can be
 viewed as a complementary response to the same underlying problem: TopLoRA modifies the adapter itself so that
-its capacity is allocated more selectively, while ARTW leaves the adapter unchanged but
+its capacity is allocated more selectively, while ARCA leaves the adapter unchanged but
 reweights the policy gradient so that token updates reflect where the adapter actually
 had non-trivial influence. To our knowledge, no prior work has characterized the
 interaction between LoRA and token-level credit assignment, nor proposed an
@@ -219,5 +219,5 @@ has converged on}: under LoRA they collapse toward uniform, so any paper that re
 null result for ``fancy intrinsic weighting versus uniform'' under LoRA is observing a
 LoRA artefact, not evidence against token-level credit assignment. We formalize this,
 supply a unified diagnostic (Gini/EffN) that makes the collapse visible at training
-time, and propose ARTW as an adaptation-aware alternative whose construction directly
+time, and propose ARCA as an adaptation-aware alternative whose construction directly
 avoids the failure mode we identify.

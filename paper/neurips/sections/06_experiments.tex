@@ -2,7 +2,7 @@
 
 Our experiments are designed around the thesis of Section~\ref{sec:methods}:
 that under LoRA, intrinsic credit-assignment signals collapse to uniform,
-and that Adapter-Residual Token Weighting (ARTW) is the only intrinsic
+and that Adapter-Residual Credit Assignment (ARCA) is the only intrinsic
 scheme we study that preserves per-token structure in this regime. We
 therefore report two complementary comparisons: a \emph{diagnostic
 comparison} that measures the distribution of token weights produced by
@@ -35,11 +35,11 @@ regime, isolating the weighting scheme as the only algorithmic difference.
 
 \paragraph{Weighting schemes.} We compare six weighting schemes: uniform
 (baseline), surprisal, entropy-reduction, policy-divergence, critic-based
-(learned value head), and ARTW. The first four are intrinsic schemes
+(learned value head), and ARCA. The first four are intrinsic schemes
 described in Section~\ref{sec:methods}. The critic-based scheme follows a
 learned value head trained with MSE against trajectory return and provides
 a strong within-family comparison to the token-level-actor-critic
-literature. ARTW is our proposed method.
+literature. ARCA is our proposed method.
 
 \paragraph{Baselines.} Every weighting scheme is combined with both RLOO
 and GRPO prompt-level advantages, giving a $6 \times 2$ grid of
@@ -59,7 +59,7 @@ receives all credit), $G \to 1$ and $\mathrm{EffN}/T \to 1/T$.
 \caption{\textbf{Signal collapse under LoRA.} Weight concentration
 metrics (Gini coefficient and effective-token ratio) averaged across
 training under different adaptation strategies. All intrinsic
-output-distribution signals collapse toward uniform under LoRA; ARTW
+output-distribution signals collapse toward uniform under LoRA; ARCA
 remains non-degenerate. Numbers to be filled from completed runs.}
 \label{tab:collapse}
 \begin{tabular}{l cc cc}
@@ -76,7 +76,7 @@ Entropy reduction       & \textit{tbd} & \textit{tbd}
                         & \textit{tbd} & \textit{tbd} \\
 Policy divergence       & \textit{tbd} & \textit{tbd}
                         & \textit{tbd} & \textit{tbd} \\
-ARTW                    & \textit{tbd} & \textit{tbd}
+ARCA                    & \textit{tbd} & \textit{tbd}
                         & \textit{tbd} & \textit{tbd} \\
 \bottomrule
 \end{tabular}
@@ -86,7 +86,7 @@ Table~\ref{tab:collapse} reports the diagnostic result. The prediction from
 Propositions~\ref{prop:surprisal-collapse}
 and~\ref{prop:divergence-collapse} is that surprisal, entropy-reduction, and
 policy-divergence weighting under LoRA produce $G(w)$ and
-$\mathrm{EffN}/T$ close to the uniform limits, and that ARTW produces
+$\mathrm{EffN}/T$ close to the uniform limits, and that ARCA produces
 substantially more concentrated weights. The full-parameter column serves
 as a control showing that, without the LoRA constraint, intrinsic schemes
 do produce meaningfully non-uniform distributions.
@@ -113,7 +113,7 @@ Surprisal           & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} 
 Entropy reduction   & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
 Policy divergence   & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
 Critic              & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-ARTW                & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+ARCA                & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -121,7 +121,7 @@ ARTW                & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} 
 Our hypothesis, consistent with Table~\ref{tab:collapse}, is that under
 LoRA the intrinsic output-distribution schemes should perform
 indistinguishably from uniform (because their realized token weights
-\emph{are} approximately uniform), while ARTW should produce the only
+\emph{are} approximately uniform), while ARCA should produce the only
 meaningful gap. Table~\ref{tab:gsm8k} is the corresponding downstream
 measurement.
 
@@ -132,8 +132,8 @@ measurement.
 \fbox{\rule{0pt}{4.5cm}\rule{0.9\linewidth}{0pt}}
 \caption{\textbf{LoRA rank ablation.} Left: weight concentration
 ($\mathrm{EffN}/T$) as a function of LoRA rank for surprisal,
-policy-divergence, and ARTW weighting. Right: GSM8K greedy accuracy for
-uniform and ARTW weighting at each rank. The plots isolate how adapter
+policy-divergence, and ARCA weighting. Right: GSM8K greedy accuracy for
+uniform and ARCA weighting at each rank. The plots isolate how adapter
 capacity modulates both the collapse and the rescue effect. Plot to be
 generated from completed runs.}
 \label{fig:rank-ablation}
@@ -143,10 +143,10 @@ Varying LoRA rank $r \in \{4, 8, 16, 32, 64\}$ allows us to test the
 quantitative prediction of Section~\ref{sec:collapse}: as $r$ decreases,
 the per-token log-probability differential becomes increasingly uniform
 across positions, so intrinsic output-distribution schemes collapse
-\emph{more strongly} to uniform. ARTW, whose position-discriminative power
+\emph{more strongly} to uniform. ARCA, whose position-discriminative power
 is inherited from the base model's own activation pattern rather than from
 the adapter's logit impact, is predicted by
-Proposition~\ref{prop:artw-nondeg} to be comparatively robust.
+Proposition~\ref{prop:arca-nondeg} to be comparatively robust.
 Figure~\ref{fig:rank-ablation} reports the corresponding sweep.
 
 \subsection{Methods Compared at a Glance}
@@ -158,8 +158,8 @@ The implemented training variants, shipped as YAML configs under
     uniform, GRPO + uniform, RLOO + surprisal, GRPO + surprisal, RLOO +
     entropy-reduction, GRPO + entropy-reduction, RLOO + divergence,
     GRPO + divergence, RLOO + critic.
-    \item \textbf{Proposed (ARTW):} RLOO + ARTW, GRPO + ARTW.
-    \item \textbf{LoRA rank ablation:} RLOO + ARTW at $r \in \{4, 64\}$
+    \item \textbf{Proposed (ARCA):} RLOO + ARCA, GRPO + ARCA.
+    \item \textbf{LoRA rank ablation:} RLOO + ARCA at $r \in \{4, 64\}$
     paired with RLOO + uniform at the same ranks.
 \end{itemize}
 All configs share rollout count, prompt formatting, optimizer, learning
@@ -175,13 +175,13 @@ current policy, computes binary rewards after full generation, constructs
 either RLOO or GRPO prompt-level advantages, and applies the weighted
 token-level objective from Section~\ref{sec:methods}. For modes that need
 them, the script additionally computes reference-model log-probabilities
-(via \texttt{model.disable\_adapter()} under LoRA) and, for ARTW, the
+(via \texttt{model.disable\_adapter()} under LoRA) and, for ARCA, the
 per-token adapter-residual norm from the last-layer hidden states.
 
 The code records the following metrics at every logging interval: (i)
 greedy accuracy on the evaluation split, (ii) pass@$k$, (iii) reward mean
 and variance, (iv) completion length, (v) the Gini and effective-token
-metrics described above, and (vi) for ARTW, the mean and maximum
+metrics described above, and (vi) for ARCA, the mean and maximum
 per-token adapter-residual norm. These six metrics jointly allow us to
 check whether a weighting scheme produced a meaningful signal
 (metric group v), whether it actually trained (groups iii, iv), and
@@ -191,7 +191,7 @@ whether it improved downstream behaviour (groups i, ii).
 
 The implementation is intentionally compact: intrinsic token weights are
 computed from quantities already produced by the policy during rollout or
-the subsequent teacher-forced forward pass. ARTW adds at most one
+the subsequent teacher-forced forward pass. ARCA adds at most one
 adapter-disabled forward pass per minibatch, which is identical to the
 forward pass already needed for KL regularization against the reference
 policy; this overhead is negligible relative to sampling costs. All runs

@@ -1,25 +1,19 @@
-# tokenweighting
+# ARCA
 
-Intrinsic token weighting (ITW) experiments for critic-free RL on language models.
+Code for the ARCA paper: adapter-residual token credit assignment for LoRA-based
+LLM reinforcement learning.
 
-This branch implements the paper's actual experiment scaffolding rather than a synthetic benchmark:
-- Qwen/Qwen2.5-Math-1.5B-Instruct on GSM8K
-- Qwen/Qwen2.5-Coder-1.5B-Instruct on MBPP
-- RLOO and GRPO baselines
-- uniform, surprisal, and entropy-reduction token weighting
+The reported sweep fine-tunes `Qwen/Qwen3-1.7B-Base` on MATH with GRPO, binary
+exact-match rewards, and LoRA. It compares uniform, surprisal,
+entropy-reduction, policy-divergence, and adapter-residual (ARCA) token
+weighting.
 
-Main entrypoint
-- `python experiment/run_experiment.py --config <config.yaml>`
+```bash
+cd experiment/hf
+uv sync
+CUDA_VISIBLE_DEVICES=0 uv run python run_experiment.py \
+  --config configs/experiments/qwen3-1.7b-base-math-deadline-grpo-adapter-residual-r64-s1337.yaml
+```
 
-Useful configs
-- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-uniform.yaml`
-- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-surprisal.yaml`
-- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-rloo-entropy.yaml`
-- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-grpo-uniform.yaml`
-- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-grpo-surprisal.yaml`
-- `experiment/configs/experiments/qwen25-math-1.5b-gsm8k-grpo-entropy.yaml`
-- `experiment/configs/experiments/qwen25-coder-1.5b-mbpp-rloo-uniform.yaml`
-- `experiment/configs/experiments/qwen25-coder-1.5b-mbpp-rloo-surprisal.yaml`
-- `experiment/configs/experiments/qwen25-coder-1.5b-mbpp-rloo-entropy.yaml`
-
-See `experiment/README.md` for install and run instructions.
+The seven paper configs live under `experiment/hf/configs/experiments/` as
+`qwen3-1.7b-base-math-deadline-grpo-*.yaml`.

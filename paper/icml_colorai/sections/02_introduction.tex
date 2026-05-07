@@ -1,0 +1,73 @@
+\section{Introduction}
+
+Reinforcement learning has become a central component of large language model
+(LLM) post-training, particularly for alignment and for reasoning-oriented
+tasks with verifiable rewards. A persistent challenge across these settings is
+\emph{credit assignment}: trajectories are long, rewards are sparse and
+outcome-level, and it is not obvious how a single scalar signal at the end of
+a generation should be distributed across hundreds or thousands of token
+decisions. Recent work has responded with a rapidly growing toolbox of
+token-level credit-assignment methods, including entropy-aware modulation,
+process reward models, tree-based prefix values, and reward
+redistribution~\citep{cui2025prime,li2024red,tran2025tempo,wang2025beyond8020,he2026eapo,yu2026erpo,kazemnejad2024vineppo}.
+
+In parallel, many open-source and academic LLM-RL pipelines use
+parameter-efficient fine-tuning, especially LoRA~\citep{hu2021lora}, because of
+memory and compute constraints; widely used frameworks such as TRL and verl
+support this workflow. Recent results show that LoRA + RL can be dramatically
+more sample- and parameter-efficient than full fine-tuning~\citep{wang2025tina}. Yet
+the two research threads are developed in near-total isolation. Papers on
+token-level credit assignment specify methods without reference to the
+adaptation strategy, and PEFT is treated as an orthogonal implementation
+detail.
+
+In this work we argue that this separation is a mistake, and that the
+\emph{interaction} between PEFT and credit assignment is itself a first-class
+methodological issue. The core issue is geometric. Intrinsic token-level
+weighting schemes derive per-token salience from quantities such as
+surprisal, entropy reduction, or divergence between the policy and a reference
+model. Under LoRA, however, the policy is constrained to a small low-rank
+neighborhood of the reference, and the per-token differences that these
+signals measure can lose the variation that made them useful. We formalize
+this as degeneration of the normalized salience distribution, characterize it
+with Gini coefficient and effective token count, and
+show that the same mechanism applies across multiple
+output-distribution-based weighting rules. This gives a mechanistic
+explanation for the empirically observed failure of full-token
+GRPO~+~LoRA~\citep{lee2025tokenefficientrl}: the weighting signal itself is
+degraded before training ever begins.
+
+Rather than trying to recover per-token structure from signals that LoRA
+intrinsically flattens, we measure salience directly from the adapter's own
+contribution to the forward pass. Adapter-Residual Credit Assignment (ARCA)
+sets the salience at position $t$ equal to the norm of the adapter residual,
+$\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$, computed via a forward pass
+with the adapter disabled. This signal is positive whenever the adapter is
+active, non-uniform across positions because adapter input activations are
+non-uniform, and requires no additional networks, learned reward models, or tree
+construction.
+
+Concretely, this paper makes three contributions:
+\begin{enumerate}
+    \item We identify and formalize a PEFT-specific failure mode of token
+    credit assignment: under LoRA, output-distribution salience can degenerate
+    into uniform broadcast or spurious sparsity, even when the underlying RL
+    objective is unchanged.
+    \item We introduce ARCA, a lightweight adapter-residual credit assignment
+    rule whose normalized token weights remain non-degenerate whenever the
+    adapter has position-varying hidden-state impact.
+    \item We validate the mechanism with concentration diagnostics and a
+    matched MATH/Qwen3-1.7B sweep, separating downstream performance from the
+    more basic question of whether a proposed token-credit signal survives the
+    adaptation regime actually used in LLM-RL.
+\end{enumerate}
+
+The remainder of the paper develops these contributions. Section
+\ref{sec:related-work} positions the work relative to PEFT for language RL
+and token-level credit assignment. Section \ref{sec:methods} presents the
+weighting schemes, explains why output-distribution signals degenerate under
+LoRA, and defines ARCA. Section \ref{sec:experiments} reports the diagnostic
+and performance comparison on MATH with Qwen3-1.7B under the seven-run
+reported sweep. Extended related work and theoretical interpretation
+appear in Appendices~\ref{app:extended-related-work}
+and~\ref{sec:theoretical}.

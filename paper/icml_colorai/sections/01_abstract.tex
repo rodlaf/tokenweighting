@@ -1,0 +1,21 @@
+\begin{abstract}\noindent Token-level credit assignment for language-model
+reinforcement learning is usually formulated as if the policy were fully
+trainable, while practical LLM-RL pipelines often rely on
+parameter-efficient fine-tuning, especially LoRA. We argue that this
+separation hides a structural failure mode. Under LoRA, the policy is
+restricted to a low-rank neighborhood of the reference model, so the
+per-token output-distribution differences used by common intrinsic credit
+signals, surprisal, entropy reduction, and policy divergence, can become
+degenerate after within-trajectory normalization, either approaching uniform
+weights or concentrating on a small set of task-agnostic positions. We
+formalize this behavior and propose measuring it directly with concentration
+diagnostics such as weight Gini and effective-token ratio. We then introduce \emph{Adapter-Residual Credit
+Assignment} (ARCA), a lightweight alternative that derives token salience from
+the adapter's own hidden-state residual,
+$\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$. ARCA asks where the adapter
+actually changes the model, rather than where the output distribution appears
+uncertain or shifted, and requires no learned reward model, value head, or tree
+construction. In a compact MATH/Qwen3-1.7B GRPO sweep, ARCA exhibits the
+predicted non-degenerate middle-regime credit distribution under matched
+rollout budgets and remains competitive with rank-matched baselines.
+\end{abstract}

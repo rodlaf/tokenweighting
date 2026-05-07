@@ -1,0 +1,71 @@
+%%%%%%%% ICML 2026 LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\newtheorem{proposition}{Proposition}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use the following line for the initial blind version submitted for review:
+\usepackage{icml2026}
+\renewcommand{\ttdefault}{cmtt}
+
+% For preprint, use
+% \usepackage[preprint]{icml2026}
+
+% If accepted, instead use the following line for the camera-ready submission:
+% \usepackage[accepted]{icml2026}
+
+\icmltitlerunning{ARCA: Adapter-Residual Credit Assignment}
+
+\begin{document}
+
+\twocolumn[
+  \icmltitle{ARCA: Adapter-Residual Credit Assignment When Token Signals Degenerate}
+
+  % The ICML style automatically removes author information for the blind
+  % submission unless the [accepted] or [preprint] option is used.
+  \begin{icmlauthorlist}
+    \icmlauthor{David S.~Hippocampus}{cranberry}
+  \end{icmlauthorlist}
+
+  \icmlaffiliation{cranberry}{Department of Computer Science, Cranberry-Lemon University, Pittsburgh, PA 15213}
+  \icmlcorrespondingauthor{David S.~Hippocampus}{hippo@cs.cranberry-lemon.edu}
+
+  \icmlkeywords{Machine Learning, ICML}
+
+  \vskip 0.3in
+]
+
+\printAffiliationsAndNotice{}
+
+\input{sections/01_abstract}
+\input{sections/02_introduction}
+\input{sections/03_related_work}
+\input{sections/04_methods}
+\input{sections/06_experiments}
+\input{sections/07_conclusion}
+
+\bibliography{references}
+\bibliographystyle{icml2026}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\appendix
+
+\input{sections/07_appendix}
+\input{sections/05_theoretical}
+
+\end{document}

@@ -1,0 +1,265 @@
+\section{Methods}\label{sec:methods}
+
+We consider on-policy reinforcement learning for autoregressive language models with
+trajectory-level rewards. Let $\pi_\theta$ denote a language model parameterized by
+$\theta$, generating a completion $y=(y_1,\dots,y_T)$ conditioned on a prompt $x$. After
+sampling a full trajectory, the model receives a scalar reward $R(x,y)\in\mathbb{R}$
+computed by an external verifier, such as exact-answer correctness or unit-test pass
+rate. Our objective is
+\begin{equation}
+J(\theta)=\mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot \mid x)}[R(x,y)],
+\end{equation}
+where $\mathcal{D}$ denotes the prompt distribution. We focus on the regime most
+relevant to recent reasoning-model training: sparse outcome rewards, on-policy sampling,
+and no learned value function.
+
+\subsection{Policy Gradient with Trajectory-Level Reward}
+
+For a fixed prompt $x$, the standard REINFORCE estimator is
+\begin{equation}
+g_{\mathrm{rf}}(x,y)=R(x,y)\sum_{t=1}^{T}\nabla_\theta \log \pi_\theta(y_t \mid y_{<t},x).
+\end{equation}
+In practice, a baseline $b(x)$ is subtracted to reduce variance without changing the
+expected gradient as long as $b(x)$ does not depend on the sampled action at token $t$:
+\begin{equation}
+g_{\mathrm{base}}(x,y)=\left(R(x,y)-b(x)\right)\sum_{t=1}^{T}\nabla_\theta \log \pi_\theta(y_t \mid y_{<t},x).
+\end{equation}
+
+We use prompt-level multi-sample baselines. Given $K$ sampled completions
+$\{y^{(i)}\}_{i=1}^{K}$ for the same prompt $x$ with rewards $\{R^{(i)}\}_{i=1}^{K}$:
+\begin{equation}
+b_{\mathrm{RLOO}}^{(i)}(x)=\frac{1}{K-1}\sum_{j \neq i}R^{(j)}
+\end{equation}
+is the leave-one-out baseline used in RLOO-style estimators, while GRPO-style
+normalization can be written as
+\begin{equation}
+A_{\mathrm{GRPO}}^{(i)}(x)=\frac{R^{(i)}-\mu_R(x)}{\sigma_R(x)+\varepsilon},
+\end{equation}
+where $\mu_R(x)$ and $\sigma_R(x)$ are the within-prompt mean and standard deviation of
+the $K$ rewards. In both cases, the resulting scalar advantage is then broadcast
+uniformly over all tokens in the sampled trajectory. This scalar-broadcast assumption is
+precisely what we relax.
+
+\subsection{Token-Level Credit Redistribution}
+
+We introduce token-level weights $w_t(x,y)$ that redistribute a trajectory-level
+advantage across tokens:
+\begin{equation}
+g_{w}(x,y)=A(x,y)\sum_{t=1}^{T} w_t(x,y)\,\nabla_\theta \log \pi_\theta(y_t \mid y_{<t},x),
+\end{equation}
+where $A(x,y)$ denotes either $R(x,y)-b_{\mathrm{RLOO}}(x)$ or $A_{\mathrm{GRPO}}(x,y)$
+depending on the baseline choice.
+
+The weights satisfy
+\begin{equation}
+\sum_{t=1}^{T}w_t(x,y)=1, \qquad w_t(x,y)\ge 0.
+\end{equation}
+This length normalization keeps the total update magnitude comparable across
+weighting schemes and isolates the effect of credit redistribution from
+simple rescaling. It also means that the uniform baseline below is the
+length-normalized version of the usual token-sum estimator, rather than the
+unnormalized sum itself.
+
+Uniform token credit corresponds to $w_t=1/T$ for all $t$. Our goal is to replace this
+uniform allocation with \emph{intrinsic} weights derived from quantities already
+produced by the policy during generation. We do not train learned token-level
+reward models, estimate prefix values, or build explicit search trees.
+
+\subsection{Intrinsic Token-Weighting Mechanisms}
+
+We define each method through an unnormalized salience score $\alpha_t(x,y)\ge 0$ and
+then normalize within each trajectory:
+\begin{equation}\label{eq:normalize}
+w_t(x,y)=\frac{\alpha_t(x,y)+\varepsilon}{\sum_{k=1}^{T}\left(\alpha_k(x,y)+\varepsilon\right)},
+\end{equation}
+with a small $\varepsilon>0$ to avoid degenerate all-zero cases. In implementation, the
+weights are treated as \emph{detached} scalars when multiplying the policy-gradient
+term, so the update does not introduce second-order derivatives through the weighting
+function itself. This keeps the optimization rule close in spirit and cost to standard
+critic-free policy gradients. The floor $\varepsilon$ is part of the estimator:
+if all raw scores vanish relative to this floor, the normalized weights become
+uniform, while without such a floor nearly-zero scores can make the
+normalization ill-conditioned.
+
+\paragraph{Uniform Weighting (Baseline).}
+\begin{equation}w_t^{\text{uniform}}=\frac{1}{T}.\end{equation}
+Combined with an RLOO or GRPO baseline, this gives a length-normalized
+uniform-token baseline that assigns identical credit to every token in the
+sampled completion. It has the same token direction as the unnormalized
+critic-free token-sum estimator, but differs by the trajectory-length factor
+$1/T$.
+
+\paragraph{Surprisal Weighting.}
+Our first intrinsic score is token surprisal,
+\begin{equation}
+\alpha_t^{\text{surp}}(x,y)=-\log \pi_\theta(y_t \mid y_{<t},x).
+\end{equation}
+This emphasizes low-probability decisions under the current policy. Intuitively, these
+are tokens where the model commits to a less routine continuation and where uniform
+credit assignment may be most diluted by predictable filler tokens.
+
+\paragraph{Entropy-Reduction Weighting.}
+Our second intrinsic score measures local entropy reduction. Let
+\begin{equation}
+H_t^{\mathrm{pre}}(x,y)=-\sum_{v}\pi_\theta(v \mid y_{<t},x)\log \pi_\theta(v \mid y_{<t},x)
+\end{equation}
+denote the predictive entropy before sampling token $y_t$, and let
+\begin{equation}
+\Delta H_t^{\mathrm{ent}}(x,y)=\max\left(0, H_t^{\mathrm{pre}}(x,y)-H_{t+1}^{\mathrm{pre}}(x,y)\right)
+\end{equation}
+for $t<T$. For the final token we set $\Delta H_T^{\mathrm{ent}}=0$. We then use
+\begin{equation}
+\alpha_t^{\text{ent}}(x,y)=\Delta H_t^{\mathrm{ent}}(x,y).
+\end{equation}
+This score highlights tokens after which the model's next-step distribution becomes
+substantially more concentrated. Such events often correspond to commitment points in
+reasoning, where one branch of continuation becomes much more likely than its
+alternatives.
+
+\paragraph{Policy-Divergence Weighting.}
+A third intrinsic score measures how much the current policy has drifted from
+a reference $\pi_{\mathrm{ref}}$ (typically the base model prior to RL) at
+each token position:
+\begin{equation}
+\alpha_t^{\mathrm{div}}(x,y) = \lvert \log \pi_\theta(y_t \mid y_{<t}, x) -
+\log \pi_{\mathrm{ref}}(y_t \mid y_{<t}, x) \rvert.
+\end{equation}
+In the RLHF/RLVR setting $\pi_{\mathrm{ref}}$ is already available because
+it is used to compute the KL regularizer, so this score is essentially free.
+
+\paragraph{Length-Robust Normalization.}
+Because reasoning trajectories can vary substantially in length, all weights are
+normalized within each sampled completion rather than across the minibatch. This ensures
+that longer trajectories do not automatically receive larger aggregate updates simply
+because they contain more token positions with nonzero salience. The comparison between
+weighting schemes therefore reflects \emph{where} credit is assigned within a
+trajectory, not how much total credit a longer sequence receives.
+
+\paragraph{Batch-Level Baselines.}
+All weighting schemes can be paired with either RLOO or GRPO-style prompt-level
+baselines. Unless otherwise specified, we use the same rollout groups, optimizer,
+sampling hyperparameters, and baseline family across methods. This isolates token
+redistribution as the only algorithmic difference.
+
+\subsection{Signal Degeneration Under Low-Rank Adaptation}\label{sec:collapse}
+
+So far our exposition has treated the policy $\pi_\theta$ as an unconstrained
+language model being updated by gradient descent. In practice, however, many
+LLM-RL pipelines apply LoRA~\citep{hu2021lora}, which restricts
+$\pi_\theta$ to a rank-$r$ perturbation of a frozen reference policy
+$\pi_{\mathrm{ref}}$. We now show that the intrinsic weighting schemes defined
+above are qualitatively degraded by this constraint.
+
+We use \emph{collapse} to mean degeneration of the normalized token weights,
+not only convergence to the perfectly uniform distribution. Depending on the
+raw score scale, the $\varepsilon$ floor, and any sharpening transform, a
+degraded signal can appear either as uniform broadcast or as spuriously sparse
+credit concentrated on a tiny set of positions. In both cases, the weights no
+longer reflect where the adapter has learned to act.
+
+\paragraph{Notation.}
+Write the logits produced by the base model at position $t$ as
+$z_t^{\mathrm{ref}} = W_{\mathrm{lm}} h_t^{\mathrm{base}}$ and the logits
+produced by the adapted model as $z_t^{\theta} = W_{\mathrm{lm}}
+h_t^{\mathrm{adapted}}$, where $h_t^{\mathrm{adapted}} = h_t^{\mathrm{base}} +
+\Delta h_t$ and $\Delta h_t$ is the sum of LoRA adapter contributions
+propagated through the transformer to position $t$. Each adapter contributes
+$B_\ell A_\ell x_{\ell,t}$ at layer $\ell$, where $B_\ell \in \mathbb{R}^{d
+\times r}$ and $A_\ell \in \mathbb{R}^{r \times d}$, so the raw per-layer
+perturbation at each position lies in the fixed $r$-dimensional column space
+of $B_\ell$.
+
+\paragraph{Degeneration of surprisal and entropy.}
+Because $\|\Delta h_t\|$ is bounded by a product of adapter norms and input
+activation norms that are themselves roughly stationary across positions in a
+well-trained base model, the first-order perturbation to per-token surprisal,
+\[
+-\log \pi_\theta(y_t \mid y_{<t}, x) =
+-\log \pi_{\mathrm{ref}}(y_t \mid y_{<t}, x) + O(\|\Delta h_t\|),
+\]
+is dominated by the base model's surprisal pattern rather than by the LoRA
+update. The same holds for predictive entropy. Consequently, when we
+normalize these scores within a trajectory (equation~\eqref{eq:normalize}),
+the resulting weights can be non-uniform, but their non-uniformity is not an
+adapter-aware credit signal; it mostly reflects base-model uncertainty or the
+numerics of the normalization.
+
+\paragraph{Degeneration of policy divergence.}
+Divergence weighting,
+$\alpha_t^{\mathrm{div}} = \lvert \log \pi_\theta(y_t) - \log
+\pi_{\mathrm{ref}}(y_t) \rvert$, is of direct interest because it quantifies
+exactly the policy change that the RL update is trying to drive. Under LoRA,
+however, this quantity is small and approximately uniform across positions for
+a different reason: the KL budget $\mathrm{KL}(\pi_\theta \| \pi_{\mathrm{ref}})$
+is bounded by the rank-$r$ adapter's capacity, so the per-token
+log-probability ratios are compressed toward zero~\citep{anon2026implicitklra}.
+Under the within-trajectory normalization in equation~\eqref{eq:normalize},
+this compression is pathological. If the score is approximately constant and
+the $\varepsilon$ floor dominates, the weights approach uniform broadcast. If
+the floor is negligible, the same tiny differences can be amplified into a
+spurious sparse distribution.
+
+\paragraph{Consequence.}
+We summarize the practical implication as follows. Let the Gini coefficient
+$G(w)$ and the effective-token ratio $\mathrm{EffN}(w) / T = 1/(T \sum_t
+w_t^2)$ be standard concentration measures, with $G(w) = 0$ and
+$\mathrm{EffN}/T = 1$ corresponding to perfectly uniform weights. For
+surprisal, entropy-reduction, and divergence weighting under LoRA, these
+metrics reveal whether the normalized weights have become degenerate:
+uniform broadcast gives $G(w)\approx0$, while spuriously sparse credit gives
+$G(w)\approx1$ and small $\mathrm{EffN}/T$. Both outcomes are failures of
+adapter-aware credit assignment. This is \emph{not} a problem with the
+underlying signals in a fully trainable policy; it is a structural
+consequence of applying output-distribution signals inside a low-rank
+adaptation.
+
+\subsection{Adapter-Residual Credit Assignment (ARCA)}\label{sec:arca}
+
+The degeneration result motivates a different design choice. Rather than measuring
+per-token properties of the \emph{output distribution} (whose shape is
+dominated by the frozen base model under LoRA), we measure per-token
+properties of the \emph{adapter's own contribution} to the forward pass.
+
+\paragraph{Definition.}
+Given a model with a LoRA adapter, let $h_t^{\mathrm{adapted}}$ denote the
+last-layer hidden state at position $t$ with the adapter enabled, and
+$h_t^{\mathrm{base}}$ the same hidden state with the adapter disabled.
+Define the Adapter-Residual Credit Assignment salience as
+\begin{equation}
+\alpha_t^{\mathrm{ARCA}}(x, y) = \lVert h_t^{\mathrm{adapted}} -
+h_t^{\mathrm{base}} \rVert_2,
+\end{equation}
+and normalize within the trajectory as in
+equation~\eqref{eq:normalize} to obtain per-token weights
+$w_t^{\mathrm{ARCA}}$. The adapter residual is computed once per minibatch
+via an extra no-grad forward pass with the adapter disabled, using
+\texttt{model.disable\_adapter()} in frameworks such as PEFT. This is exactly
+the same call already required to compute a KL regularizer against the
+reference policy or to support divergence weighting, so ARCA adds no new
+infrastructure.
+
+\paragraph{Why ARCA avoids output-signal collapse.}
+The key property that distinguishes ARCA from the intrinsic schemes above is
+that it measures a quantity whose \emph{per-token} value is actively shaped by
+the attention and MLP pathways through which the adapter input activations are
+routed. Even for a low-rank adapter with small $\|B_\ell A_\ell\|$, the
+input activations $x_{\ell,t}$ are non-uniform across positions (attention
+patterns, layer norms, and content-versus-filler distinctions are already
+non-uniform in the base model), so $\|\Delta h_t\|$ retains nontrivial
+position-to-position variation. With a fixed $\varepsilon$ floor, any score
+whose magnitude vanishes completely will eventually become uniform after
+normalization. ARCA's claim is therefore not that an infinitesimal adapter can
+defeat the floor; it is that, while the adapter residual is measurable, its
+normalized variation is tied to where the adapter actually changes the hidden
+state rather than to small output-distribution perturbations.
+
+\paragraph{Interpretation as implicit gradient-informed credit.}
+ARCA can be read as a cheap proxy for a gradient-based notion of token
+importance. Positions at which the adapter contribution is large are
+positions at which the adapter's parameter gradient has high contribution to
+the loss, and therefore positions where a policy-gradient update can have
+the most effect. This is a substantially weaker statement than the one made
+by a learned critic, but it has the advantage of being available for free
+from quantities the adapted forward pass already computes, and of being
+exactly targeted at the PEFT-specific failure mode introduced above.
+

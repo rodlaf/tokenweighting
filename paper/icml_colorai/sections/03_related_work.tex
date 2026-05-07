@@ -1,0 +1,66 @@
+\section{Related Work}\label{sec:related-work}
+
+\subsection{PEFT and Low-Rank Adaptation in Language RL}\label{sec:rw-peft}
+
+Parameter-efficient fine-tuning, and in particular LoRA~\cite{hu2021lora}, is a
+dominant adaptation strategy in open-source LLM-RL work. Tina
+demonstrated that tiny LoRA adapters on a 1.5B base model suffice to reach
+DeepSeek-R1-class reasoning behavior when combined with GRPO, at a tiny fraction of
+full fine-tuning cost~\cite{wang2025tina}. A broader systematic evaluation of PEFT
+methods under RLVR~\cite{yin2025peftrlvr} benchmarks over a dozen PEFT variants
+(including DoRA, AdaLoRA, MiSS, PiSSA, MiLoRA, VeRA and Rank-1) on DeepSeek-R1-Distill
+models and finds that standard LoRA is not optimal; structural variants such as DoRA,
+AdaLoRA and MiSS consistently outperform it, and SVD-initialized variants (PiSSA,
+MiLoRA) suffer from \emph{spectral collapse}, a finding that is broadly compatible with
+our own signal-degeneration analysis. Token-Efficient RL introduces critic-free LoRA-compatible
+variants of GRPO (S-GRPO and T-SPMO) that focus training on a subset of tokens,
+reporting large gains on small models where full-token GRPO~+~LoRA trains
+unstably~\cite{lee2025tokenefficientrl}; we now provide a mechanistic explanation for
+that instability via signal degeneration. \emph{LoRA as an Implicit KL Regularizer}
+analyzes how LoRA restricts the policy to a rank-constrained neighborhood of the
+reference, deriving an explicit rank-dependent upper bound on the KL divergence between
+policy and reference throughout training~\cite{anon2026implicitklra}. Our Section
+\ref{sec:collapse} builds directly on this observation: an implicit KL bound is the
+same mechanism that forces per-token log-probability differentials to be small,
+which is the formal starting point for our degeneration result.
+
+On the analysis side, \emph{Narrow Fine-Tuning Traces} shows that narrow
+fine-tuning leaves clearly readable traces in the activation differences between
+base and fine-tuned hidden states, and that the fine-tuning domain can be
+recovered from those differences alone using simple diffing tools such as
+patchscopes and activation steering~\cite{minder2025narrowfinetuning}. This is
+directly relevant to ARCA because the adapter residual
+$h^{\mathrm{adapted}}_t - h^{\mathrm{base}}_t$ is a per-position activation
+difference of exactly the kind they study; their results supply empirical
+evidence that this difference carries meaningful, semantically nontrivial
+content, the property our method exploits. Concurrent work on
+TopLoRA studies how to concentrate LoRA capacity on a small number of
+high-impact tokens via token-wise input-output projections~\cite{li2025toplora}. To our knowledge, no prior work has characterized the
+interaction between LoRA and token-level credit assignment, nor proposed an
+adaptation-aware intrinsic weighting scheme.
+
+\subsection{Positioning of This Work}
+
+The literature makes three points clear. First, critics are not strictly required for
+effective LLM post-training: critic-free estimators such as RLOO, ReMax, GRPO, and GSPO
+are already competitive in both RLHF and RLVR
+\cite{ahmadian2024backtobasics,li2023remax,shao2024deepseekmath,zheng2025gspo}. Second,
+many researchers have concluded that trajectory-level rewards are too coarse and have
+introduced denser supervision through process reward models, redistribution rules, tree
+structures, optimal baselines, temporal traces, or entropy-based modulation
+\cite{li2024red,cui2025prime,tran2025tempo,cao2025scar,parthasarathi2025grpolambda,li2026otb,hu2026pspo,he2026eapo,yu2026erpo,meng2026sparsebutcritical}.
+Third, the overwhelming majority of practical LLM-RL pipelines are \emph{trained with
+LoRA}, and a focused sub-literature has studied PEFT-specific effects in this
+regime~\cite{hu2021lora,wang2025tina,yin2025peftrlvr,anon2026implicitklra,lee2025tokenefficientrl,minder2025narrowfinetuning,li2025toplora}.
+
+Our contribution is to bridge the second and third of these threads. Existing intrinsic
+credit-assignment signals (surprisal, entropy, divergence) are not novel as standalone
+objects, and we do not claim otherwise; they are our baselines. Our novel claim is that
+these signals \emph{interact pathologically with the adaptation strategy that the field
+often uses}: under LoRA they can degenerate into uniform broadcast or spurious sparsity,
+so any paper that reports a null result for ``more elaborate intrinsic weighting versus
+uniform'' under LoRA may be observing a LoRA artifact, not evidence against token-level credit
+assignment. We formalize this, supply a unified diagnostic (Gini/EffN) that makes the
+degeneration visible at training
+time, and propose ARCA as an adaptation-aware alternative whose construction directly
+avoids the failure mode we identify.

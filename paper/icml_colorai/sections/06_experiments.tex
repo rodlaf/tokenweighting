@@ -1,0 +1,216 @@
+\section{Experiments}\label{sec:experiments}
+
+We evaluate whether adapter-residual credit assignment gives a useful
+token-level signal in the low-rank fine-tuning regime. The empirical section
+focuses on a single controlled sweep, summarized in
+Table~\ref{tab:sweep}. It uses one model, one task, one advantage estimator,
+and seven weighting configurations. This design trades breadth for a cleaner
+test of the central claim: ARCA changes credit assignment without adding
+trainable parameters beyond the LoRA adapter used by the matched baselines.
+
+\subsection{Setup}
+
+\paragraph{Model and task.} We fine-tune \texttt{Qwen/Qwen3-1.7B-Base} on
+the MATH training split and evaluate on held-out MATH examples. Prompts ask
+the model to solve the problem step by step and place the final answer in
+\texttt{\textbackslash boxed\{\}}. Rewards are binary exact-match scores
+computed from the final boxed answer after normalization.
+
+\paragraph{Training.} All runs use GRPO prompt-level advantages, LoRA
+adapters on the attention and MLP projections, and the same rollout budget,
+optimizer, learning-rate schedule, prompt format, and decoding parameters.
+Each training step samples $K=4$ completions per prompt, uses 100 update
+steps, and evaluates greedy accuracy and pass@4 on 200 held-out MATH
+examples. We use a single seed (1337). We save checkpoints every 20 steps.
+We use AdamW with learning rate $5\times10^{-6}$, zero weight decay, a
+10-step warmup followed by cosine decay, batch size 2, gradient accumulation
+over 4 microbatches, maximum prompt length 512, maximum generation length
+512, temperature 1.0, and top-$p$ 0.95 sampling during training.
+
+\paragraph{Methods.} The sweep contains seven runs. Four baselines use LoRA
+rank $r=64$: uniform token weighting, surprisal weighting,
+entropy-reduction weighting, and policy-divergence weighting. The proposed
+method, ARCA, is run at $r \in \{4,16,64\}$. The $r=64$ comparison tests
+ARCA against baselines with the same trainable parameter count. The $r=4$
+and $r=16$ comparisons test whether ARCA remains competitive with fewer
+adapter parameters than the $r=64$ baselines.
+
+\begin{table*}[t]
+\centering
+\caption{\textbf{Reported sweep.} All runs use
+\texttt{Qwen/Qwen3-1.7B-Base}, MATH, GRPO, one seed, and 100 training steps.
+The non-ARCA baselines are matched at LoRA rank 64; ARCA is evaluated at
+three ranks to separate credit assignment from adapter capacity.}
+\label{tab:sweep}
+\begin{tabular}{l c c c}
+\toprule
+Method & LoRA rank & Trainable params & Role in comparison \\
+\midrule
+Uniform & 64 & 69.7M & Same-rank baseline \\
+Surprisal & 64 & 69.7M & Intrinsic token baseline \\
+Entropy reduction & 64 & 69.7M & Intrinsic token baseline \\
+Policy divergence & 64 & 69.7M & Intrinsic token baseline \\
+ARCA & 4 & 4.36M & Low-rank ARCA control \\
+ARCA & 16 & 17.4M & Mid-rank ARCA control \\
+ARCA & 64 & 69.7M & Same-rank ARCA comparison \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Main Results on MATH}
+
+Table~\ref{tab:math-results} reports held-out MATH performance after RL
+fine-tuning. The primary comparison is ARCA at rank 64 versus the rank-64
+baselines, which holds the trainable parameter count fixed. The rank-4 and
+rank-16 ARCA runs provide a more stringent control: if lower-rank ARCA is
+competitive with rank-64 baselines, the gain cannot be attributed simply to
+using a larger adapter.
+
+\begin{table*}[t]
+\centering
+\caption{\textbf{Held-out MATH performance.} Greedy accuracy and pass@4
+after GRPO fine-tuning. ARCA at rank 64 is parameter-matched to the
+rank-64 baselines; lower-rank ARCA rows test the parameter-count
+alternative. Train reward is averaged over the 100 update steps.}
+\label{tab:math-results}
+\begin{tabular}{l c c c c}
+\toprule
+Method & LoRA rank & Greedy acc. & Pass@4 & Avg. train reward \\
+\midrule
+Uniform & 64 & \textbf{0.620} & 0.675 & 0.362 \\
+Surprisal & 64 & 0.520 & 0.650 & 0.326 \\
+Entropy reduction & 64 & 0.600 & \textbf{0.700} & 0.367 \\
+Policy divergence & 64 & 0.565 & 0.670 & 0.351 \\
+ARCA & 4 & 0.525 & 0.640 & 0.327 \\
+ARCA & 16 & 0.510 & 0.655 & 0.336 \\
+ARCA & 64 & 0.590 & 0.680 & 0.353 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+Table~\ref{tab:math-results} should be read as a compact validation rather
+than a broad benchmark. Uniform weighting obtains the highest greedy
+accuracy, while entropy reduction obtains the highest pass@4. ARCA at rank
+64 is competitive with these baselines under the same trainable parameter
+count, trailing uniform greedy accuracy by three points and exceeding uniform
+pass@4 by 0.5 points. The lower-rank ARCA variants do not outperform the
+rank-64 baselines in this run, which is consistent with a capacity-performance
+tradeoff rather than evidence that ARCA gains come from extra parameters.
+
+\subsection{Credit-Assignment Diagnostics}
+
+Performance alone does not show whether a method changes token-level credit
+assignment. We therefore log the concentration of token weights during
+training. We report the Gini coefficient $G(w)$ and effective-token ratio
+$\mathrm{EffN}(w)/T$. Uniform weighting has $G=0$ and
+$\mathrm{EffN}/T=1$; highly concentrated weights have $G$ near one and a
+small effective-token ratio.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Token-weight diagnostics.} Concentration statistics
+averaged over training. These diagnostics test whether a method produces a
+non-uniform but non-degenerate token-credit signal, the empirical observable
+predicted by the degeneration analysis.}
+\label{tab:weight-diagnostics}
+\begin{tabular}{l c c c}
+\toprule
+Method & LoRA rank & $G(w)$ & $\mathrm{EffN}/T$ \\
+\midrule
+Uniform & 64 & 0.000 & 1.000 \\
+Surprisal & 64 & 0.941 & 0.052 \\
+Entropy reduction & 64 & 0.920 & 0.073 \\
+Policy divergence & 64 & 0.939 & 0.055 \\
+ARCA & 4 & 0.353 & 0.467 \\
+ARCA & 16 & 0.388 & 0.460 \\
+ARCA & 64 & 0.490 & 0.334 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:weight-diagnostics} is the central diagnostic result. Uniform
+weighting is exactly flat. Surprisal, entropy reduction, and policy divergence
+produce extremely concentrated distributions, with effective-token ratios
+between 0.052 and 0.073 on average. These methods therefore do not collapse to
+uniform in this implementation; they degenerate in the other direction, into
+spuriously sparse credit. ARCA occupies the predicted middle regime: it is far
+from uniform, but it does not concentrate credit onto the tiny effective
+support used by the output-distribution baselines. This is the empirical
+signature of the theoretical distinction. Output-distribution scores ask
+where the model is uncertain or shifted; ARCA asks where the adapter actually
+acts.
+
+\subsection{Results and Discussion}
+
+The results support a theory-first interpretation. The downstream accuracy
+numbers do not show a universal ARCA win: uniform is best under greedy
+decoding, and entropy reduction is best under pass@4. However, ARCA at rank
+64 is competitive under matched parameters, and its token-credit distribution
+is qualitatively different from every baseline. In this paper, that diagnostic
+is not secondary. It is the observable predicted by the LoRA-degeneration
+analysis: a method whose salience is measured through output distributions
+can broadcast credit uniformly or concentrate it on a very small set of
+positions, while adapter-residual salience remains position-discriminative
+without becoming maximally sparse.
+
+This distinction matters because token-level credit assignment is often
+evaluated only by final task accuracy. The concentration diagnostics separate these cases.
+ARCA demonstrates that one can obtain an adaptation-aware credit signal from
+the LoRA adapter itself, with no value head, learned process reward model, or tree
+construction, while keeping the trainable parameter count identical to the
+rank-64 baselines.
+
+The rank controls provide a useful boundary on the claim. ARCA at ranks 4 and
+16 uses substantially fewer trainable parameters than the rank-64 baselines,
+and in this sweep those lower-rank variants do not match rank-64 performance.
+We therefore do not claim that ARCA removes the need for sufficient adapter
+capacity. The supported claim is sharper: at a fixed adapter rank, ARCA
+changes the geometry of token credit in the way predicted by the theory, and
+does so while remaining competitive on held-out MATH.
+
+\subsection{Implementation and Metrics}
+
+The main experiment entrypoint is \texttt{experiment/hf/run\_experiment.py}.
+For each minibatch, the script samples completions from the current policy,
+computes binary rewards after full generation, constructs GRPO advantages,
+and applies the weighted token-level objective from
+Section~\ref{sec:methods}. Surprisal uses current-policy token log
+probabilities, entropy-reduction uses next-token entropy drops,
+policy-divergence compares adapted and adapter-disabled log probabilities,
+and ARCA weights tokens by adapter-residual norms in the final hidden layer.
+
+The code records per-step reward mean, reward variance, loss, completion
+length, token-weight Gini, effective-token ratio, and, for ARCA, the mean
+and maximum adapter-residual norm. Final evaluation records greedy accuracy
+and pass@4 on held-out MATH examples. These metrics allow us to distinguish
+three claims: whether the method trained, whether it changed token-credit
+structure, and whether that structure improved held-out performance.
+
+\subsection{Compute}
+
+Each run fits on a single H100-class GPU. The seven submission-time runs are
+executed independently, one configuration per GPU, with wall-clock training
+time on the order of a few hours per run plus final evaluation. The reported
+sweep therefore requires seven single-GPU runs; preliminary development runs
+were used to tune runtime and checkpointing but are not included in the
+reported comparison.
+
+\subsection{Broader Impacts}
+
+This work is methodological and studies how to assign token-level credit
+during reinforcement learning for language models. The potential positive
+impact is improved sample efficiency and interpretability of RL fine-tuning,
+especially in settings where practitioners already use parameter-efficient
+adaptation. The same techniques could also improve the fine-tuning of models
+for harmful or misleading generation if applied without appropriate task,
+data, and deployment safeguards. We do not release a new general-purpose
+model in this paper.
+
+\subsection{Limitations}
+
+This sweep is deliberately small: one model, one dataset, one seed, one
+advantage estimator, and seven configurations. It is sufficient to test the
+parameter-matched ARCA comparison and the low-rank control, but the reported
+numbers are descriptive rather than statistical significance claims. We view
+the results as a targeted validation of the mechanism rather than a broad
+benchmark claim.

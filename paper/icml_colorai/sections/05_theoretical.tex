@@ -1,0 +1,254 @@
+\section{Theoretical Interpretation}\label{sec:theoretical}
+
+We provide an interpretation of intrinsic token weighting as a variance-control and
+credit-redistribution mechanism for policy gradient estimation in language models. Our
+goal is not to derive new convergence guarantees, but to clarify how token weighting
+relates to advantage estimation and why it can be effective without learning value
+functions.
+
+\subsection{Token Weighting as Credit Redistribution}
+
+Consider the standard REINFORCE estimator with a batch-level baseline:
+\begin{equation}
+g = (R - b)\sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+This estimator assigns equal credit to all tokens in a trajectory. Introducing token
+weights yields:
+\begin{equation}
+g_w = (R - b)\sum_{t=1}^{T} w_t(y)\, \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x),
+\end{equation}
+where $\sum_t w_t = 1$.
+
+Importantly, this transformation does not change the reward signal itself; it
+redistributes how the trajectory-level signal is attributed to individual decisions.
+When $w_t$ depends only on quantities available at sampling time (e.g.,
+log-probabilities or entropy), the estimator remains on-policy and does not require
+learning additional functions.
+
+\subsection{Relationship to Advantage Estimation}
+
+Advantage-based methods can be interpreted as implicitly defining token-level weights
+via a learned value function:
+\begin{equation}
+A_t = R - V(y_{<t}, x).
+\end{equation}
+In this view, the contribution of each token is scaled according to how much the
+observed outcome deviates from an estimated expectation conditioned on the prefix.
+
+However, this interpretation relies on the existence of a meaningful value function over
+prefixes. In language generation, prefixes are non-Markov and do not form a stable state
+space, making $V(y_{<t}, x)$ difficult to estimate and prone to bias. Token weighting
+offers an alternative: rather than estimating expected returns from prefixes, it
+emphasizes tokens based on intrinsic measures of decision salience, such as uncertainty
+or information gain.
+
+\subsection{Connection to Control Variates}
+
+From a statistical perspective, subtracting a baseline $b$ is a form of control variate
+that reduces variance without affecting unbiasedness. Token weighting can be viewed as a
+complementary mechanism that reshapes the contribution of individual score-function
+terms:
+\begin{equation}
+\nabla_\theta \log \pi_\theta(y) = \sum_{t=1}^{T} \nabla_\theta \log \pi_\theta(y_t \mid y_{<t}, x).
+\end{equation}
+
+Uniform weighting treats all score-function terms equally, regardless of their variance
+or relevance. Intrinsic weighting schemes effectively reweight these terms,
+down-weighting low-variance or low-impact contributions (e.g., high-probability
+continuation tokens) and emphasizing high-variance or high-impact decisions (e.g.,
+low-probability or uncertainty-reducing tokens). While this reweighting introduces bias
+relative to the uniform estimator, it can substantially reduce variance, leading to
+improved optimization dynamics in practice.
+
+\subsection{Interpretation of Specific Weighting Schemes}
+
+\paragraph{Surprisal Weighting.}
+Surprisal-based weights emphasize tokens with low conditional probability under the
+current policy. These tokens correspond to decisions where small parameter changes can
+induce large changes in likelihood, and therefore often dominate gradient variance.
+Weighting by surprisal concentrates learning signal on such high-sensitivity decisions.
+
+\paragraph{Entropy-Reduction Weighting.}
+Entropy-reduction weighting emphasizes tokens that sharply reduce predictive entropy.
+These tokens correspond to commitment points in generation, where the model transitions
+from a diffuse distribution over continuations to a more concentrated one. This mirrors
+the role of branching points in tree-based reasoning methods, but is computed locally
+from the model's predictive distribution without explicit tree construction.
+
+\subsection{Bias--Variance Tradeoff}
+
+Both advantage estimation and intrinsic token weighting introduce bias in exchange for
+variance reduction. Advantage estimation does so by relying on a learned value function,
+whose bias can be substantial when the underlying state abstraction is weak. Intrinsic
+token weighting introduces bias by reshaping the contribution of token-level gradients
+based on heuristic salience measures. The empirical question is therefore not whether
+bias is introduced, but whether the bias--variance tradeoff is favorable.
+
+This motivates the empirical comparison implemented in the repository: if intrinsic
+token weighting improves accuracy, pass@$k$, or optimization behavior under matched
+settings, then the bias it introduces may be more benign than the bias induced by
+ill-defined value targets over text prefixes. The point is not that weighting is
+unbiased, but that its inductive bias may be better aligned with token-level credit
+assignment in language generation.
+
+\subsection{Signal Degeneration Under Low-Rank Adaptation}\label{sec:theory-collapse}
+
+The preceding analysis assumes that the intrinsic weights
+$\{w_t\}_{t=1}^T$ are non-degenerate: if every scheme becomes uniform or
+spuriously sparse for reasons unrelated to the learned adapter, then token
+weighting cannot provide meaningful credit redistribution over a uniform
+baseline. We now formalize when this degeneracy occurs under LoRA.
+
+\paragraph{Setup.}
+Let $\pi_{\mathrm{ref}}$ be a frozen base model with last-layer hidden states
+$h_t^{\mathrm{base}} \in \mathbb{R}^d$ and a LoRA adapter whose net
+contribution at position $t$ is $\Delta h_t \in \mathbb{R}^d$, giving
+adapted hidden states $h_t^{\mathrm{adapted}} = h_t^{\mathrm{base}} + \Delta
+h_t$ and logits $z_t^{\theta} = W_{\mathrm{lm}} h_t^{\mathrm{adapted}}$.
+Let $\beta = \max_t \|\Delta h_t\|_2$ denote the maximum per-position
+adapter contribution and $L = \|W_{\mathrm{lm}}\|_{\mathrm{op}}$ its
+logit-space Lipschitz constant. Write $G(\cdot)$ for the Gini coefficient
+of a non-negative vector and $\mathrm{EffN}(w)/T = 1 / (T \sum_t w_t^2)$ for
+the normalized effective-token count. When a normalization uses an
+$\varepsilon$ floor, the statements below are interpreted in the regime where
+the raw salience scores dominate $\varepsilon$; if fixed $\varepsilon$
+dominates all scores, every scheme reverts to uniform by construction.
+These are local deterministic statements about the normalized score vectors
+for a fixed trajectory, not asymptotic convergence guarantees for RL training.
+
+\begin{proposition}[Degeneration of surprisal and entropy weighting]
+\label{prop:surprisal-collapse}
+Let $\alpha_t^{\mathrm{surp}} = -\log \pi_\theta(y_t \mid y_{<t}, x)$ and
+$\alpha_t^{\mathrm{surp,ref}} = -\log \pi_{\mathrm{ref}}(y_t \mid y_{<t}, x)$,
+with corresponding normalized weights $w^{\mathrm{surp}}$ and
+$w^{\mathrm{surp,ref}}$. Then for every trajectory,
+\[
+\lVert w^{\mathrm{surp}} - w^{\mathrm{surp,ref}} \rVert_1
+\le \frac{4 L \beta}{\sum_t \alpha_t^{\mathrm{surp,ref}}}.
+\]
+In particular, the adapted surprisal weights remain close to the reference
+model's surprisal profile rather than becoming an adapter-specific credit
+signal. If that reference profile is close to uniform, the weights approach
+$1/T$; if it is highly uneven, the weights can instead remain spuriously
+concentrated for reasons inherited from the base model. The analogous
+statement holds for the entropy-reduction score.
+\end{proposition}
+
+\noindent\emph{Proof.}
+The softmax Jacobian is $2$-Lipschitz in the log-space norm, so the per-token
+log-probabilities differ by at most $2 L \beta$ between the adapted and base
+model. The projection onto the simplex via within-trajectory normalization is
+$1$-Lipschitz in $\ell_1$ up to a factor of $2 / \sum_t \alpha_t^{\mathrm{ref}}$;
+combining these gives the stated bound. \hfill$\square$
+
+\begin{proposition}[Degeneration of divergence weighting]
+\label{prop:divergence-collapse}
+Let $\alpha_t^{\mathrm{div}} = \lvert \log \pi_\theta(y_t \mid y_{<t}, x)
+- \log \pi_{\mathrm{ref}}(y_t \mid y_{<t}, x) \rvert$ and
+$w^{\mathrm{div}} = (\alpha^{\mathrm{div}}+\varepsilon) /
+\sum_t (\alpha_t^{\mathrm{div}}+\varepsilon)$.
+Then
+\[
+0 \le \alpha_t^{\mathrm{div}} \le 2 L \beta \qquad \forall t,
+\]
+so if $\varepsilon$ is fixed and $\beta \to 0$, then
+$w^{\mathrm{div}} \to 1/T$. If $\varepsilon=0$ or is negligible relative to
+the raw scores, the same normalization is ill-conditioned as $\beta \to 0$:
+the limiting weights are determined by tiny relative differences among
+vanishing log-probability shifts rather than by a robust adapter-credit
+signal.
+\end{proposition}
+
+\noindent\emph{Proof.}
+The first inequality follows from the same log-probability Lipschitz bound as
+Proposition~\ref{prop:surprisal-collapse}. If $\varepsilon>0$ is fixed, then
+each numerator in $w^{\mathrm{div}}$ is
+$\varepsilon(1+O(\beta/\varepsilon))$ and the denominator is
+$T\varepsilon(1+O(\beta/\varepsilon))$, so
+$w_t^{\mathrm{div}}\to 1/T$ as $\beta/\varepsilon\to0$. If the floor is
+removed or negligible, the normalization divides by $\sum_t
+\alpha_t^{\mathrm{div}}\to0$; different sequences of vanishing score vectors
+can converge to different normalized limits, including highly concentrated
+ones. \hfill$\square$
+
+The key observation is that the intrinsic scores are all determined by the
+per-token \emph{log-probability differential}, which is precisely what LoRA's
+rank-$r$ constraint drives small and approximately uniform across positions.
+The degeneration is not a property of a particular weighting scheme; it is a
+property of measuring per-token variation through the output distribution
+when the policy has been constrained to a small neighborhood of the
+reference.
+
+\subsection{ARCA and Position-Discriminative Signal}\label{sec:theory-arca}
+
+ARCA side-steps this degeneration by measuring a quantity that is position-varying
+even when the adapter's logit-space impact is small.
+
+\begin{proposition}[ARCA remains non-degenerate]
+\label{prop:arca-nondeg}
+Suppose the adapter-induced residual admits the decomposition $\Delta h_t =
+\sum_\ell B_\ell A_\ell x_{\ell,t}^{\mathrm{pre}} + e_t$, where
+$x_{\ell,t}^{\mathrm{pre}}$ is the pre-adapter activation at layer $\ell$ and
+position $t$ and $\|e_t\|$ is a higher-order cross-layer term. Let
+$v_{\ell,t} = B_\ell A_\ell x_{\ell,t}^{\mathrm{pre}}$ and define
+$V_\ell = \mathrm{Var}_t(\|v_{\ell,t}\|)$ and $\bar{V}_\ell =
+\mathbb{E}_t[\|v_{\ell,t}\|]$. Then
+\[
+\mathrm{Var}_t(\alpha_t^{\mathrm{ARCA}}) \ge \max_\ell V_\ell
+- O\!\left(\sum_{\ell}\bar{V}_\ell \, \|e_t\|\right).
+\]
+Assume the residual scores dominate the normalization floor $\varepsilon$.
+In particular, as long as the pre-adapter activations
+$x_{\ell,t}^{\mathrm{pre}}$ have nontrivial position-to-position variance at
+any layer, $\alpha_t^{\mathrm{ARCA}}$ has bounded-below variance across
+positions, and its normalized weights $w_t^{\mathrm{ARCA}}$ do not converge
+to the uniform distribution merely because the output-distribution shift is
+small. With fixed $\varepsilon$, however, all scores become uniform in the
+limit where the adapter residual itself vanishes below the floor.
+\end{proposition}
+
+\noindent\emph{Proof.}
+Ignoring the higher-order residual $e_t$, the ARCA score contains the norms
+$\|v_{\ell,t}\|$ of the layerwise adapter contributions. A dominant layer with
+nonzero position-to-position variance therefore gives nonzero variance in the
+raw ARCA scores. The perturbation $e_t$ changes these norms by at most its
+size through the reverse triangle inequality, giving the stated lower bound up
+to the displayed higher-order term. Normalization by a common positive sum
+preserves non-uniformity while the raw scores remain above the floor; if a
+fixed $\varepsilon$ dominates all residual scores, the normalized weights
+become uniform by equation~\eqref{eq:normalize}. \hfill$\square$
+
+The intuitive content of Proposition~\ref{prop:arca-nondeg} is that ARCA
+inherits its position-discrimination from the \emph{base model's own
+activation pattern} (which is already non-uniform because attention and
+layer norm routing produce content-versus-filler distinctions) rather than
+from a quantity that LoRA is specifically constrained to make small. Scaling
+the adapter weights uniformly scales $\alpha^{\mathrm{ARCA}}$ uniformly, so
+the normalized weights $w^{\mathrm{ARCA}}$ are scale-invariant in the
+adapter magnitude.
+
+\subsection{Bias--Variance Tradeoff}
+
+Both advantage estimation and intrinsic token weighting introduce bias in
+exchange for variance reduction. Advantage estimation does so by relying on
+a learned value function, whose bias can be substantial when the underlying
+state abstraction is weak. Intrinsic token weighting introduces bias by
+reshaping the contribution of token-level gradients based on heuristic
+salience measures. The empirical question is therefore not whether bias is
+introduced, but whether the bias--variance tradeoff is favorable and whether,
+per Propositions~\ref{prop:surprisal-collapse}
+and~\ref{prop:divergence-collapse}, the bias-inducing signal survives the
+LoRA bottleneck at all.
+
+\subsection{Summary}
+
+This perspective reframes advantage estimation as one particular approach to
+credit redistribution in policy gradient methods. Intrinsic token weighting
+offers an alternative that leverages the structure of the language model's
+predictive distribution, without assuming the existence of meaningful state
+values. Under LoRA, however, the output-distribution-based signals that
+most published weighting methods rely on can degenerate into uniform or
+spuriously sparse token weights; the adapter-residual signal that ARCA uses
+is, by Proposition~\ref{prop:arca-nondeg}, non-degenerate whenever the
+adapter residual remains measurable above the normalization floor.

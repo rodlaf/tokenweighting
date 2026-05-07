@@ -111,9 +111,9 @@ framework, and we found through an extensive literature review that the token-le
 actor--critic design space was already well-covered: VinePPO~\cite{kazemnejad2024vineppo}
 and GenAC~\cite{shan2026genac} cover non-parametric and generative critics
 respectively, and OTB~\cite{li2026otb} provides a principled variance-minimizing
-position-dependent baseline. We therefore do \emph{not} position a critic-based
-configuration as the proposed method, and the submission-time sweep focuses on
-critic-free intrinsic weighting schemes.
+position-dependent baseline. We therefore do \emph{not} position critic-based
+variants as part of the proposed method, and we leave a full comparison against
+token-level critics to future empirical work.
 
 A third family redistributes outcome rewards algorithmically rather than by training a
 dense reward model. RED derives token-level rewards by redistributing holistic

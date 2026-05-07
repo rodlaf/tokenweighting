@@ -245,7 +245,7 @@ the attention and MLP pathways through which the adapter input activations are
 routed. Even for a low-rank adapter with small $\|B_\ell A_\ell\|$, the
 input activations $x_{\ell,t}$ are non-uniform across positions (attention
 patterns, layer norms, and content-versus-filler distinctions are already
-non-uniform in the base model), so $\|\Delta h_t\|$ retains non-trivial
+non-uniform in the base model), so $\|\Delta h_t\|$ retains nontrivial
 position-to-position variation. With a fixed $\varepsilon$ floor, any score
 whose magnitude vanishes completely will eventually become uniform after
 normalization. ARCA's claim is therefore not that an infinitesimal adapter can

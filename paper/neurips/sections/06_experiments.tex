@@ -1,13 +1,12 @@
 \section{Experiments}\label{sec:experiments}
 
 We evaluate whether adapter-residual credit assignment gives a useful
-token-level signal in the low-rank fine-tuning regime. Because the
-submission-time experiments are intentionally compact, the empirical section
-focuses on a single controlled sweep: one model, one task, one advantage
-estimator, and seven weighting configurations. This design trades breadth
-for a cleaner test of the central claim: ARCA changes credit assignment
-without adding trainable parameters beyond the LoRA adapter used by the
-matched baselines.
+token-level signal in the low-rank fine-tuning regime. The empirical section
+focuses on a single controlled sweep, summarized in
+Table~\ref{tab:sweep}. It uses one model, one task, one advantage estimator,
+and seven weighting configurations. This design trades breadth for a cleaner
+test of the central claim: ARCA changes credit assignment without adding
+trainable parameters beyond the LoRA adapter used by the matched baselines.
 
 \subsection{Setup}
 
@@ -22,7 +21,7 @@ adapters on the attention and MLP projections, and the same rollout budget,
 optimizer, learning-rate schedule, prompt format, and decoding parameters.
 Each training step samples $K=4$ completions per prompt, uses 100 update
 steps, and evaluates greedy accuracy and pass@4 on 200 held-out MATH
-examples. We run a single seed, 1337. Checkpoints are saved every 20 steps.
+examples. We use a single seed (1337). We save checkpoints every 20 steps.
 We use AdamW with learning rate $5\times10^{-6}$, zero weight decay, a
 10-step warmup followed by cosine decay, batch size 2, gradient accumulation
 over 4 microbatches, maximum prompt length 512, maximum generation length
@@ -38,7 +37,7 @@ adapter parameters than the $r=64$ baselines.
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Submission-time sweep.} All runs use
+\caption{\textbf{Reported sweep.} All runs use
 \texttt{Qwen/Qwen3-1.7B-Base}, MATH, GRPO, one seed, and 100 training steps.
 The non-ARCA baselines are matched at LoRA rank 64; ARCA is evaluated at
 three ranks to separate credit assignment from adapter capacity.}

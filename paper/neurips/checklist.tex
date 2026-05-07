@@ -201,7 +201,7 @@
     \item[] Question: Does the paper report error bars suitably and correctly defined or
     other appropriate information about the statistical significance of the experiments?
     \item[] Answer: \answerNo{}.
-    \item[] Justification: The submission-time sweep uses a single seed and does
+    \item[] Justification: The reported sweep uses a single seed and does
     not report confidence intervals or significance tests. The limitations
     subsection explicitly notes that the results do not establish robustness
     across seeds, tasks, or algorithms.
@@ -337,11 +337,14 @@
     \item[] Question: Are the creators or original owners of assets (e.g., code, data,
     models), used in the paper, properly credited and are the license and terms of use
     explicitly mentioned and properly respected?
-    \item[] Answer: \answerNo{}.
+    \item[] Answer: \answerYes{}.
     \item[] Justification: The paper credits the public model and benchmark
-    families used in the experiments, but the current manuscript does not
-    explicitly enumerate the licenses and terms of use for every existing
-    software, model, and dataset asset.
+    families used in the experiments. The experiments use
+    \texttt{Qwen/Qwen3-1.7B-Base} under its public model-card terms
+    (Apache-2.0), the MATH benchmark as released by Hendrycks et al.\ under
+    its public dataset terms (MIT), and open-source training infrastructure
+    such as PyTorch, Transformers, and PEFT under their respective open-source
+    licenses.
     \item[] Guidelines:
     \begin{itemize}
         \item The answer \answerNA{} means that the paper does not use existing assets.

@@ -32,7 +32,7 @@ patchscopes and activation steering~\cite{minder2025narrowfinetuning}. This is
 directly relevant to ARCA because the adapter residual
 $h^{\mathrm{adapted}}_t - h^{\mathrm{base}}_t$ is a per-position activation
 difference of exactly the kind they study; their results supply empirical
-evidence that this difference carries meaningful, semantically non-trivial
+evidence that this difference carries meaningful, semantically nontrivial
 content---the property our method exploits. Concurrent work on
 TopLoRA studies how to concentrate LoRA capacity on a small number of
 high-impact tokens via token-wise input-output projections~\cite{li2025toplora}. To our knowledge, no prior work has characterized the
@@ -58,8 +58,8 @@ credit-assignment signals (surprisal, entropy, divergence) are not novel as stan
 objects, and we do not claim otherwise; they are our baselines. Our novel claim is that
 these signals \emph{interact pathologically with the adaptation strategy that the field
 often uses}: under LoRA they can degenerate into uniform broadcast or spurious sparsity,
-so any paper that reports a null result for ``fancy intrinsic weighting versus uniform''
-under LoRA may be observing a LoRA artifact, not evidence against token-level credit
+so any paper that reports a null result for ``more elaborate intrinsic weighting versus
+uniform'' under LoRA may be observing a LoRA artifact, not evidence against token-level credit
 assignment. We formalize this, supply a unified diagnostic (Gini/EffN) that makes the
 degeneration visible at training
 time, and propose ARCA as an adaptation-aware alternative whose construction directly

@@ -244,27 +244,3 @@ by a learned critic, but it has the advantage of being available for free
 from quantities the adapted forward pass already computes, and of being
 exactly targeted at the PEFT-specific failure mode introduced above.
 
-\subsection{Relationship to Existing Methods}
-
-Our formulation recovers standard critic-free RL as a special case: uniform
-weighting plus a prompt-level batch baseline yields the usual RLOO/GRPO-style
-estimator. The intrinsic weighting schemes (surprisal, entropy reduction,
-policy divergence) are the natural baselines within our framework and map
-cleanly to published methods (e.g., divergence weighting corresponds to the
-divergence-advantage analyses of \emph{Sparse but
-Critical}~\cite{meng2026sparsebutcritical}, entropy-based weighting
-to~\cite{he2026eapo,yu2026erpo}). ARCA is the only scheme we
-study that uses an explicitly \emph{adaptation-aware} signal. Unlike
-critic-based PPO, ARCA does not learn a value head. Unlike RED, PRIME, or
-token-level reward-model methods, ARCA does not construct dense rewards from
-an auxiliary model. Unlike TEMPO or related tree-based methods, ARCA does not
-build prefix graphs or estimate branch values. Unlike hard token-selection
-methods based on top-entropy masking, ARCA retains a dense token update but
-modulates it continuously using an intrinsic salience score derived from the
-adapter itself.
-
-The resulting estimator is intentionally minimal. It changes only the
-within-trajectory allocation of a scalar on-policy advantage, using
-quantities already available from the forward pass with the adapter disabled.
-This makes it easy to layer on top of existing critic-free RLVR pipelines
-while preserving their computational simplicity.

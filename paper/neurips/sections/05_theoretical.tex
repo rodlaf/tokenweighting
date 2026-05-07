@@ -92,13 +92,13 @@ ill-defined value targets over text prefixes. The point is not that weighting is
 unbiased, but that its inductive bias may be better aligned with token-level credit
 assignment in language generation.
 
-\subsection{Signal Collapse Under Low-Rank Adaptation}\label{sec:theory-collapse}
+\subsection{Signal Degeneration Under Low-Rank Adaptation}\label{sec:theory-collapse}
 
 The preceding analysis assumes that the intrinsic weights
-$\{w_t\}_{t=1}^T$ are non-degenerate: if every scheme degenerates to
-$w_t \equiv 1/T$, then token weighting cannot provide any credit
-redistribution over uniform. We now formalize when this degeneracy occurs
-under LoRA.
+$\{w_t\}_{t=1}^T$ are non-degenerate: if every scheme becomes uniform or
+spuriously sparse for reasons unrelated to the learned adapter, then token
+weighting cannot provide meaningful credit redistribution over a uniform
+baseline. We now formalize when this degeneracy occurs under LoRA.
 
 \paragraph{Setup.}
 Let $\pi_{\mathrm{ref}}$ be a frozen base model with last-layer hidden states
@@ -110,9 +110,12 @@ Let $\beta = \max_t \|\Delta h_t\|_2$ denote the maximum per-position
 adapter contribution and $L = \|W_{\mathrm{lm}}\|_{\mathrm{op}}$ its
 logit-space Lipschitz constant. Write $G(\cdot)$ for the Gini coefficient
 of a non-negative vector and $\mathrm{EffN}(w)/T = 1 / (T \sum_t w_t^2)$ for
-the normalized effective-token count.
+the normalized effective-token count. When a normalization uses an
+$\varepsilon$ floor, the statements below are interpreted in the regime where
+the raw salience scores dominate $\varepsilon$; if fixed $\varepsilon$
+dominates all scores, every scheme reverts to uniform by construction.
 
-\begin{proposition}[Collapse of surprisal and entropy weighting]
+\begin{proposition}[Degeneration of surprisal and entropy weighting]
 \label{prop:surprisal-collapse}
 Let $\alpha_t^{\mathrm{surp}} = -\log \pi_\theta(y_t \mid y_{<t}, x)$ and
 $\alpha_t^{\mathrm{surp,ref}} = -\log \pi_{\mathrm{ref}}(y_t \mid y_{<t}, x)$,
@@ -122,10 +125,12 @@ $w^{\mathrm{surp,ref}}$. Then for every trajectory,
 \lVert w^{\mathrm{surp}} - w^{\mathrm{surp,ref}} \rVert_1
 \le \frac{4 L \beta}{\sum_t \alpha_t^{\mathrm{surp,ref}}}.
 \]
-In particular, if the base-model surprisal profile is close to uniform (as it
-is on content-dense reasoning traces with smooth base-model calibration),
-$w^{\mathrm{surp}} \to 1/T$ as $\beta / \min_t \alpha_t^{\mathrm{surp,ref}}
-\to 0$. The analogous statement holds for the entropy-reduction score.
+In particular, the adapted surprisal weights remain close to the reference
+model's surprisal profile rather than becoming an adapter-specific credit
+signal. If that reference profile is close to uniform, the weights approach
+$1/T$; if it is highly uneven, the weights can instead remain spuriously
+concentrated for reasons inherited from the base model. The analogous
+statement holds for the entropy-reduction score.
 \end{proposition}
 
 \noindent\emph{Proof sketch.}
@@ -135,33 +140,35 @@ model. The projection onto the simplex via within-trajectory normalization is
 $1$-Lipschitz in $\ell_1$ up to a factor of $2 / \sum_t \alpha_t^{\mathrm{ref}}$;
 combining these gives the stated bound. \hfill$\square$
 
-\begin{proposition}[Collapse of divergence weighting]
+\begin{proposition}[Degeneration of divergence weighting]
 \label{prop:divergence-collapse}
 Let $\alpha_t^{\mathrm{div}} = \lvert \log \pi_\theta(y_t \mid y_{<t}, x)
 - \log \pi_{\mathrm{ref}}(y_t \mid y_{<t}, x) \rvert$ and
-$w^{\mathrm{div}} = \alpha^{\mathrm{div}} / \sum_t \alpha_t^{\mathrm{div}}$.
+$w^{\mathrm{div}} = (\alpha^{\mathrm{div}}+\varepsilon) /
+\sum_t (\alpha_t^{\mathrm{div}}+\varepsilon)$.
 Then
 \[
 0 \le \alpha_t^{\mathrm{div}} \le 2 L \beta \qquad \forall t,
 \]
-so $\max_t \alpha_t^{\mathrm{div}} / \min_t (\alpha_t^{\mathrm{div}} +
-\varepsilon) \to 1$ as $\beta \to 0$, and consequently $G(w^{\mathrm{div}})
-\to 0$ and $\mathrm{EffN}(w^{\mathrm{div}})/T \to 1$. That is, divergence
-weighting collapses to the uniform distribution whenever the LoRA adapter's
-per-token perturbation norm vanishes uniformly.
+so if $\varepsilon$ is fixed and $\beta \to 0$, then
+$w^{\mathrm{div}} \to 1/T$. If $\varepsilon=0$ or is negligible relative to
+the raw scores, the same normalization is ill-conditioned as $\beta \to 0$:
+the limiting weights are determined by tiny relative differences among
+vanishing log-probability shifts rather than by a robust adapter-credit
+signal.
 \end{proposition}
 
 The key observation is that the intrinsic scores are all determined by the
 per-token \emph{log-probability differential}, which is precisely what LoRA's
 rank-$r$ constraint drives small and approximately uniform across positions.
-The collapse is not a property of a particular weighting scheme; it is a
+The degeneration is not a property of a particular weighting scheme; it is a
 property of measuring per-token variation through the output distribution
-when the policy has been constrained to a small neighbourhood of the
+when the policy has been constrained to a small neighborhood of the
 reference.
 
 \subsection{ARCA and Position-Discriminative Signal}\label{sec:theory-arca}
 
-ARCA side-steps the collapse by measuring a quantity that is position-varying
+ARCA side-steps this degeneration by measuring a quantity that is position-varying
 even when the adapter's logit-space impact is small.
 
 \begin{proposition}[ARCA remains non-degenerate]
@@ -177,11 +184,14 @@ $V_\ell = \mathrm{Var}_t(\|v_{\ell,t}\|)$ and $\bar{V}_\ell =
 \mathrm{Var}_t(\alpha_t^{\mathrm{ARCA}}) \ge \max_\ell V_\ell
 - O\!\left(\sum_{\ell}\bar{V}_\ell \, \|e_t\|\right).
 \]
+Assume the residual scores dominate the normalization floor $\varepsilon$.
 In particular, as long as the pre-adapter activations
 $x_{\ell,t}^{\mathrm{pre}}$ have non-trivial position-to-position variance at
 any layer, $\alpha_t^{\mathrm{ARCA}}$ has bounded-below variance across
 positions, and its normalized weights $w_t^{\mathrm{ARCA}}$ do not converge
-to the uniform distribution as the adapter shrinks uniformly.
+to the uniform distribution merely because the output-distribution shift is
+small. With fixed $\varepsilon$, however, all scores become uniform in the
+limit where the adapter residual itself vanishes below the floor.
 \end{proposition}
 
 The intuitive content of Proposition~\ref{prop:arca-nondeg} is that ARCA
@@ -213,6 +223,7 @@ credit redistribution in policy gradient methods. Intrinsic token weighting
 offers an alternative that leverages the structure of the language model's
 predictive distribution, without assuming the existence of meaningful state
 values. Under LoRA, however, the output-distribution-based signals that
-most published weighting methods rely on are driven toward uniform; the
-adapter-residual signal that ARCA uses is, by Proposition~\ref{prop:arca-nondeg},
-provably non-degenerate in the same regime.
+most published weighting methods rely on can degenerate into uniform or
+spuriously sparse token weights; the adapter-residual signal that ARCA uses
+is, by Proposition~\ref{prop:arca-nondeg}, non-degenerate whenever the
+adapter residual remains measurable above the normalization floor.

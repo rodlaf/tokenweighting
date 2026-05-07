@@ -54,13 +54,16 @@ The weights satisfy
 \begin{equation}
 \sum_{t=1}^{T}w_t(x,y)=1, \qquad w_t(x,y)\ge 0.
 \end{equation}
-This normalization keeps the total update magnitude comparable across weighting schemes
-and isolates the effect of credit redistribution from simple rescaling.
+This length normalization keeps the total update magnitude comparable across
+weighting schemes and isolates the effect of credit redistribution from
+simple rescaling. It also means that the uniform baseline below is the
+length-normalized version of the usual token-sum estimator, rather than the
+unnormalized sum itself.
 
 Uniform token credit corresponds to $w_t=1/T$ for all $t$. Our goal is to replace this
 uniform allocation with \emph{intrinsic} weights derived from quantities already
-produced by the policy during generation. We do not train token-level reward models,
-estimate prefix values, or build explicit search trees.
+produced by the policy during generation. We do not train learned token-level
+reward models, estimate prefix values, or build explicit search trees.
 
 \subsection{Intrinsic Token-Weighting Mechanisms}
 
@@ -73,12 +76,18 @@ with a small $\varepsilon>0$ to avoid degenerate all-zero cases. In implementati
 weights are treated as \emph{detached} scalars when multiplying the policy-gradient
 term, so the update does not introduce second-order derivatives through the weighting
 function itself. This keeps the optimization rule close in spirit and cost to standard
-critic-free policy gradients.
+critic-free policy gradients. The floor $\varepsilon$ is part of the estimator:
+if all raw scores vanish relative to this floor, the normalized weights become
+uniform, while without such a floor nearly-zero scores can make the
+normalization ill-conditioned.
 
 \paragraph{Uniform Weighting (Baseline).}
 \begin{equation}w_t^{\text{uniform}}=\frac{1}{T}.\end{equation}
-Combined with an RLOO or GRPO baseline, this recovers the standard critic-free estimator
-that assigns identical credit to every token in the sampled completion.
+Combined with an RLOO or GRPO baseline, this gives a length-normalized
+uniform-token baseline that assigns identical credit to every token in the
+sampled completion. It has the same token direction as the unnormalized
+critic-free token-sum estimator, but differs by the trajectory-length factor
+$1/T$.
 
 \paragraph{Surprisal Weighting.}
 Our first intrinsic score is token surprisal,
@@ -132,14 +141,21 @@ baselines. Unless otherwise specified, we use the same rollout groups, optimizer
 sampling hyperparameters, and baseline family across methods. This isolates token
 redistribution as the only algorithmic difference.
 
-\subsection{Signal Collapse Under Low-Rank Adaptation}\label{sec:collapse}
+\subsection{Signal Degeneration Under Low-Rank Adaptation}\label{sec:collapse}
 
 So far our exposition has treated the policy $\pi_\theta$ as an unconstrained
-language model being updated by gradient descent. In practice, however, almost
-all LLM-RL pipelines apply LoRA~\citep{hu2021lora}, which restricts
+language model being updated by gradient descent. In practice, however, many
+LLM-RL pipelines apply LoRA~\citep{hu2021lora}, which restricts
 $\pi_\theta$ to a rank-$r$ perturbation of a frozen reference policy
 $\pi_{\mathrm{ref}}$. We now show that the intrinsic weighting schemes defined
 above are qualitatively degraded by this constraint.
+
+We use \emph{collapse} to mean degeneration of the normalized token weights,
+not only convergence to the perfectly uniform distribution. Depending on the
+raw score scale, the $\varepsilon$ floor, and any sharpening transform, a
+degraded signal can appear either as uniform broadcast or as spuriously sparse
+credit concentrated on a tiny set of positions. In both cases, the weights no
+longer reflect where the adapter has learned to act.
 
 \paragraph{Notation.}
 Write the logits produced by the base model at position $t$ as
@@ -153,7 +169,7 @@ $B_\ell A_\ell x_{\ell,t}$ at layer $\ell$, where $B_\ell \in \mathbb{R}^{d
 perturbation at each position lies in the fixed $r$-dimensional column space
 of $B_\ell$.
 
-\paragraph{Collapse of surprisal and entropy.}
+\paragraph{Degeneration of surprisal and entropy.}
 Because $\|\Delta h_t\|$ is bounded by a product of adapter norms and input
 activation norms that are themselves roughly stationary across positions in a
 well-trained base model, the first-order perturbation to per-token surprisal,
@@ -161,14 +177,14 @@ well-trained base model, the first-order perturbation to per-token surprisal,
 -\log \pi_\theta(y_t \mid y_{<t}, x) =
 -\log \pi_{\mathrm{ref}}(y_t \mid y_{<t}, x) + O(\|\Delta h_t\|),
 \]
-is dominated by the base model's surprisal pattern, which is task-agnostic
-and primarily reflects filler versus content tokens. The same holds for
-predictive entropy. Consequently, when we normalize these scores within a
-trajectory (equation~\eqref{eq:normalize}), the resulting weights are nearly
-identical to the base model's surprisal or entropy weights, regardless of
-what the adapter has learned.
+is dominated by the base model's surprisal pattern rather than by the LoRA
+update. The same holds for predictive entropy. Consequently, when we
+normalize these scores within a trajectory (equation~\eqref{eq:normalize}),
+the resulting weights can be non-uniform, but their non-uniformity is not an
+adapter-aware credit signal; it mostly reflects base-model uncertainty or the
+numerics of the normalization.
 
-\paragraph{Collapse of policy divergence.}
+\paragraph{Degeneration of policy divergence.}
 Divergence weighting,
 $\alpha_t^{\mathrm{div}} = \lvert \log \pi_\theta(y_t) - \log
 \pi_{\mathrm{ref}}(y_t) \rvert$, is of direct interest because it quantifies
@@ -177,28 +193,29 @@ however, this quantity is small and approximately uniform across positions for
 a different reason: the KL budget $\mathrm{KL}(\pi_\theta \| \pi_{\mathrm{ref}})$
 is bounded by the rank-$r$ adapter's capacity, so the per-token
 log-probability ratios are compressed toward zero~\citep{anon2026implicitklra}.
-Under the within-trajectory normalization in
-equation~\eqref{eq:normalize}, this compression maps any approximately
-constant score function to the uniform distribution, giving
-$w_t^{\mathrm{div}} \approx 1/T$.
+Under the within-trajectory normalization in equation~\eqref{eq:normalize},
+this compression is pathological. If the score is approximately constant and
+the $\varepsilon$ floor dominates, the weights approach uniform broadcast. If
+the floor is negligible, the same tiny differences can be amplified into a
+spurious sparse distribution.
 
 \paragraph{Consequence.}
 We summarize the practical implication as follows. Let the Gini coefficient
 $G(w)$ and the effective-token ratio $\mathrm{EffN}(w) / T = 1/(T \sum_t
 w_t^2)$ be standard concentration measures, with $G(w) = 0$ and
-$\mathrm{EffN}/T = 1$ corresponding to perfectly uniform weights. Then for
-surprisal, entropy-reduction, and divergence weighting under LoRA, both
-concentration measures approach their uniform limits as the adapter rank
-$r$ decreases relative to the hidden dimension $d$. In this regime,
-``intrinsic token weighting'' is indistinguishable from uniform broadcast,
-and intrinsic-weighting methods cannot provide the credit-redistribution
-benefit they were designed to deliver. This is \emph{not} a problem with the
-underlying signals; it is a structural consequence of applying them inside a
-low-rank adaptation.
+$\mathrm{EffN}/T = 1$ corresponding to perfectly uniform weights. For
+surprisal, entropy-reduction, and divergence weighting under LoRA, these
+metrics reveal whether the normalized weights have become degenerate:
+uniform broadcast gives $G(w)\approx0$, while spuriously sparse credit gives
+$G(w)\approx1$ and small $\mathrm{EffN}/T$. Both outcomes are failures of
+adapter-aware credit assignment. This is \emph{not} a problem with the
+underlying signals in a fully trainable policy; it is a structural
+consequence of applying output-distribution signals inside a low-rank
+adaptation.
 
 \subsection{Adapter-Residual Credit Assignment (ARCA)}\label{sec:arca}
 
-The collapse result motivates a different design choice. Rather than measuring
+The degeneration result motivates a different design choice. Rather than measuring
 per-token properties of the \emph{output distribution} (whose shape is
 dominated by the frozen base model under LoRA), we measure per-token
 properties of the \emph{adapter's own contribution} to the forward pass.
@@ -221,7 +238,7 @@ the same call already required to compute a KL regularizer against the
 reference policy or to support divergence weighting, so ARCA adds no new
 infrastructure.
 
-\paragraph{Why ARCA does not collapse.}
+\paragraph{Why ARCA avoids output-signal collapse.}
 The key property that distinguishes ARCA from the intrinsic schemes above is
 that it measures a quantity whose \emph{per-token} value is actively shaped by
 the attention and MLP pathways through which the adapter input activations are
@@ -229,10 +246,12 @@ routed. Even for a low-rank adapter with small $\|B_\ell A_\ell\|$, the
 input activations $x_{\ell,t}$ are non-uniform across positions (attention
 patterns, layer norms, and content-versus-filler distinctions are already
 non-uniform in the base model), so $\|\Delta h_t\|$ retains non-trivial
-position-to-position variation. Formally, as the adapter rank goes to zero
-the signal $\alpha_t^{\mathrm{ARCA}}$ vanishes uniformly, but its
-\emph{normalized} counterpart $w_t^{\mathrm{ARCA}}$ remains non-degenerate
-as long as the adapter is nontrivially active at \emph{any} position.
+position-to-position variation. With a fixed $\varepsilon$ floor, any score
+whose magnitude vanishes completely will eventually become uniform after
+normalization. ARCA's claim is therefore not that an infinitesimal adapter can
+defeat the floor; it is that, while the adapter residual is measurable, its
+normalized variation is tied to where the adapter actually changes the hidden
+state rather than to small output-distribution perturbations.
 
 \paragraph{Interpretation as implicit gradient-informed credit.}
 ARCA can be read as a cheap proxy for a gradient-based notion of token

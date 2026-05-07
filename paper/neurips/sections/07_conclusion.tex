@@ -3,11 +3,11 @@
 Token-level credit assignment and parameter-efficient fine-tuning are usually
 studied as separate design choices. This paper argues that they are coupled.
 Under LoRA, output-distribution signals such as surprisal, entropy reduction,
-and policy divergence can lose the token-level variation that credit
-assignment methods rely on. ARCA addresses this failure mode by measuring
+and policy divergence can degenerate into token weights that no longer track
+where the adapter acts. ARCA addresses this failure mode by measuring
 salience where LoRA actually acts: in the adapter-induced hidden-state
 residual. The resulting signal is lightweight, requires no learned critic or
-process reward model, and produces non-collapsed token-credit distributions in
+learned process reward model, and produces non-degenerate token-credit distributions in
 the regime where output-distribution baselines become either flat or highly
 concentrated. Our MATH/Qwen3-1.7B sweep is intentionally compact, but it
 supports the central mechanism: adaptation-aware credit assignment changes the

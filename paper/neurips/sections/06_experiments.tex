@@ -111,8 +111,8 @@ small effective-token ratio.
 \centering
 \caption{\textbf{Token-weight diagnostics.} Concentration statistics
 averaged over training. These diagnostics test whether a method produces a
-non-uniform but non-collapsed token-credit signal, the empirical observable
-predicted by the collapse analysis.}
+non-uniform but non-degenerate token-credit signal, the empirical observable
+predicted by the degeneration analysis.}
 \label{tab:weight-diagnostics}
 \begin{tabular}{l c c c}
 \toprule
@@ -132,8 +132,10 @@ ARCA & 64 & 0.490 & 0.334 \\
 Table~\ref{tab:weight-diagnostics} is the central diagnostic result. Uniform
 weighting is exactly flat. Surprisal, entropy reduction, and policy divergence
 produce extremely concentrated distributions, with effective-token ratios
-between 0.052 and 0.073 on average. ARCA occupies the predicted middle regime:
-it is far from uniform, but it does not collapse onto the tiny effective
+between 0.052 and 0.073 on average. These methods therefore do not collapse to
+uniform in this implementation; they degenerate in the other direction, into
+spuriously sparse credit. ARCA occupies the predicted middle regime: it is far
+from uniform, but it does not concentrate credit onto the tiny effective
 support used by the output-distribution baselines. This is the empirical
 signature of the theoretical distinction. Output-distribution scores ask
 where the model is uncertain or shifted; ARCA asks where the adapter actually
@@ -146,18 +148,16 @@ numbers do not show a universal ARCA win: uniform is best under greedy
 decoding, and entropy reduction is best under pass@4. However, ARCA at rank
 64 is competitive under matched parameters, and its token-credit distribution
 is qualitatively different from every baseline. In this paper, that diagnostic
-is not secondary. It is the observable predicted by the LoRA-collapse
+is not secondary. It is the observable predicted by the LoRA-degeneration
 analysis: a method whose salience is measured through output distributions
-either broadcasts credit uniformly or concentrates it on a very small set of
+can broadcast credit uniformly or concentrate it on a very small set of
 positions, while adapter-residual salience remains position-discriminative
 without becoming maximally sparse.
 
 This distinction matters because token-level credit assignment is often
-evaluated only by final task accuracy. Accuracy alone cannot tell whether a
-method actually changed token-level credit or merely produced a different
-optimization trajectory. The concentration diagnostics separate these cases.
+evaluated only by final task accuracy. The concentration diagnostics separate these cases.
 ARCA demonstrates that one can obtain an adaptation-aware credit signal from
-the LoRA adapter itself, with no value head, process reward model, or tree
+the LoRA adapter itself, with no value head, learned process reward model, or tree
 construction, while keeping the trainable parameter count identical to the
 rank-64 baselines.
 

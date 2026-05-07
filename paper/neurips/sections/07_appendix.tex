@@ -111,9 +111,9 @@ framework, and we found through an extensive literature review that the token-le
 actor--critic design space was already well-covered: VinePPO~\cite{kazemnejad2024vineppo}
 and GenAC~\cite{shan2026genac} cover non-parametric and generative critics
 respectively, and OTB~\cite{li2026otb} provides a principled variance-minimizing
-position-dependent baseline. We therefore do \emph{not} position our critic-based
-configuration as a proposed method; we include it purely as a strong within-family
-baseline in our comparisons, and acknowledge this prior art explicitly.
+position-dependent baseline. We therefore do \emph{not} position a critic-based
+configuration as the proposed method, and the submission-time sweep focuses on
+critic-free intrinsic weighting schemes.
 
 A third family redistributes outcome rewards algorithmically rather than by training a
 dense reward model. RED derives token-level rewards by redistributing holistic
@@ -132,7 +132,7 @@ forward-pass probabilities~\cite{li2026otb}. PSPO applies potential-based reward
 shaping theory to construct dense token rewards from outcome signals without altering
 the optimal policy \cite{hu2026pspo}. Compared with these approaches, our focus is
 orthogonal: we do not propose a new redistribution rule, but instead diagnose a failure
-mode that affects essentially all intrinsic-signal-based redistribution methods when
+mode that can affect intrinsic-signal-based redistribution methods when
 applied inside LoRA.
 
 \subsection{Alternative Action Granularities and Token Selection}

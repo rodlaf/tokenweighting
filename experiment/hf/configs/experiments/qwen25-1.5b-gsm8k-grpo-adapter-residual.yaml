@@ -1,0 +1,5 @@
+base_config: ../base/qwen25-1.5b-gsm8k.yaml
+output_dir: outputs/qwen25-1.5b-gsm8k-grpo-adapter-residual
+training:
+  algorithm: grpo
+  weighting: adapter_residual

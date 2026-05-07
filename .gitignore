@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+outputs/
+outputs_*/
+figures/
+.env
+scratch/
+.cursor/
+.nfs*
+paper/

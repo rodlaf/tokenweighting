@@ -1,0 +1,5 @@
+base_config: ../base/qwen25-math-1.5b-math.yaml
+output_dir: outputs/qwen25-math-1.5b-math-grpo-uniform
+training:
+  algorithm: grpo
+  weighting: uniform

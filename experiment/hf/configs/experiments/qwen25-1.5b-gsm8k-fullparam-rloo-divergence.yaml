@@ -1,0 +1,7 @@
+base_config: ../base/qwen25-1.5b-gsm8k-fullparam.yaml
+output_dir: outputs/qwen25-1.5b-gsm8k-fullparam-rloo-divergence
+training:
+  algorithm: rloo
+  weighting: divergence
+  batch_size: 2
+  grad_accum_steps: 8

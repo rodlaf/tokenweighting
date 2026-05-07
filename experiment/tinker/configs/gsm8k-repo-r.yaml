@@ -1,0 +1,22 @@
+model:
+  name: "Qwen/Qwen3-8B"
+  renderer: "qwen3"
+  lora_rank: 32
+
+training:
+  train_steps: 200
+  batch_size: 16
+  group_size: 8
+  max_new_tokens: 512
+  learning_rate: 4.0e-5
+  temperature: 0.8
+  topk_entropy: 50
+  adaptive_zeta: true
+
+credit:
+  alpha: "uniform"
+  psi: "repo_rescale"
+  psi_kwargs:
+    zeta: 1.0
+
+output_dir: "outputs/gsm8k-repo-r"

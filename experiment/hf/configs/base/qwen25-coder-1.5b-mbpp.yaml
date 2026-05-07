@@ -1,0 +1,42 @@
+seed: 1337
+output_dir: outputs/qwen25-coder-1.5b-mbpp
+
+model:
+  name_or_path: Qwen/Qwen2.5-Coder-1.5B-Instruct
+  torch_dtype: bfloat16
+  load_in_4bit: false
+  lora:
+    enabled: true
+    r: 16
+    alpha: 32
+    dropout: 0.05
+
+dataset:
+  name: mbpp
+  train_split: train
+  eval_split: test
+  max_train_samples:
+  max_eval_samples: 200
+
+training:
+  algorithm: rloo
+  weighting: uniform
+  train_steps: 300
+  batch_size: 2
+  grad_accum_steps: 8
+  learning_rate: 1.0e-5
+  weight_decay: 0.0
+  warmup_steps: 20
+  num_generations: 4
+  max_prompt_length: 384
+  max_new_tokens: 384
+  temperature: 0.8
+  top_p: 0.95
+  max_grad_norm: 1.0
+  eval_every: 50
+  save_every: 100
+
+evaluation:
+  num_examples: 50
+  pass_k: 4
+  code_timeout: 3.0

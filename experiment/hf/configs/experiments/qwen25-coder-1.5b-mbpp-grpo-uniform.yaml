@@ -1,0 +1,5 @@
+base_config: ../base/qwen25-coder-1.5b-mbpp.yaml
+output_dir: outputs/qwen25-coder-1.5b-mbpp-grpo-uniform
+training:
+  algorithm: grpo
+  weighting: uniform

@@ -1,0 +1,5 @@
+base_config: ../base/qwen25-1.5b-gsm8k-fullparam.yaml
+output_dir: outputs/qwen25-1.5b-gsm8k-fullparam-rloo-entropy
+training:
+  algorithm: rloo
+  weighting: entropy_reduction

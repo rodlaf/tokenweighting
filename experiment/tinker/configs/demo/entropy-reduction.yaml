@@ -1,0 +1,7 @@
+base_config: base.yaml
+
+credit:
+  alpha: "entropy_reduction"
+  psi: "none"
+
+output_dir: "outputs/demo/entropy-reduction"

@@ -1,0 +1,10 @@
+base_config: ../base/qwen3-1.7b-base-math-deadline.yaml
+seed: 1337
+output_dir: outputs/qwen3-1.7b-base-math-deadline-grpo-divergence-s1337
+model:
+  lora:
+    r: 64
+    alpha: 128
+training:
+  algorithm: grpo
+  weighting: divergence

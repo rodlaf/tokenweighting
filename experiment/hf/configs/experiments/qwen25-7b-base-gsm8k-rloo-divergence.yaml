@@ -1,0 +1,5 @@
+base_config: ../base/qwen25-7b-base-gsm8k.yaml
+output_dir: outputs/qwen25-7b-base-gsm8k-rloo-divergence
+training:
+  algorithm: rloo
+  weighting: divergence

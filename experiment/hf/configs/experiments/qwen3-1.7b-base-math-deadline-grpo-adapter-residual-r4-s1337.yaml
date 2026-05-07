@@ -1,0 +1,10 @@
+base_config: ../base/qwen3-1.7b-base-math-deadline.yaml
+seed: 1337
+output_dir: outputs/qwen3-1.7b-base-math-deadline-grpo-adapter-residual-r4-s1337
+model:
+  lora:
+    r: 4
+    alpha: 8
+training:
+  algorithm: grpo
+  weighting: adapter_residual

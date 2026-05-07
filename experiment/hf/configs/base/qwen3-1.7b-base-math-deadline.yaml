@@ -1,0 +1,47 @@
+seed: 1337
+output_dir: outputs/qwen3-1.7b-base-math-deadline
+
+model:
+  name_or_path: Qwen/Qwen3-1.7B-Base
+  torch_dtype: bfloat16
+  load_in_4bit: false
+  attn_implementation: sdpa
+  gradient_checkpointing: false
+  lora:
+    enabled: true
+    r: 64
+    alpha: 128
+    dropout: 0.05
+
+dataset:
+  name: math
+  train_split: train
+  eval_split: test
+  max_train_samples:
+  max_eval_samples: 200
+
+training:
+  algorithm: grpo
+  weighting: uniform
+  sharpening: 2.0
+  train_steps: 300
+  batch_size: 2
+  grad_accum_steps: 4
+  learning_rate: 5.0e-6
+  weight_decay: 0.0
+  warmup_steps: 10
+  num_generations: 4
+  max_prompt_length: 512
+  max_new_tokens: 512
+  temperature: 1.0
+  top_p: 0.95
+  max_grad_norm: 1.0
+  eval_every:
+  save_every: 20
+
+evaluation:
+  num_examples: 200
+  pass_k: 4
+  batch_size: 8
+  code_timeout: 3.0
+  bonus_evals: []

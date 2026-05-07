@@ -1,0 +1,5 @@
+base_config: ../base/qwen25-1.5b-gsm8k.yaml
+output_dir: outputs/qwen25-1.5b-gsm8k-rloo-surprisal-v2
+training:
+  algorithm: rloo
+  weighting: surprisal

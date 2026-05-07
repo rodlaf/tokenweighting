@@ -1,199 +1,178 @@
 \section{Experiments}\label{sec:experiments}
 
-Our experiments are designed around the thesis of Section~\ref{sec:methods}:
-that under LoRA, intrinsic credit-assignment signals collapse to uniform,
-and that Adapter-Residual Credit Assignment (ARCA) is the only intrinsic
-scheme we study that preserves per-token structure in this regime. We
-therefore report two complementary comparisons: a \emph{diagnostic
-comparison} that measures the distribution of token weights produced by
-each scheme under LoRA vs.\ full-parameter training, and a \emph{performance
-comparison} that measures downstream accuracy on GSM8K with Qwen2.5. We
-then vary LoRA rank to characterize how the collapse-and-rescue behaviour
-changes with adapter capacity.
+We evaluate whether adapter-residual credit assignment gives a useful
+token-level signal in the low-rank fine-tuning regime. Because the
+submission-time experiments are intentionally compact, the empirical section
+focuses on a single controlled sweep: one model, one task, one advantage
+estimator, and seven weighting configurations. This design trades breadth
+for a cleaner test of the central claim: ARCA changes credit assignment
+without adding trainable parameters beyond the LoRA adapter used by the
+matched baselines.
 
 \subsection{Setup}
 
-\paragraph{Models.} We use \texttt{Qwen/Qwen2.5-1.5B-Instruct} as our
-primary model. This is a general-instruct model (not a math-tuned variant),
-chosen on the basis of preliminary experiments which showed that the
-math-tuned variant is already at its post-training ceiling on GSM8K and
-provides little headroom for RL to produce differentiable improvements. For
-selected ablations we additionally use the math-tuned variant as a
-robustness check.
+\paragraph{Model and task.} We fine-tune \texttt{Qwen/Qwen3-1.7B-Base} on
+the MATH training split and evaluate on held-out MATH examples. Prompts ask
+the model to solve the problem step by step and place the final answer in
+\texttt{\textbackslash boxed\{\}}. Rewards are binary exact-match scores
+computed from the final boxed answer after normalization.
 
-\paragraph{Dataset and reward.} We train on the \texttt{gsm8k/main} split
-with prompts formatted under an explicit final-answer convention, and report
-evaluation on the held-out GSM8K test split. Rewards are binary exact-match
-against the reference answer after normalization.
+\paragraph{Training.} All runs use GRPO prompt-level advantages, LoRA
+adapters on the attention and MLP projections, and the same rollout budget,
+optimizer, learning-rate schedule, prompt format, and decoding parameters.
+Each training step samples $K=4$ completions per prompt, uses 100 update
+steps, and evaluates greedy accuracy and pass@4 on 200 held-out MATH
+examples. We run a single seed, 1337. Checkpoints are saved every 20 steps.
+We use AdamW with learning rate $5\times10^{-6}$, zero weight decay, a
+10-step warmup followed by cosine decay, batch size 2, gradient accumulation
+over 4 microbatches, maximum prompt length 512, maximum generation length
+512, temperature 1.0, and top-$p$ 0.95 sampling during training.
 
-\paragraph{Adaptation strategies.} Each method is run in two regimes: (i)
-LoRA adaptation with rank $r \in \{4, 8, 16, 32, 64\}$ on the attention and
-MLP projections, and (ii) full-parameter training. Beyond adaptation
-strategy, all methods share the same rollout count, prompt formatting,
-optimizer family, learning-rate schedule, and decoding parameters within a
-regime, isolating the weighting scheme as the only algorithmic difference.
-
-\paragraph{Weighting schemes.} We compare six weighting schemes: uniform
-(baseline), surprisal, entropy-reduction, policy-divergence, critic-based
-(learned value head), and ARCA. The first four are intrinsic schemes
-described in Section~\ref{sec:methods}. The critic-based scheme follows a
-learned value head trained with MSE against trajectory return and provides
-a strong within-family comparison to the token-level-actor-critic
-literature. ARCA is our proposed method.
-
-\paragraph{Baselines.} Every weighting scheme is combined with both RLOO
-and GRPO prompt-level advantages, giving a $6 \times 2$ grid of
-configurations per adaptation regime.
-
-\subsection{Diagnostic: Weight Concentration Across Schemes}
-
-We measure how much per-token structure each scheme produces by logging,
-during training, the Gini coefficient $G(w)$ and the effective-token
-ratio $\mathrm{EffN}(w)/T$ of the token weights. Both metrics have a
-direct interpretation: under uniform weighting, $G = 0$ and
-$\mathrm{EffN}/T = 1$; under maximally concentrated weighting (one token
-receives all credit), $G \to 1$ and $\mathrm{EffN}/T \to 1/T$.
+\paragraph{Methods.} The sweep contains seven runs. Four baselines use LoRA
+rank $r=64$: uniform token weighting, surprisal weighting,
+entropy-reduction weighting, and policy-divergence weighting. The proposed
+method, ARCA, is run at $r \in \{4,16,64\}$. The $r=64$ comparison tests
+ARCA against baselines with the same trainable parameter count. The $r=4$
+and $r=16$ comparisons test whether ARCA remains competitive with fewer
+adapter parameters than the $r=64$ baselines.
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Signal collapse under LoRA.} Weight concentration
-metrics (Gini coefficient and effective-token ratio) averaged across
-training under different adaptation strategies. All intrinsic
-output-distribution signals collapse toward uniform under LoRA; ARCA
-remains non-degenerate. Numbers to be filled from completed runs.}
-\label{tab:collapse}
-\begin{tabular}{l cc cc}
+\caption{\textbf{Submission-time sweep.} All runs use
+\texttt{Qwen/Qwen3-1.7B-Base}, MATH, GRPO, one seed, and 100 training steps.
+The non-ARCA baselines are matched at LoRA rank 64; ARCA is evaluated at
+three ranks to separate credit assignment from adapter capacity.}
+\label{tab:sweep}
+\begin{tabular}{l c c c}
 \toprule
-& \multicolumn{2}{c}{LoRA ($r=8$)} & \multicolumn{2}{c}{Full parameter} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}
-Weighting scheme & $G(w)\,\uparrow$ & $\mathrm{EffN}/T\,\downarrow$
-& $G(w)$ & $\mathrm{EffN}/T$ \\
+Method & LoRA rank & Trainable params & Role in comparison \\
 \midrule
-Uniform                 & 0.00 & 1.00 & 0.00 & 1.00 \\
-Surprisal               & \textit{tbd} & \textit{tbd}
-                        & \textit{tbd} & \textit{tbd} \\
-Entropy reduction       & \textit{tbd} & \textit{tbd}
-                        & \textit{tbd} & \textit{tbd} \\
-Policy divergence       & \textit{tbd} & \textit{tbd}
-                        & \textit{tbd} & \textit{tbd} \\
-ARCA                    & \textit{tbd} & \textit{tbd}
-                        & \textit{tbd} & \textit{tbd} \\
+Uniform & 64 & \textit{tbd} & Same-rank baseline \\
+Surprisal & 64 & \textit{tbd} & Intrinsic token baseline \\
+Entropy reduction & 64 & \textit{tbd} & Intrinsic token baseline \\
+Policy divergence & 64 & \textit{tbd} & Intrinsic token baseline \\
+ARCA & 4 & \textit{tbd} & Low-rank ARCA control \\
+ARCA & 16 & \textit{tbd} & Mid-rank ARCA control \\
+ARCA & 64 & \textit{tbd} & Same-rank ARCA comparison \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:collapse} reports the diagnostic result. The prediction from
-Propositions~\ref{prop:surprisal-collapse}
-and~\ref{prop:divergence-collapse} is that surprisal, entropy-reduction, and
-policy-divergence weighting under LoRA produce $G(w)$ and
-$\mathrm{EffN}/T$ close to the uniform limits, and that ARCA produces
-substantially more concentrated weights. The full-parameter column serves
-as a control showing that, without the LoRA constraint, intrinsic schemes
-do produce meaningfully non-uniform distributions.
+\subsection{Main Results on MATH}
 
-\subsection{Performance on GSM8K}
+Table~\ref{tab:math-results} reports held-out MATH performance after RL
+fine-tuning. The primary comparison is ARCA at rank 64 versus the rank-64
+baselines, which holds the trainable parameter count fixed. The rank-4 and
+rank-16 ARCA runs provide a more stringent control: if lower-rank ARCA is
+competitive with rank-64 baselines, the gain cannot be attributed simply to
+using a larger adapter.
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Downstream accuracy on GSM8K.} Greedy accuracy and
-pass@4 after RL training on \texttt{Qwen/Qwen2.5-1.5B-Instruct} with LoRA
-rank 8. Numbers to be filled from completed runs; starting checkpoint
-greedy accuracy is reported for reference.}
-\label{tab:gsm8k}
-\begin{tabular}{l cc cc}
+\caption{\textbf{Held-out MATH performance.} Greedy accuracy and pass@4
+after GRPO fine-tuning. Numbers are placeholders until the seven runs
+complete.}
+\label{tab:math-results}
+\begin{tabular}{l c c c c}
 \toprule
-& \multicolumn{2}{c}{RLOO} & \multicolumn{2}{c}{GRPO} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}
-Weighting scheme & Greedy & Pass@4 & Greedy & Pass@4 \\
+Method & LoRA rank & Greedy acc. & Pass@4 & Train reward \\
 \midrule
-Start checkpoint    & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+Start checkpoint & -- & \textit{tbd} & \textit{tbd} & -- \\
 \midrule
-Uniform             & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-Surprisal           & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-Entropy reduction   & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-Policy divergence   & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-Critic              & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-ARCA                & \textit{tbd} & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+Uniform & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+Surprisal & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+Entropy reduction & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+Policy divergence & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+ARCA & 4 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+ARCA & 16 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+ARCA & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Our hypothesis, consistent with Table~\ref{tab:collapse}, is that under
-LoRA the intrinsic output-distribution schemes should perform
-indistinguishably from uniform (because their realized token weights
-\emph{are} approximately uniform), while ARCA should produce the only
-meaningful gap. Table~\ref{tab:gsm8k} is the corresponding downstream
-measurement.
+\subsection{Credit-Assignment Diagnostics}
 
-\subsection{LoRA Rank Ablation}
+Performance alone does not show whether a method changes token-level credit
+assignment. We therefore log the concentration of token weights during
+training. We report the Gini coefficient $G(w)$ and effective-token ratio
+$\mathrm{EffN}(w)/T$. Uniform weighting has $G=0$ and
+$\mathrm{EffN}/T=1$; highly concentrated weights have $G$ near one and a
+small effective-token ratio.
 
-\begin{figure}[t]
+\begin{table}[t]
 \centering
-\fbox{\rule{0pt}{4.5cm}\rule{0.9\linewidth}{0pt}}
-\caption{\textbf{LoRA rank ablation.} Left: weight concentration
-($\mathrm{EffN}/T$) as a function of LoRA rank for surprisal,
-policy-divergence, and ARCA weighting. Right: GSM8K greedy accuracy for
-uniform and ARCA weighting at each rank. The plots isolate how adapter
-capacity modulates both the collapse and the rescue effect. Plot to be
-generated from completed runs.}
-\label{fig:rank-ablation}
-\end{figure}
+\caption{\textbf{Token-weight diagnostics.} Concentration statistics
+averaged over training. These diagnostics test whether a method produces a
+non-uniform but non-collapsed token-credit signal. Numbers are placeholders
+until the runs complete.}
+\label{tab:weight-diagnostics}
+\begin{tabular}{l c c c}
+\toprule
+Method & LoRA rank & $G(w)$ & $\mathrm{EffN}/T$ \\
+\midrule
+Uniform & 64 & \textit{tbd} & \textit{tbd} \\
+Surprisal & 64 & \textit{tbd} & \textit{tbd} \\
+Entropy reduction & 64 & \textit{tbd} & \textit{tbd} \\
+Policy divergence & 64 & \textit{tbd} & \textit{tbd} \\
+ARCA & 4 & \textit{tbd} & \textit{tbd} \\
+ARCA & 16 & \textit{tbd} & \textit{tbd} \\
+ARCA & 64 & \textit{tbd} & \textit{tbd} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Varying LoRA rank $r \in \{4, 8, 16, 32, 64\}$ allows us to test the
-quantitative prediction of Section~\ref{sec:collapse}: as $r$ decreases,
-the per-token log-probability differential becomes increasingly uniform
-across positions, so intrinsic output-distribution schemes collapse
-\emph{more strongly} to uniform. ARCA, whose position-discriminative power
-is inherited from the base model's own activation pattern rather than from
-the adapter's logit impact, is predicted by
-Proposition~\ref{prop:arca-nondeg} to be comparatively robust.
-Figure~\ref{fig:rank-ablation} reports the corresponding sweep.
+The diagnostic prediction is not that the most concentrated scheme should
+always win. Rather, the useful regime is a middle ground: weights should
+depart from uniform enough to express token-level credit, but should not
+collapse onto a tiny number of tokens. This is the regime ARCA is designed
+to target. The rank ablation also tests a possible alternative explanation:
+ARCA introduces no additional trainable parameters, so a same-rank gain
+would reflect the loss weighting, while a low-rank ARCA gain would be
+inconsistent with a simple parameter-count explanation.
 
-\subsection{Methods Compared at a Glance}
-
-The implemented training variants, shipped as YAML configs under
-\texttt{experiment/hf/configs/experiments/}, are:
-\begin{itemize}
-    \item \textbf{Baselines (for every adaptation regime):} RLOO +
-    uniform, GRPO + uniform, RLOO + surprisal, GRPO + surprisal, RLOO +
-    entropy-reduction, GRPO + entropy-reduction, RLOO + divergence,
-    GRPO + divergence, RLOO + critic.
-    \item \textbf{Proposed (ARCA):} RLOO + ARCA, GRPO + ARCA.
-    \item \textbf{LoRA rank ablation:} RLOO + ARCA at $r \in \{4, 64\}$
-    paired with RLOO + uniform at the same ranks.
-\end{itemize}
-All configs share rollout count, prompt formatting, optimizer, learning
-rate, KL regularization coefficient, and decoding hyperparameters within a
-regime. This isolates the effect of token-level credit redistribution
-from unrelated implementation choices.
-
-\subsection{Training Procedure and Metrics}
+\subsection{Implementation and Metrics}
 
 The main experiment entrypoint is \texttt{experiment/hf/run\_experiment.py}.
-For each minibatch of prompts, the script samples $K$ completions from the
-current policy, computes binary rewards after full generation, constructs
-either RLOO or GRPO prompt-level advantages, and applies the weighted
-token-level objective from Section~\ref{sec:methods}. For modes that need
-them, the script additionally computes reference-model log-probabilities
-(via \texttt{model.disable\_adapter()} under LoRA) and, for ARCA, the
-per-token adapter-residual norm from the last-layer hidden states.
+For each minibatch, the script samples completions from the current policy,
+computes binary rewards after full generation, constructs GRPO advantages,
+and applies the weighted token-level objective from
+Section~\ref{sec:methods}. Surprisal uses current-policy token log
+probabilities, entropy-reduction uses next-token entropy drops,
+policy-divergence compares adapted and adapter-disabled log probabilities,
+and ARCA weights tokens by adapter-residual norms in the final hidden layer.
 
-The code records the following metrics at every logging interval: (i)
-greedy accuracy on the evaluation split, (ii) pass@$k$, (iii) reward mean
-and variance, (iv) completion length, (v) the Gini and effective-token
-metrics described above, and (vi) for ARCA, the mean and maximum
-per-token adapter-residual norm. These six metrics jointly allow us to
-check whether a weighting scheme produced a meaningful signal
-(metric group v), whether it actually trained (groups iii, iv), and
-whether it improved downstream behaviour (groups i, ii).
+The code records per-step reward mean, reward variance, loss, completion
+length, token-weight Gini, effective-token ratio, and, for ARCA, the mean
+and maximum adapter-residual norm. Final evaluation records greedy accuracy
+and pass@4 on held-out MATH examples. These metrics allow us to distinguish
+three claims: whether the method trained, whether it changed token-credit
+structure, and whether that structure improved held-out performance.
 
 \subsection{Compute}
 
-The implementation is intentionally compact: intrinsic token weights are
-computed from quantities already produced by the policy during rollout or
-the subsequent teacher-forced forward pass. ARCA adds at most one
-adapter-disabled forward pass per minibatch, which is identical to the
-forward pass already needed for KL regularization against the reference
-policy; this overhead is negligible relative to sampling costs. All runs
-fit on a single H100-class accelerator. No learned reward model or search
-tree is required.
+Each run fits on a single H100-class GPU. The seven submission-time runs are
+executed independently, one configuration per GPU, with wall-clock training
+time on the order of a few hours per run plus final evaluation. The reported
+sweep therefore requires seven single-GPU runs; preliminary development runs
+were used to tune runtime and checkpointing but are not included in the
+reported comparison.
+
+\subsection{Broader Impacts}
+
+This work is methodological and studies how to assign token-level credit
+during reinforcement learning for language models. The potential positive
+impact is improved sample efficiency and interpretability of RL fine-tuning,
+especially in settings where practitioners already use parameter-efficient
+adaptation. The same techniques could also improve the fine-tuning of models
+for harmful or misleading generation if applied without appropriate task,
+data, and deployment safeguards. We do not release a new general-purpose
+model in this paper.
+
+\subsection{Limitations}
+
+This sweep is deliberately small: one model, one dataset, one seed, one
+advantage estimator, and seven configurations. It is sufficient to test the
+parameter-matched ARCA comparison and the low-rank control, but it does not
+establish robustness across seeds, tasks, or algorithms. We view the results
+as a targeted validation of the mechanism rather than a broad benchmark
+claim.

@@ -9,6 +9,7 @@
 # Architecture:
 #   * One worker per GPU. Workers race for jobs via a shared file-locked queue.
 #   * Each job runs `uv run python run_experiment.py --config <yaml>`.
+#   * With --resume, incomplete jobs continue from their latest checkpoint.
 #   * Per-job stdout/stderr is captured in sprint_logs/<name>.log.
 #   * Workers always pick the next available config; no static sharding so a
 #     fast GPU keeps pulling work while a slow one finishes its current job.
@@ -75,11 +76,15 @@ run_worker() {
     local started
     started=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     echo "[gpu=$gpu] $started START $name"
+    local resume_args=()
+    if [ "$RESUME" = "1" ]; then
+      resume_args=(--resume)
+    fi
     {
       echo "=== launch_sprint.sh: $name on GPU $gpu (UTC $started) ==="
       CUDA_VISIBLE_DEVICES=$gpu \
       PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-        uv run python run_experiment.py --config "$cfg"
+        uv run python run_experiment.py --config "$cfg" "${resume_args[@]}"
     } > "$log" 2>&1 || {
       local ec=$?
       echo "[gpu=$gpu] FAIL $name (exit=$ec); see $log" >&2

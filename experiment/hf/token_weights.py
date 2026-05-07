@@ -18,8 +18,13 @@ class TokenWeightingConfig:
 def masked_normalize(weights: torch.Tensor, mask: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
     mask = mask.to(weights.dtype)
     weights = torch.clamp(weights, min=0.0) * mask
-    denom = weights.sum(dim=-1, keepdim=True).clamp_min(eps)
-    return weights / denom
+    denom = weights.sum(dim=-1, keepdim=True)
+    normalized = weights / denom.clamp_min(eps)
+
+    lengths = mask.sum(dim=-1, keepdim=True).clamp_min(1.0)
+    fallback = mask / lengths
+    valid = denom > eps
+    return torch.where(valid, normalized, fallback)
 
 
 def uniform_weights(mask: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:

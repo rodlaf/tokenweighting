@@ -13,7 +13,7 @@ from typing import Any
 import torch
 import torch.nn.functional as F
 import yaml
-from peft import LoraConfig, get_peft_model
+from peft import LoraConfig, PeftModel, get_peft_model
 from torch.optim import AdamW
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, get_cosine_schedule_with_warmup
 
@@ -31,6 +31,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run ITW experiments on Qwen + GSM8K/MBPP.")
     parser.add_argument("--config", required=True, help="Path to a YAML experiment config.")
     parser.add_argument("--output-root", help="Override config output_dir parent while preserving the run directory name.")
+    parser.add_argument("--resume", action="store_true", help="Resume from the latest checkpoint in output_dir, if present.")
+    parser.add_argument("--resume-from", help="Resume from a specific checkpoint directory.")
     parser.add_argument("--dry-run", action="store_true", help="Validate config, model, and dataset without training.")
     return parser.parse_args()
 
@@ -106,9 +108,10 @@ def _load_base_model(model_cfg: dict[str, Any]):
     return AutoModelForCausalLM.from_pretrained(model_name, **load_kwargs)
 
 
-def build_model_and_tokenizer(model_cfg: dict[str, Any]):
+def build_model_and_tokenizer(model_cfg: dict[str, Any], adapter_checkpoint: Path | None = None):
     model_name = model_cfg["name_or_path"]
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+    tokenizer_source = adapter_checkpoint if adapter_checkpoint is not None else model_name
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_source, use_fast=True)
     tokenizer.padding_side = "left"
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -118,18 +121,21 @@ def build_model_and_tokenizer(model_cfg: dict[str, Any]):
     uses_lora = False
     lora_cfg = model_cfg.get("lora", {})
     if lora_cfg.get("enabled", True):
-        peft_config = LoraConfig(
-            r=lora_cfg.get("r", 16),
-            lora_alpha=lora_cfg.get("alpha", 32),
-            lora_dropout=lora_cfg.get("dropout", 0.05),
-            bias="none",
-            task_type="CAUSAL_LM",
-            target_modules=lora_cfg.get(
-                "target_modules",
-                ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-            ),
-        )
-        model = get_peft_model(model, peft_config)
+        if adapter_checkpoint is not None:
+            model = PeftModel.from_pretrained(model, adapter_checkpoint, is_trainable=True)
+        else:
+            peft_config = LoraConfig(
+                r=lora_cfg.get("r", 16),
+                lora_alpha=lora_cfg.get("alpha", 32),
+                lora_dropout=lora_cfg.get("dropout", 0.05),
+                bias="none",
+                task_type="CAUSAL_LM",
+                target_modules=lora_cfg.get(
+                    "target_modules",
+                    ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+                ),
+            )
+            model = get_peft_model(model, peft_config)
         model.print_trainable_parameters()
         uses_lora = True
 
@@ -455,13 +461,115 @@ def save_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
-def maybe_save_checkpoint(model, tokenizer, output_dir: Path, step: int) -> None:
+def parse_checkpoint_step(path: Path) -> int | None:
+    prefix = "checkpoint-"
+    if not path.name.startswith(prefix):
+        return None
+    try:
+        return int(path.name[len(prefix) :])
+    except ValueError:
+        return None
+
+
+def find_latest_checkpoint(output_dir: Path) -> Path | None:
+    checkpoints = []
+    for path in output_dir.glob("checkpoint-*"):
+        step = parse_checkpoint_step(path)
+        if step is not None and path.is_dir():
+            checkpoints.append((step, path))
+    if not checkpoints:
+        return None
+    return max(checkpoints, key=lambda item: item[0])[1]
+
+
+def checkpoint_state_path(checkpoint_dir: Path) -> Path:
+    return checkpoint_dir / "training_state.pt"
+
+
+def load_torch_checkpoint(path: Path) -> dict[str, Any]:
+    try:
+        return torch.load(path, map_location="cpu", weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location="cpu")
+
+
+def move_optimizer_state_to_device(optimizer: torch.optim.Optimizer, device: torch.device) -> None:
+    for state in optimizer.state.values():
+        for key, value in state.items():
+            if torch.is_tensor(value):
+                state[key] = value.to(device)
+
+
+def save_training_state(
+    checkpoint_dir: Path,
+    step: int,
+    optimizer: torch.optim.Optimizer | None = None,
+    scheduler: Any | None = None,
+    sample_rng: random.Random | None = None,
+) -> None:
+    if optimizer is None or scheduler is None or sample_rng is None:
+        return
+    state = {
+        "step": step,
+        "optimizer": optimizer.state_dict(),
+        "scheduler": scheduler.state_dict(),
+        "python_rng": random.getstate(),
+        "torch_rng": torch.get_rng_state(),
+        "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+        "sample_rng": sample_rng.getstate(),
+    }
+    torch.save(state, checkpoint_state_path(checkpoint_dir))
+
+
+def restore_training_state(
+    checkpoint_dir: Path,
+    optimizer: torch.optim.Optimizer,
+    scheduler: Any,
+    sample_rng: random.Random,
+    device: torch.device,
+) -> int:
+    state_path = checkpoint_state_path(checkpoint_dir)
+    checkpoint_step = parse_checkpoint_step(checkpoint_dir)
+    if not state_path.exists():
+        if checkpoint_step is None:
+            raise ValueError(f"Could not infer step from checkpoint path: {checkpoint_dir}")
+        print(
+            f"WARNING: {state_path} not found; resuming adapter weights from step {checkpoint_step} "
+            "with fresh optimizer/scheduler/RNG state."
+        )
+        return checkpoint_step + 1
+
+    state = load_torch_checkpoint(state_path)
+    optimizer.load_state_dict(state["optimizer"])
+    move_optimizer_state_to_device(optimizer, device)
+    scheduler.load_state_dict(state["scheduler"])
+    if "sample_rng" in state:
+        sample_rng.setstate(state["sample_rng"])
+    if "python_rng" in state:
+        random.setstate(state["python_rng"])
+    if "torch_rng" in state:
+        torch.set_rng_state(state["torch_rng"])
+    if torch.cuda.is_available() and state.get("cuda_rng") is not None:
+        torch.cuda.set_rng_state_all(state["cuda_rng"])
+    return int(state["step"]) + 1
+
+
+def maybe_save_checkpoint(
+    model,
+    tokenizer,
+    output_dir: Path,
+    step: int,
+    optimizer: torch.optim.Optimizer | None = None,
+    scheduler: Any | None = None,
+    sample_rng: random.Random | None = None,
+) -> None:
     ckpt_dir = ensure_dir(output_dir / f"checkpoint-{step}")
     model.save_pretrained(ckpt_dir)
     tokenizer.save_pretrained(ckpt_dir)
+    save_training_state(ckpt_dir, step, optimizer=optimizer, scheduler=scheduler, sample_rng=sample_rng)
 
 
-def run_training(config: dict[str, Any], dry_run: bool) -> None:
+def run_training(config: dict[str, Any], dry_run: bool, resume: bool = False, resume_from: str | None = None) -> None:
     seed_everything(config["seed"])
     output_dir = ensure_dir(Path(config["output_dir"]))
     final_eval_path = output_dir / "final_eval.json"
@@ -470,7 +578,12 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
             f"{final_eval_path} already exists; refusing to overwrite a completed run. "
             "Use a fresh output_dir or move the existing artifacts first."
         )
-    if not dry_run:
+    resume_checkpoint = Path(resume_from).resolve() if resume_from else None
+    if resume and resume_checkpoint is None:
+        resume_checkpoint = find_latest_checkpoint(output_dir)
+    if resume_checkpoint is not None and not resume_checkpoint.exists():
+        raise FileNotFoundError(f"Resume checkpoint does not exist: {resume_checkpoint}")
+    if not dry_run and not resume:
         for stale in output_dir.glob("eval_step_*.json"):
             stale.unlink()
         for stale_name in ["train_metrics.jsonl", "final_eval.json", "final_eval_math.json", "final_eval_gsm8k.json"]:
@@ -479,7 +592,7 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
                 stale.unlink()
     save_json(output_dir / "resolved_config.json", config)
 
-    model, tokenizer, uses_lora = build_model_and_tokenizer(config["model"])
+    model, tokenizer, uses_lora = build_model_and_tokenizer(config["model"], adapter_checkpoint=resume_checkpoint)
 
     ref_model = None
     weighting = config["training"]["weighting"]
@@ -514,10 +627,19 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
     scheduler = get_cosine_schedule_with_warmup(optimizer, warmup_steps, total_steps)
     rng = random.Random(config["seed"])
     metrics_path = output_dir / "train_metrics.jsonl"
+    start_step = 1
+    if resume_checkpoint is not None:
+        start_step = restore_training_state(resume_checkpoint, optimizer, scheduler, rng, model.device)
+        print(json.dumps({"resumed_from": str(resume_checkpoint), "start_step": start_step}))
+    elif resume and metrics_path.exists():
+        raise FileExistsError(
+            f"{metrics_path} exists but no checkpoint was found for --resume; "
+            "use --resume-from or move the partial output directory."
+        )
 
     grad_accum = train_cfg.get("grad_accum_steps", 1)
     optimizer.zero_grad(set_to_none=True)
-    for step in range(1, total_steps + 1):
+    for step in range(start_step, total_steps + 1):
         step_rewards = []
         step_losses = []
         step_started = time.time()
@@ -585,9 +707,9 @@ def run_training(config: dict[str, Any], dry_run: bool) -> None:
 
         save_every = train_cfg.get("save_every")
         if save_every and step % save_every == 0:
-            maybe_save_checkpoint(model, tokenizer, output_dir, step)
+            maybe_save_checkpoint(model, tokenizer, output_dir, step, optimizer=optimizer, scheduler=scheduler, sample_rng=rng)
 
-    maybe_save_checkpoint(model, tokenizer, output_dir, total_steps)
+    maybe_save_checkpoint(model, tokenizer, output_dir, total_steps, optimizer=optimizer, scheduler=scheduler, sample_rng=rng)
     save_json(output_dir / "final_eval.json", evaluate(model, tokenizer, eval_ds, config))
 
     # Optional: extra out-of-distribution evals run only at end-of-training.
@@ -637,7 +759,7 @@ def main() -> None:
     if output_root:
         config["output_dir"] = str(Path(output_root) / Path(config["output_dir"]).name)
     validate_config(config)
-    run_training(config, dry_run=args.dry_run)
+    run_training(config, dry_run=args.dry_run, resume=args.resume, resume_from=args.resume_from)
 
 
 if __name__ == "__main__":

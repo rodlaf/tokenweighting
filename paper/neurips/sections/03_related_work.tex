@@ -9,7 +9,7 @@ DeepSeek-R1-class reasoning behavior when combined with GRPO, at a tiny fraction
 full fine-tuning cost~\cite{wang2025tina}. A broader systematic evaluation of PEFT
 methods under RLVR~\cite{yin2025peftrlvr} benchmarks over a dozen PEFT variants
 (including DoRA, AdaLoRA, MiSS, PiSSA, MiLoRA, VeRA and Rank-1) on DeepSeek-R1-Distill
-models and finds that standard LoRA is not optimal---structural variants such as DoRA,
+models and finds that standard LoRA is not optimal; structural variants such as DoRA,
 AdaLoRA and MiSS consistently outperform it, and SVD-initialized variants (PiSSA,
 MiLoRA) suffer from \emph{spectral collapse}, a finding that is broadly compatible with
 our own signal-degeneration analysis. Token-Efficient RL introduces critic-free LoRA-compatible
@@ -21,8 +21,8 @@ analyzes how LoRA restricts the policy to a rank-constrained neighborhood of the
 reference, deriving an explicit rank-dependent upper bound on the KL divergence between
 policy and reference throughout training~\cite{anon2026implicitklra}. Our Section
 \ref{sec:collapse} builds directly on this observation: an implicit KL bound is the
-same mechanism that forces per-token log-probability differentials to be small and
-small, which is the formal starting point for our degeneration result.
+same mechanism that forces per-token log-probability differentials to be small,
+which is the formal starting point for our degeneration result.
 
 On the analysis side, \emph{Narrow Fine-Tuning Traces} shows that narrow
 fine-tuning leaves clearly readable traces in the activation differences between
@@ -33,7 +33,7 @@ directly relevant to ARCA because the adapter residual
 $h^{\mathrm{adapted}}_t - h^{\mathrm{base}}_t$ is a per-position activation
 difference of exactly the kind they study; their results supply empirical
 evidence that this difference carries meaningful, semantically nontrivial
-content---the property our method exploits. Concurrent work on
+content, the property our method exploits. Concurrent work on
 TopLoRA studies how to concentrate LoRA capacity on a small number of
 high-impact tokens via token-wise input-output projections~\cite{li2025toplora}. To our knowledge, no prior work has characterized the
 interaction between LoRA and token-level credit assignment, nor proposed an

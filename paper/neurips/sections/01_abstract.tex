@@ -5,7 +5,7 @@ parameter-efficient fine-tuning, especially LoRA. We argue that this
 separation hides a structural failure mode. Under LoRA, the policy is
 restricted to a low-rank neighborhood of the reference model, so the
 per-token output-distribution differences used by common intrinsic credit
-signals---surprisal, entropy reduction, and policy divergence---can become
+signals, surprisal, entropy reduction, and policy divergence, can become
 degenerate after within-trajectory normalization, either approaching uniform
 weights or concentrating on a small set of task-agnostic positions. We
 formalize this behavior and propose measuring it directly with concentration

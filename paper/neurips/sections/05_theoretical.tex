@@ -114,6 +114,8 @@ the normalized effective-token count. When a normalization uses an
 $\varepsilon$ floor, the statements below are interpreted in the regime where
 the raw salience scores dominate $\varepsilon$; if fixed $\varepsilon$
 dominates all scores, every scheme reverts to uniform by construction.
+These are local deterministic statements about the normalized score vectors
+for a fixed trajectory, not asymptotic convergence guarantees for RL training.
 
 \begin{proposition}[Degeneration of surprisal and entropy weighting]
 \label{prop:surprisal-collapse}
@@ -133,7 +135,7 @@ concentrated for reasons inherited from the base model. The analogous
 statement holds for the entropy-reduction score.
 \end{proposition}
 
-\noindent\emph{Proof sketch.}
+\noindent\emph{Proof.}
 The softmax Jacobian is $2$-Lipschitz in the log-space norm, so the per-token
 log-probabilities differ by at most $2 L \beta$ between the adapted and base
 model. The projection onto the simplex via within-trajectory normalization is
@@ -157,6 +159,18 @@ the limiting weights are determined by tiny relative differences among
 vanishing log-probability shifts rather than by a robust adapter-credit
 signal.
 \end{proposition}
+
+\noindent\emph{Proof.}
+The first inequality follows from the same log-probability Lipschitz bound as
+Proposition~\ref{prop:surprisal-collapse}. If $\varepsilon>0$ is fixed, then
+each numerator in $w^{\mathrm{div}}$ is
+$\varepsilon(1+O(\beta/\varepsilon))$ and the denominator is
+$T\varepsilon(1+O(\beta/\varepsilon))$, so
+$w_t^{\mathrm{div}}\to 1/T$ as $\beta/\varepsilon\to0$. If the floor is
+removed or negligible, the normalization divides by $\sum_t
+\alpha_t^{\mathrm{div}}\to0$; different sequences of vanishing score vectors
+can converge to different normalized limits, including highly concentrated
+ones. \hfill$\square$
 
 The key observation is that the intrinsic scores are all determined by the
 per-token \emph{log-probability differential}, which is precisely what LoRA's
@@ -193,6 +207,17 @@ to the uniform distribution merely because the output-distribution shift is
 small. With fixed $\varepsilon$, however, all scores become uniform in the
 limit where the adapter residual itself vanishes below the floor.
 \end{proposition}
+
+\noindent\emph{Proof.}
+Ignoring the higher-order residual $e_t$, the ARCA score contains the norms
+$\|v_{\ell,t}\|$ of the layerwise adapter contributions. A dominant layer with
+nonzero position-to-position variance therefore gives nonzero variance in the
+raw ARCA scores. The perturbation $e_t$ changes these norms by at most its
+size through the reverse triangle inequality, giving the stated lower bound up
+to the displayed higher-order term. Normalization by a common positive sum
+preserves non-uniformity while the raw scores remain above the floor; if a
+fixed $\varepsilon$ dominates all residual scores, the normalized weights
+become uniform by equation~\eqref{eq:normalize}. \hfill$\square$
 
 The intuitive content of Proposition~\ref{prop:arca-nondeg} is that ARCA
 inherits its position-discrimination from the \emph{base model's own

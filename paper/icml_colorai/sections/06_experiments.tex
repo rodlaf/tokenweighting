@@ -170,8 +170,7 @@ does so while remaining competitive on held-out MATH.
 
 \subsection{Implementation and Metrics}
 
-The main experiment entrypoint is \texttt{experiment/hf/run\_experiment.py}.
-For each minibatch, the script samples completions from the current policy,
+For each minibatch, training samples completions from the current policy,
 computes binary rewards after full generation, constructs GRPO advantages,
 and applies the weighted token-level objective from
 Section~\ref{sec:methods}. Surprisal uses current-policy token log

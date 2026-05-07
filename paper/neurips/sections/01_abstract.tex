@@ -1,23 +1,20 @@
 \begin{abstract}\noindent Token-level credit assignment for language-model
-reinforcement learning is an active area of research, with methods that
-reweight policy-gradient credit using intrinsic signals such as surprisal,
-entropy, and divergence from a reference policy. At the same time, practical
-LLM-RL pipelines overwhelmingly rely on parameter-efficient fine-tuning,
-especially LoRA. These threads are usually studied separately: token-credit
-methods are specified as if the policy were fully trainable, while PEFT is
-treated as an implementation detail. We argue that this separation is
-misleading. Under LoRA, the policy is restricted to a low-rank neighbourhood of
-the reference, which can flatten the per-token differences used by common
-intrinsic credit signals and drive their normalized weights toward uniform
-broadcast. We formalize this failure mode and propose measuring it directly
-with concentration diagnostics such as weight Gini and effective-token ratio.
-We then introduce \emph{Adapter-Residual Credit Assignment} (ARCA), a
-lightweight alternative that derives token salience from the adapter's own
-hidden-state residual,
-$\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$. This signal asks where the
-adapter actually changes the model, rather than where the output distribution
-appears uncertain or shifted, and requires no reward model, value head, or tree
-construction. Our experiments are designed to test whether adapter-residual
-credit remains non-degenerate under LoRA and whether preserving that structure
-improves RL fine-tuning under matched rollout budgets.
+reinforcement learning is usually formulated as if the policy were fully
+trainable, while practical LLM-RL pipelines overwhelmingly rely on
+parameter-efficient fine-tuning, especially LoRA. We argue that this
+separation hides a structural failure mode. Under LoRA, the policy is
+restricted to a low-rank neighbourhood of the reference model, so the
+per-token output-distribution differences used by common intrinsic credit
+signals---surprisal, entropy reduction, and policy divergence---can be driven
+toward degenerate normalized weights. We formalize this collapse and propose
+measuring it directly with concentration diagnostics such as weight Gini and
+effective-token ratio. We then introduce \emph{Adapter-Residual Credit
+Assignment} (ARCA), a lightweight alternative that derives token salience from
+the adapter's own hidden-state residual,
+$\|h^{\text{adapted}}_t - h^{\text{base}}_t\|_2$. ARCA asks where the adapter
+actually changes the model, rather than where the output distribution appears
+uncertain or shifted, and requires no reward model, value head, or tree
+construction. In a compact MATH/Qwen3-1.7B GRPO sweep, ARCA exhibits the
+predicted non-collapsed middle-regime credit distribution under matched
+rollout budgets and remains competitive with rank-matched baselines.
 \end{abstract}

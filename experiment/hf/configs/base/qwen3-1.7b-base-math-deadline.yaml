@@ -24,7 +24,7 @@ training:
   algorithm: grpo
   weighting: uniform
   sharpening: 2.0
-  train_steps: 100
+  train_steps: 300
   batch_size: 2
   grad_accum_steps: 4
   learning_rate: 5.0e-6

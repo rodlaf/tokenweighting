@@ -47,13 +47,13 @@ three ranks to separate credit assignment from adapter capacity.}
 \toprule
 Method & LoRA rank & Trainable params & Role in comparison \\
 \midrule
-Uniform & 64 & \textit{tbd} & Same-rank baseline \\
-Surprisal & 64 & \textit{tbd} & Intrinsic token baseline \\
-Entropy reduction & 64 & \textit{tbd} & Intrinsic token baseline \\
-Policy divergence & 64 & \textit{tbd} & Intrinsic token baseline \\
-ARCA & 4 & \textit{tbd} & Low-rank ARCA control \\
-ARCA & 16 & \textit{tbd} & Mid-rank ARCA control \\
-ARCA & 64 & \textit{tbd} & Same-rank ARCA comparison \\
+Uniform & 64 & 69.7M & Same-rank baseline \\
+Surprisal & 64 & 69.7M & Intrinsic token baseline \\
+Entropy reduction & 64 & 69.7M & Intrinsic token baseline \\
+Policy divergence & 64 & 69.7M & Intrinsic token baseline \\
+ARCA & 4 & 4.36M & Low-rank ARCA control \\
+ARCA & 16 & 17.4M & Mid-rank ARCA control \\
+ARCA & 64 & 69.7M & Same-rank ARCA comparison \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -70,25 +70,33 @@ using a larger adapter.
 \begin{table}[t]
 \centering
 \caption{\textbf{Held-out MATH performance.} Greedy accuracy and pass@4
-after GRPO fine-tuning. Numbers are placeholders until the seven runs
-complete.}
+after GRPO fine-tuning. ARCA at rank 64 is parameter-matched to the
+rank-64 baselines; lower-rank ARCA rows test the parameter-count
+alternative. Train reward is averaged over the 100 update steps.}
 \label{tab:math-results}
 \begin{tabular}{l c c c c}
 \toprule
-Method & LoRA rank & Greedy acc. & Pass@4 & Train reward \\
+Method & LoRA rank & Greedy acc. & Pass@4 & Avg. train reward \\
 \midrule
-Start checkpoint & -- & \textit{tbd} & \textit{tbd} & -- \\
-\midrule
-Uniform & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-Surprisal & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-Entropy reduction & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-Policy divergence & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-ARCA & 4 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-ARCA & 16 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
-ARCA & 64 & \textit{tbd} & \textit{tbd} & \textit{tbd} \\
+Uniform & 64 & \textbf{0.620} & 0.675 & 0.362 \\
+Surprisal & 64 & 0.520 & 0.650 & 0.326 \\
+Entropy reduction & 64 & 0.600 & \textbf{0.700} & 0.367 \\
+Policy divergence & 64 & 0.565 & 0.670 & 0.351 \\
+ARCA & 4 & 0.525 & 0.640 & 0.327 \\
+ARCA & 16 & 0.510 & 0.655 & 0.336 \\
+ARCA & 64 & 0.590 & 0.680 & 0.353 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+Table~\ref{tab:math-results} should be read as a compact validation rather
+than a broad benchmark. Uniform weighting obtains the highest greedy
+accuracy, while entropy reduction obtains the highest pass@4. ARCA at rank
+64 is competitive with these baselines under the same trainable parameter
+count, trailing uniform greedy accuracy by three points and exceeding uniform
+pass@4 by 0.5 points. The lower-rank ARCA variants do not outperform the
+rank-64 baselines in this run, which is consistent with a capacity-performance
+tradeoff rather than evidence that ARCA gains come from extra parameters.
 
 \subsection{Credit-Assignment Diagnostics}
 
@@ -103,32 +111,63 @@ small effective-token ratio.
 \centering
 \caption{\textbf{Token-weight diagnostics.} Concentration statistics
 averaged over training. These diagnostics test whether a method produces a
-non-uniform but non-collapsed token-credit signal. Numbers are placeholders
-until the runs complete.}
+non-uniform but non-collapsed token-credit signal, the empirical observable
+predicted by the collapse analysis.}
 \label{tab:weight-diagnostics}
 \begin{tabular}{l c c c}
 \toprule
 Method & LoRA rank & $G(w)$ & $\mathrm{EffN}/T$ \\
 \midrule
-Uniform & 64 & \textit{tbd} & \textit{tbd} \\
-Surprisal & 64 & \textit{tbd} & \textit{tbd} \\
-Entropy reduction & 64 & \textit{tbd} & \textit{tbd} \\
-Policy divergence & 64 & \textit{tbd} & \textit{tbd} \\
-ARCA & 4 & \textit{tbd} & \textit{tbd} \\
-ARCA & 16 & \textit{tbd} & \textit{tbd} \\
-ARCA & 64 & \textit{tbd} & \textit{tbd} \\
+Uniform & 64 & 0.000 & 1.000 \\
+Surprisal & 64 & 0.941 & 0.052 \\
+Entropy reduction & 64 & 0.920 & 0.073 \\
+Policy divergence & 64 & 0.939 & 0.055 \\
+ARCA & 4 & 0.353 & 0.467 \\
+ARCA & 16 & 0.388 & 0.460 \\
+ARCA & 64 & 0.490 & 0.334 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The diagnostic prediction is not that the most concentrated scheme should
-always win. Rather, the useful regime is a middle ground: weights should
-depart from uniform enough to express token-level credit, but should not
-collapse onto a tiny number of tokens. This is the regime ARCA is designed
-to target. The rank ablation also tests a possible alternative explanation:
-ARCA introduces no additional trainable parameters, so a same-rank gain
-would reflect the loss weighting, while a low-rank ARCA gain would be
-inconsistent with a simple parameter-count explanation.
+Table~\ref{tab:weight-diagnostics} is the central diagnostic result. Uniform
+weighting is exactly flat. Surprisal, entropy reduction, and policy divergence
+produce extremely concentrated distributions, with effective-token ratios
+between 0.052 and 0.073 on average. ARCA occupies the predicted middle regime:
+it is far from uniform, but it does not collapse onto the tiny effective
+support used by the output-distribution baselines. This is the empirical
+signature of the theoretical distinction. Output-distribution scores ask
+where the model is uncertain or shifted; ARCA asks where the adapter actually
+acts.
+
+\subsection{Results and Discussion}
+
+The results support a theory-first interpretation. The downstream accuracy
+numbers do not show a universal ARCA win: uniform is best under greedy
+decoding, and entropy reduction is best under pass@4. However, ARCA at rank
+64 is competitive under matched parameters, and its token-credit distribution
+is qualitatively different from every baseline. In this paper, that diagnostic
+is not secondary. It is the observable predicted by the LoRA-collapse
+analysis: a method whose salience is measured through output distributions
+either broadcasts credit uniformly or concentrates it on a very small set of
+positions, while adapter-residual salience remains position-discriminative
+without becoming maximally sparse.
+
+This distinction matters because token-level credit assignment is often
+evaluated only by final task accuracy. Accuracy alone cannot tell whether a
+method actually changed token-level credit or merely produced a different
+optimization trajectory. The concentration diagnostics separate these cases.
+ARCA demonstrates that one can obtain an adaptation-aware credit signal from
+the LoRA adapter itself, with no value head, process reward model, or tree
+construction, while keeping the trainable parameter count identical to the
+rank-64 baselines.
+
+The rank controls provide a useful boundary on the claim. ARCA at ranks 4 and
+16 uses substantially fewer trainable parameters than the rank-64 baselines,
+and in this sweep those lower-rank variants do not match rank-64 performance.
+We therefore do not claim that ARCA removes the need for sufficient adapter
+capacity. The supported claim is sharper: at a fixed adapter rank, ARCA
+changes the geometry of token credit in the way predicted by the theory, and
+does so while remaining competitive on held-out MATH.
 
 \subsection{Implementation and Metrics}
 

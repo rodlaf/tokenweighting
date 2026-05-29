@@ -17,8 +17,11 @@
 % Attempt to make hyperref and algorithmic work together better:
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
-% Use the following line for the initial blind version submitted for review:
-\usepackage{icml2026}
+% Camera-ready version for the ICML 2026 DEMO workshop.
+\usepackage[accepted]{icml2026}
+\makeatletter
+\renewcommand{\ICML@appearing}{\textit{Accepted to DEMO 2026: ICML Workshop on Decision-Making from Offline Datasets to Online Adaptation. Non-archival report.}}
+\makeatother
 
 % For preprint, use
 % \usepackage[preprint]{icml2026}
@@ -31,16 +34,16 @@
 \begin{document}
 
 \twocolumn[
-  \icmltitle{ARCA: Adapter-Residual Credit Assignment When Token Signals Degenerate}
+  \icmltitle{ARCA: Adapter-Residual Credit Assignment\texorpdfstring{\\}{ }When Token Signals Degenerate}
 
   % The ICML style automatically removes author information for the blind
   % submission unless the [accepted] or [preprint] option is used.
   \begin{icmlauthorlist}
-    \icmlauthor{David S.~Hippocampus}{cranberry}
+    \icmlauthor{Rodney Lafuente-Mercado}{scale}
   \end{icmlauthorlist}
 
-  \icmlaffiliation{cranberry}{Department of Computer Science, Cranberry-Lemon University, Pittsburgh, PA 15213}
-  \icmlcorrespondingauthor{David S.~Hippocampus}{hippo@cs.cranberry-lemon.edu}
+  \icmlaffiliation{scale}{Scale AI}
+  \icmlcorrespondingauthor{Rodney Lafuente-Mercado}{rodney.lafuente@scale.com}
 
   \icmlkeywords{Machine Learning, ICML}
 
@@ -51,7 +54,7 @@
 
 \input{sections/01_abstract}
 \paragraph{Code.}
-An anonymized code repository is available at
+Code is available at
 \url{https://anonymous.4open.science/r/tokenweighting-5293}.
 
 \input{sections/02_introduction}
@@ -65,7 +68,7 @@ An anonymized code repository is available at
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newpage
+\clearpage
 \appendix
 
 \input{sections/07_appendix}
